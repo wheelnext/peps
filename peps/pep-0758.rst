@@ -6,7 +6,6 @@ BDFL-Delegate: Donald Stufft <donald@python.org>
 Status: Draft
 Type: Standards Track
 Topic: Packaging
-Discussions-To: https://discuss.python.org/c/peps/19
 Created: 19-Sep-2024
 Post-History:
 
@@ -49,8 +48,7 @@ A related workaround is the `"wheel stub"
 indirect link between PyPI and an external third party package index, where
 such limitations can be avoided. Wheel stubs are `source distributions
 <https://packaging.python.org/en/latest/specifications/source-distribution-format/>`__,
-a.k.a. "sdists" which utilize a `PEP 517
-<https://peps.python.org/pep-0517/>`__ build backend that, instead of turning
+a.k.a. "sdists" which utilize a :pep:`517` build backend that, instead of turning
 source code into a binary wheel, performs some logic to calculate the URL for
 an existing, externally hosted wheel to download.  Technically speaking, this
 satisfies the build backend contract, but the link between PyPI, the sdist,
@@ -60,22 +58,20 @@ auditable.
 Historical context
 ==================
 
-In 2013, `PEP 438 <https://peps.python.org/pep-0438/>`__ proposed a
-"backward-compatible two-phase transition process" to modify several aspects
-of release file hosting on PyPI. As this PEP describes, PyPI originally
-supported only project and release *registration* without also allowing for
-artifact file hosting. As such, most projects hosted release file artifacts
-elsewhere. Artifact hosting was later added, but the mix of externally and
-PyPI-hosted files lead to a wide range of usability and potential
-security-related problems. PEP 438 was an attempt to provide several
-facilities to allow external hosting while promoting a PyPI-first hosting
-preference.
+In 2013, :pep:`438` proposed a "backward-compatible two-phase transition
+process" to modify several aspects of release file hosting on PyPI. As this
+PEP describes, PyPI originally supported only project and release
+*registration* without also allowing for artifact file hosting. As such, most
+projects hosted release file artifacts elsewhere. Artifact hosting was later
+added, but the mix of externally and PyPI-hosted files lead to a wide range of
+usability and potential security-related problems. PEP 438 was an attempt to
+provide several facilities to allow external hosting while promoting a
+PyPI-first hosting preference.
 
 PEP 438 was complex, with three different "hosting modes", ``rel`` metadata in
 the simple HTML index pages to signify hosting locations, and a two-phase
 transition plan affecting PyPI and installer tools. PEP 438 was ultimately
-retracted in 2015 by `PEP 470 <https://peps.python.org/pep-0470/>`__. In one
-respect, PEP 438 did succeed in:
+retracted in 2015 by :pep:`470`. In one respect, PEP 438 did succeed in:
 
    bringing about more people to utilize PyPI's repository features, an
    altogether good thing given the global CDN powering PyPI providing speed
@@ -107,16 +103,15 @@ install`` uses for resolving package dependencies and preferred versions. The
 whereby users can select between, e.g. a ``pip``-compatible strategy, and a
 more limited strategy that prevents such dependency confusion attacks.
 
-`PEP 708 <https://peps.python.org/pep-0708/>`__ provides additional background
-about dependency confusion attacks, and takes a different approach to
-preventing them. At its core, PEP 708 allows repository owners to indicate
-that projects track across different repositories, which allows installers to
-determine how to treat the global package namespace when combined across
-multiple repositories. PEP 708 has been provisionally accepted, pending
-several required conditions as outlined in PEP 708, some of which may have an
-indeterminate future. As PEP 708 itself says, this won't by itself solve
-dependency confusion attacks, but is one way to provide enough information to
-installers to help minimize these attacks.
+:pep:`708` provides additional background about dependency confusion attacks,
+and takes a different approach to preventing them. At its core, PEP 708 allows
+repository owners to indicate that projects track across different
+repositories, which allows installers to determine how to treat the global
+package namespace when combined across multiple repositories. PEP 708 has been
+provisionally accepted, pending several required conditions as outlined in PEP
+708, some of which may have an indeterminate future. As PEP 708 itself says,
+this won't by itself solve dependency confusion attacks, but is one way to
+provide enough information to installers to help minimize these attacks.
 
 While there can still be valid use cases for standing up a totally independent
 package index (such as providing richer platform support for GPUs until a
@@ -195,12 +190,9 @@ in a ``.whl`` file's ``.dist-info`` directory: a file called
 ``EXTERNAL-HOSTING``.
 
 The format of this file contains lines of key-value pairs separated by a
-colon, in what `PEP 1
-<https://peps.python.org/pep-0001/#pep-header-preamble>`__ calls in its PEP
-Header Preamble section, "`RFC 2822
-<https://datatracker.ietf.org/doc/html/rfc2822.html>`__" style headers. The
-following header keys are mandatory and exclusive (all headers are
-case-insensitive):
+colon, in what :pep:`1` calls in its "PEP Header Preamble" section,
+:rfc:`2822` style headers. The following header keys are mandatory and
+exclusive (all headers are case-insensitive):
 
 - ``Version:`` This is the ``EXTERNAL-HOSTING`` file format version, which for
    this PEP MUST be ``1.0``.
@@ -209,8 +201,7 @@ case-insensitive):
 - ``URI:`` This is a single URL naming the location of the physical ``.whl``
    file hosted on an external site. This URL MUST use the ``https`` scheme and
    it MUST include a hash fragment in exactly the same format as described the
-   `PEP 376 <https://peps.python.org/pep-0376/>`__ originated `signed wheel
-   file format
+   :pep:`376` originated `signed wheel file format
    <https://packaging.python.org/en/latest/specifications/binary-distribution-format/#signed-wheel-files>`__
    in the ``.dist-info/RECORD`` file. The exact same rules for selection of
    hash algorithm and encoding is used here.
@@ -231,11 +222,10 @@ populated from the URI's hash fragment.
 In all other respects, a compliant package index should treat ``.rim`` files
 the same as ``.whl`` files, with some other minor exceptions as outlined
 below. For example, ``.rim`` files can be `deleted
-<https://pypi.org/help/#deletion>`__ and `yanked
-<https://peps.python.org/pep-0592/>`__ just like any ``.whl`` file, with the
-exact same semantics (i.e. deletions are permanent). When a ``.rim`` is
-deleted, an index MUST NOT allow a matching ``.whl`` or ``.rim`` file to be
-(re-)uploaded.
+<https://pypi.org/help/#deletion>`__ and yanked (:pep:`592`) just like any
+``.whl`` file, with the exact same semantics (i.e. deletions are
+permanent). When a ``.rim`` is deleted, an index MUST NOT allow a matching
+``.whl`` or ``.rim`` file to be (re-)uploaded.
 
 Wheels can override RIMs
 ========================
@@ -287,11 +277,10 @@ This PEP thus proposes that:
 - Organization accounts do not automatically gain the ability to externally
   host wheels; this feature MUST be explicitly enabled by PyPI admins. Since
   this will not be a common request, we don't expect the overhead to be nearly
-  as burdensome as `PEP 541 <https://peps.python.org/pep-0541/>`__
-  resolutions, account recovery requests, or even file/project size increase
-  requests.  External hosting requests would be handled in the same manner as
-  those requests, i.e. via the `PyPI GitHub support tracker
-  <https://github.com/pypi/support>`__.
+  as burdensome as :pep:`541` resolutions, account recovery requests, or even
+  file/project size increase requests.  External hosting requests would be
+  handled in the same manner as those requests, i.e. via the `PyPI GitHub
+  support tracker <https://github.com/pypi/support>`__.
 - Organization accounts requesting external wheel hosting MUST register their
   own support contact URI, be it a ``mailto`` URI for a contact email address,
   or the URL to the organization's support tracker. Such a contact URI is
@@ -316,7 +305,7 @@ provide a useful error message to the end user:
   owner of the externally hosted wheel.
 - An informative error message would then be displayed, e.g.:
 
-   The externally hosted wheel file `foo-....whl` could not be
+   The externally hosted wheel file ``foo-....whl`` could not be
    downloaded. Please contact support@foo.example.com for help. Do not report
    this to the PyPI administrators.
 
@@ -324,12 +313,11 @@ Dismounting wheels
 ==================
 
 It is generally very easy to produce a ``.rim`` file from an existing ``.whl``
-file. This could be done efficiently by a `build backend
-<https://peps.python.org/pep-0518/>`__ with an additional command line option,
-or a separate tool which takes a ``.whl`` file as input and creates the
-associated ``.rim`` file. To complete the analogy, the act of turning a
-``.whl`` into a ``.rim`` is called "dismounting".  The steps such a tool would
-take are:
+file. This could be done efficiently by a :pep:`518` build backend with an
+additional command line option, or a separate tool which takes a ``.whl`` file
+as input and creates the associated ``.rim`` file. To complete the analogy,
+the act of turning a ``.whl`` into a ``.rim`` is called "dismounting".  The
+steps such a tool would take are:
 
 - Accept as input the source ``.whl`` file, the organization owner of the
   package, and URL at which the ``.whl`` will be hosted, and the support URI
@@ -416,10 +404,9 @@ Several ideas were considered and rejected.
   a good idea to avoid any race condition, it should not be a
   requirement. This also means that the upload of the ``.rim`` file cannot be
   accepted until this external ``.whl`` file is downloaded and verified. This
-  increases PyPI bandwidth and slows down the upload query, although `PEP 694
-  <https://peps.python.org/pep-0694/>`__ draft uploads could potentially
-  mitigate these concerns. Still, the benefit is not likely worth the
-  additional complexity.
+  increases PyPI bandwidth and slows down the upload query, although
+  :pep:`694` draft uploads could potentially mitigate these concerns. Still,
+  the benefit is not likely worth the additional complexity.
 - Periodic verification of the download URLs by the index. PyPI could try to
   periodically ensure that the external wheel host or the external ``.whl``
   file itself is still available. This is again likely overkill and bandwidth
