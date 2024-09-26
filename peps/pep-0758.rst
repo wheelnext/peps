@@ -300,7 +300,7 @@ installer tool tries to download and install the package ``foo`` wheel, the
 download step will fail. The installer would then be able to query PyPI to
 provide a useful error message to the end user:
 
-- The installer reads the ``Owner`` field from the ``EXTERNAL-HOSTING`` file
+- The installer downloads the `.rim` file and reads the ``Owner`` field from the ``EXTERNAL-HOSTING`` file
   inside the ``.rim`` zip file.
 - The installer queries PyPI for the support URI for the organization
   owner of the externally hosted wheel.
