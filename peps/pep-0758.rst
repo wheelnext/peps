@@ -275,7 +275,7 @@ This PEP thus proposes that:
 - External wheel hosting is only allowed for packages which are owned by
   `organization accounts <https://docs.pypi.org/organization-accounts/>`__.
 - Organization accounts do not automatically gain the ability to externally
-  host wheels; this feature MUST be explicitly enabled by PyPI admins. Since
+  host wheels; this feature MUST be explicitly enabled by PyPI admins at their discretion. Since
   this will not be a common request, we don't expect the overhead to be nearly
   as burdensome as :pep:`541` resolutions, account recovery requests, or even
   file/project size increase requests.  External hosting requests would be
