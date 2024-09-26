@@ -191,8 +191,8 @@ in a ``.whl`` file's ``.dist-info`` directory: a file called
 
 The format of this file contains lines of key-value pairs separated by a
 colon, in what :pep:`1` calls in its "PEP Header Preamble" section,
-:rfc:`2822` style headers. The following header keys are mandatory and
-exclusive (all headers are case-insensitive):
+:rfc:`2822` style headers. The following header keys are mandatory, 
+should only appear once per file, and are case-insensitive:
 
 - ``Version:`` This is the ``EXTERNAL-HOSTING`` file format version, which for
    this PEP MUST be ``1.0``.
