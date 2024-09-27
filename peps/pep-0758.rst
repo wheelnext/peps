@@ -375,8 +375,6 @@ The following constraints lead to reliable and compatible external wheel hosting
 - Externally hosted wheels **MUST NOT** be removed from an external wheel host unless the
   corresponding ``.rim`` file is deleted from PyPI first, and **MUST NOT** remove external
   wheels for yanked releases.
-- Externally wheel hosts **SHOULD** respond to `HTTP HEAD`_ requests on the ``.whl`` URL
-  in order to verify that the wheel exists without downloading the entire file contents.
 - External wheel hosts **MUST** support `HTTP range requests`_.
 - External wheel hosts **SHOULD** support the `HTTP/2`_ protocol.
 
