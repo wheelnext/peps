@@ -1,0 +1,270 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
+    <title>PEP 765 – Disallow return/break/continue that exit a finally block | peps.python.org</title>
+    <link rel="shortcut icon" href="../_static/py.png">
+    <link rel="canonical" href="https://peps.python.org/pep-0765/">
+    <link rel="stylesheet" href="../_static/style.css" type="text/css">
+    <link rel="stylesheet" href="../_static/mq.css" type="text/css">
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" media="(prefers-color-scheme: light)" id="pyg-light">
+    <link rel="stylesheet" href="../_static/pygments_dark.css" type="text/css" media="(prefers-color-scheme: dark)" id="pyg-dark">
+    <link rel="alternate" type="application/rss+xml" title="Latest PEPs" href="https://peps.python.org/peps.rss">
+    <meta property="og:title" content='PEP 765 – Disallow return/break/continue that exit a finally block | peps.python.org'>
+    <meta property="og:description" content="This PEP proposes to withdraw support for return, break and continue statements that break out of a finally block. This was proposed in the past by PEP 601. The current PEP is based on empirical evidence regarding the cost/benefit of this change, which ...">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://peps.python.org/pep-0765/">
+    <meta property="og:site_name" content="Python Enhancement Proposals (PEPs)">
+    <meta property="og:image" content="https://peps.python.org/_static/og-image.png">
+    <meta property="og:image:alt" content="Python PEPs">
+    <meta property="og:image:width" content="200">
+    <meta property="og:image:height" content="200">
+    <meta name="description" content="This PEP proposes to withdraw support for return, break and continue statements that break out of a finally block. This was proposed in the past by PEP 601. The current PEP is based on empirical evidence regarding the cost/benefit of this change, which ...">
+    <meta name="theme-color" content="#3776ab">
+</head>
+<body>
+    
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-sun-half" viewBox="0 0 24 24" pointer-events="all">
+    <title>Following system colour scheme</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="9"></circle>
+      <path d="M12 3v18m0-12l4.65-4.65M12 14.3l7.37-7.37M12 19.6l8.85-8.85"></path>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24" pointer-events="all">
+    <title>Selected dark colour scheme</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"></path>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24" pointer-events="all">
+    <title>Selected light colour scheme</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+</svg>
+    <script>
+
+        document.documentElement.dataset.colour_scheme = localStorage.getItem("colour_scheme") || "auto"
+    </script>
+    <section id="pep-page-section">
+        <header>
+            <h1>Python Enhancement Proposals</h1>
+            <ul class="breadcrumbs">
+                <li><a href="https://www.python.org/" title="The Python Programming Language">Python</a> &raquo; </li>
+                <li><a href="../pep-0000/">PEP Index</a> &raquo; </li>
+                <li>PEP 765</li>
+            </ul>
+            <button id="colour-scheme-cycler" onClick="setColourScheme(nextColourScheme())">
+                <svg aria-hidden="true" class="colour-scheme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+                <svg aria-hidden="true" class="colour-scheme-icon-when-dark"><use href="#svg-moon"></use></svg>
+                <svg aria-hidden="true" class="colour-scheme-icon-when-light"><use href="#svg-sun"></use></svg>
+                <span class="visually-hidden">Toggle light / dark / auto colour theme</span>
+            </button>
+        </header>
+        <article>
+            <section id="pep-content">
+<h1 class="page-title">PEP 765 – Disallow return/break/continue that exit a finally block</h1>
+<dl class="rfc2822 field-list simple">
+<dt class="field-odd">Author<span class="colon">:</span></dt>
+<dd class="field-odd">Irit Katriel &lt;irit&#32;&#97;t&#32;python.org&gt;, Alyssa Coghlan &lt;ncoghlan&#32;&#97;t&#32;gmail.com&gt;</dd>
+<dt class="field-even">Discussions-To<span class="colon">:</span></dt>
+<dd class="field-even"><a class="reference external" href="https://discuss.python.org/t/pep-765-disallow-return-break-continue-that-exit-a-finally-block/71348">Discourse thread</a></dd>
+<dt class="field-odd">Status<span class="colon">:</span></dt>
+<dd class="field-odd"><abbr title="Proposal under active discussion and revision">Draft</abbr></dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><abbr title="Normative PEP with a new feature for Python, implementation change for CPython or interoperability standard for the ecosystem">Standards Track</abbr></dd>
+<dt class="field-odd">Created<span class="colon">:</span></dt>
+<dd class="field-odd">15-Nov-2024</dd>
+<dt class="field-even">Python-Version<span class="colon">:</span></dt>
+<dd class="field-even">3.14</dd>
+<dt class="field-odd">Post-History<span class="colon">:</span></dt>
+<dd class="field-odd"><a class="reference external" href="https://discuss.python.org/t/an-analysis-of-return-in-finally-in-the-wild/70633" title="Discourse thread">09-Nov-2024</a>,
+<a class="reference external" href="https://discuss.python.org/t/pep-765-disallow-return-break-continue-that-exit-a-finally-block/71348" title="Discourse thread">16-Nov-2024</a></dd>
+</dl>
+<hr class="docutils" />
+<section id="contents">
+<details><summary>Table of Contents</summary><ul class="simple">
+<li><a class="reference internal" href="#abstract">Abstract</a></li>
+<li><a class="reference internal" href="#motivation">Motivation</a></li>
+<li><a class="reference internal" href="#rationale">Rationale</a></li>
+<li><a class="reference internal" href="#specification">Specification</a></li>
+<li><a class="reference internal" href="#backwards-compatibility">Backwards Compatibility</a></li>
+<li><a class="reference internal" href="#security-implications">Security Implications</a></li>
+<li><a class="reference internal" href="#how-to-teach-this">How to Teach This</a></li>
+<li><a class="reference internal" href="#copyright">Copyright</a></li>
+</ul>
+</details></section>
+<section id="abstract">
+<h2><a class="toc-backref" href="#abstract" role="doc-backlink">Abstract</a></h2>
+<p>This PEP proposes to withdraw support for <code class="docutils literal notranslate"><span class="pre">return</span></code>, <code class="docutils literal notranslate"><span class="pre">break</span></code> and
+<code class="docutils literal notranslate"><span class="pre">continue</span></code> statements that break out of a <code class="docutils literal notranslate"><span class="pre">finally</span></code> block.
+This was proposed in the past by <a class="pep reference internal" href="../pep-0601/" title="PEP 601 – Forbid return/break/continue breaking out of finally">PEP 601</a>. The current PEP
+is based on empirical evidence regarding the cost/benefit of
+this change, which did not exist at the time that <a class="pep reference internal" href="../pep-0601/" title="PEP 601 – Forbid return/break/continue breaking out of finally">PEP 601</a>
+was rejected. It also proposes a slightly different solution
+than that which was proposed by <a class="pep reference internal" href="../pep-0601/" title="PEP 601 – Forbid return/break/continue breaking out of finally">PEP 601</a>.</p>
+</section>
+<section id="motivation">
+<h2><a class="toc-backref" href="#motivation" role="doc-backlink">Motivation</a></h2>
+<p>The semantics of <code class="docutils literal notranslate"><span class="pre">return</span></code>, <code class="docutils literal notranslate"><span class="pre">break</span></code> and <code class="docutils literal notranslate"><span class="pre">continue</span></code> in a
+finally block are surprising for many developers.
+The <a class="reference external" href="https://docs.python.org/3/tutorial/errors.html#tut-cleanup" title="(in Python v3.13)"><span class="xref std std-ref">documentation</span></a> mentions that:</p>
+<ul class="simple">
+<li>If the <code class="docutils literal notranslate"><span class="pre">finally</span></code> clause executes a <code class="docutils literal notranslate"><span class="pre">break</span></code>, <code class="docutils literal notranslate"><span class="pre">continue</span></code>
+or <code class="docutils literal notranslate"><span class="pre">return</span></code> statement, exceptions are not re-raised.</li>
+<li>If a <code class="docutils literal notranslate"><span class="pre">finally</span></code> clause includes a <code class="docutils literal notranslate"><span class="pre">return</span></code> statement, the
+returned value will be the one from the <code class="docutils literal notranslate"><span class="pre">finally</span></code> clause’s
+<code class="docutils literal notranslate"><span class="pre">return</span></code> statement, not the value from the <code class="docutils literal notranslate"><span class="pre">try</span></code> clause’s
+<code class="docutils literal notranslate"><span class="pre">return</span></code> statement.</li>
+</ul>
+<p>Both of these behaviours cause confusion, but the first is
+particularly dangerous because a swallowed exception is more
+likely to slip through testing, than an incorrect return value.</p>
+<p>In 2019, <a class="pep reference internal" href="../pep-0601/" title="PEP 601 – Forbid return/break/continue breaking out of finally">PEP 601</a> proposed to change Python to emit a
+<code class="docutils literal notranslate"><span class="pre">SyntaxWarning</span></code> for a few releases and then turn it into a
+<code class="docutils literal notranslate"><span class="pre">SyntaxError</span></code>. It was rejected in favour of viewing this
+as a programming style issue, to be handled by linters and <a class="pep reference internal" href="../pep-0008/" title="PEP 8 – Style Guide for Python Code">PEP 8</a>.
+Indeed, <a class="pep reference internal" href="../pep-0008/" title="PEP 8 – Style Guide for Python Code">PEP 8</a> now recommends not to use control flow statements
+in a <code class="docutils literal notranslate"><span class="pre">finally</span></code> block, and linters such as
+<a class="reference external" href="https://pylint.readthedocs.io/en/stable/">Pylint</a>,
+<a class="reference external" href="https://docs.astral.sh/ruff/">Ruff</a> and
+<a class="reference external" href="https://github.com/PyCQA/flake8-bugbear">flake8-bugbear</a>
+flag them as a problem.</p>
+</section>
+<section id="rationale">
+<h2><a class="toc-backref" href="#rationale" role="doc-backlink">Rationale</a></h2>
+<p>A recent <a class="reference external" href="https://github.com/iritkatriel/finally/blob/main/README.md">analysis of real world code</a> shows that:</p>
+<ul class="simple">
+<li>These features are rare (2 per million LOC in the top 8,000 PyPI
+packages, 4 per million LOC in a random selection of packages).
+This could be thanks to the linters that flag this pattern.</li>
+<li>Most of the usages are incorrect, and introduce unintended
+exception-swallowing bugs.</li>
+<li>Code owners are typically receptive to fixing the bugs, and
+find that easy to do.</li>
+</ul>
+<p>This new data indicates that it would benefit Python’s users if
+Python itself moved them away from this harmful feature.</p>
+<p>One of the arguments brought up in <a class="reference external" href="https://discuss.python.org/t/pep-601-forbid-return-break-continue-breaking-out-of-finally/2239/24">the PEP 601 discussion</a>
+was that language features should be orthogonal, and combine without
+context-based restrictions. However, in the meantime <a class="pep reference internal" href="../pep-0654/" title="PEP 654 – Exception Groups and except*">PEP 654</a> has
+been implemented, and it forbids <code class="docutils literal notranslate"><span class="pre">return</span></code>, <code class="docutils literal notranslate"><span class="pre">break</span></code> and <code class="docutils literal notranslate"><span class="pre">continue</span></code>
+in an <code class="docutils literal notranslate"><span class="pre">except*</span></code> clause because the semantics of that would violate
+the property that <code class="docutils literal notranslate"><span class="pre">except*</span></code> clauses operate <em>in parallel</em>, so the
+code of one clause should not suppress the invocation of another.
+In that case we accepted that a combination of features can be
+harmful enough that it makes sense to disallow it.</p>
+</section>
+<section id="specification">
+<h2><a class="toc-backref" href="#specification" role="doc-backlink">Specification</a></h2>
+<p>The change is to specify as part of the language spec that
+Python’s compiler may emit a <code class="docutils literal notranslate"><span class="pre">SyntaxWarning</span></code> or <code class="docutils literal notranslate"><span class="pre">SyntaxError</span></code>
+when a <code class="docutils literal notranslate"><span class="pre">return</span></code>, <code class="docutils literal notranslate"><span class="pre">break</span></code> or <code class="docutils literal notranslate"><span class="pre">continue</span></code> would transfer
+control flow from within a <code class="docutils literal notranslate"><span class="pre">finally</span></code> block to a location outside
+of it.</p>
+<p>This includes the following examples:</p>
+<div class="bad highlight-default notranslate"><div class="highlight"><pre><span></span> <span class="k">def</span><span class="w"> </span><span class="nf">f</span><span class="p">():</span>
+     <span class="k">try</span><span class="p">:</span>
+         <span class="o">...</span>
+     <span class="k">finally</span><span class="p">:</span>
+         <span class="k">return</span> <span class="mi">42</span>
+
+ <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">o</span><span class="p">:</span>
+     <span class="k">try</span><span class="p">:</span>
+         <span class="o">...</span>
+     <span class="k">finally</span><span class="p">:</span>
+         <span class="k">break</span>  <span class="c1"># (or continue)</span>
+</pre></div>
+</div>
+<p>But excludes these:</p>
+<div class="good highlight-default notranslate"><div class="highlight"><pre><span></span> <span class="k">try</span><span class="p">:</span>
+     <span class="o">...</span>
+ <span class="k">finally</span><span class="p">:</span>
+     <span class="k">def</span><span class="w"> </span><span class="nf">f</span><span class="p">():</span>
+         <span class="k">return</span> <span class="mi">42</span>
+
+ <span class="k">try</span><span class="p">:</span>
+     <span class="o">...</span>
+ <span class="k">finally</span><span class="p">:</span>
+     <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">o</span><span class="p">:</span>
+         <span class="k">break</span>  <span class="c1"># (or continue)</span>
+</pre></div>
+</div>
+<p>CPython will emit a <code class="docutils literal notranslate"><span class="pre">SyntaxWarning</span></code> in version 3.14, and we leave
+it open whether, and when, this will become a <code class="docutils literal notranslate"><span class="pre">SyntaxError</span></code>.
+However, we specify here that a <code class="docutils literal notranslate"><span class="pre">SyntaxError</span></code> is permitted by
+the language spec, so that other Python implementations can choose
+to implement that.</p>
+</section>
+<section id="backwards-compatibility">
+<h2><a class="toc-backref" href="#backwards-compatibility" role="doc-backlink">Backwards Compatibility</a></h2>
+<p>For backwards compatibility reasons, we are proposing that CPython
+emit only a <code class="docutils literal notranslate"><span class="pre">SyntaxWarning</span></code>, with no concrete plan to upgrade that
+to an error. Code running with <code class="docutils literal notranslate"><span class="pre">-We</span></code> may stop working once this
+is introduced.</p>
+</section>
+<section id="security-implications">
+<h2><a class="toc-backref" href="#security-implications" role="doc-backlink">Security Implications</a></h2>
+<p>The warning/error will help programmers avoid some hard to find bugs,
+so will have a security benefit. We are not aware of security issues
+related to raising a new <code class="docutils literal notranslate"><span class="pre">SyntaxWarning</span></code> or <code class="docutils literal notranslate"><span class="pre">SyntaxError</span></code>.</p>
+</section>
+<section id="how-to-teach-this">
+<h2><a class="toc-backref" href="#how-to-teach-this" role="doc-backlink">How to Teach This</a></h2>
+<p>The change will be documented in the language spec and in the
+What’s New documentation. The <code class="docutils literal notranslate"><span class="pre">SyntaxWarning</span></code> will alert users
+that their code needs to change. The <a class="reference external" href="https://github.com/iritkatriel/finally/blob/main/README.md">empirical evidence</a>
+shows that the changes necessary are typically quite
+straightforward.</p>
+</section>
+<section id="copyright">
+<h2><a class="toc-backref" href="#copyright" role="doc-backlink">Copyright</a></h2>
+<p>This document is placed in the public domain or under the
+CC0-1.0-Universal license, whichever is more permissive.</p>
+</section>
+</section>
+<hr class="docutils" />
+<p>Source: <a class="reference external" href="https://github.com/python/peps/blob/main/peps/pep-0765.rst">https://github.com/python/peps/blob/main/peps/pep-0765.rst</a></p>
+<p>Last modified: <a class="reference external" href="https://github.com/python/peps/commits/main/peps/pep-0765.rst">2024-11-16 11:42:12 GMT</a></p>
+
+        </article>
+        <nav id="pep-sidebar">
+            <h2>Contents</h2>
+            <ul>
+<li><a class="reference internal" href="#abstract">Abstract</a></li>
+<li><a class="reference internal" href="#motivation">Motivation</a></li>
+<li><a class="reference internal" href="#rationale">Rationale</a></li>
+<li><a class="reference internal" href="#specification">Specification</a></li>
+<li><a class="reference internal" href="#backwards-compatibility">Backwards Compatibility</a></li>
+<li><a class="reference internal" href="#security-implications">Security Implications</a></li>
+<li><a class="reference internal" href="#how-to-teach-this">How to Teach This</a></li>
+<li><a class="reference internal" href="#copyright">Copyright</a></li>
+</ul>
+
+            <br>
+            <a id="source" href="https://github.com/python/peps/blob/main/peps/pep-0765.rst">Page Source (GitHub)</a>
+        </nav>
+    </section>
+    <script src="../_static/colour_scheme.js"></script>
+    <script src="../_static/wrap_tables.js"></script>
+    <script src="../_static/sticky_banner.js"></script>
+</body>
+</html>

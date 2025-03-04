@@ -1,0 +1,762 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
+    <title>PEP 9999 – Explicit Priority Choices Among Multiple Indexes | peps.python.org</title>
+    <link rel="shortcut icon" href="../_static/py.png">
+    <link rel="canonical" href="https://peps.python.org/pep-9999/">
+    <link rel="stylesheet" href="../_static/style.css" type="text/css">
+    <link rel="stylesheet" href="../_static/mq.css" type="text/css">
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" media="(prefers-color-scheme: light)" id="pyg-light">
+    <link rel="stylesheet" href="../_static/pygments_dark.css" type="text/css" media="(prefers-color-scheme: dark)" id="pyg-dark">
+    <link rel="alternate" type="application/rss+xml" title="Latest PEPs" href="https://peps.python.org/peps.rss">
+    <meta property="og:title" content='PEP 9999 – Explicit Priority Choices Among Multiple Indexes | peps.python.org'>
+    <meta property="og:description" content="Package resolution is a key part of the Python user experience as the means of extending Python’s core functionality. The experience of package resolution is mostly taken for granted until someone encounters a situation where the package installer does ...">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://peps.python.org/pep-9999/">
+    <meta property="og:site_name" content="Python Enhancement Proposals (PEPs)">
+    <meta property="og:image" content="https://peps.python.org/_static/og-image.png">
+    <meta property="og:image:alt" content="Python PEPs">
+    <meta property="og:image:width" content="200">
+    <meta property="og:image:height" content="200">
+    <meta name="description" content="Package resolution is a key part of the Python user experience as the means of extending Python’s core functionality. The experience of package resolution is mostly taken for granted until someone encounters a situation where the package installer does ...">
+    <meta name="theme-color" content="#3776ab">
+</head>
+<body>
+    
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-sun-half" viewBox="0 0 24 24" pointer-events="all">
+    <title>Following system colour scheme</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="9"></circle>
+      <path d="M12 3v18m0-12l4.65-4.65M12 14.3l7.37-7.37M12 19.6l8.85-8.85"></path>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24" pointer-events="all">
+    <title>Selected dark colour scheme</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"></path>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24" pointer-events="all">
+    <title>Selected light colour scheme</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+</svg>
+    <script>
+
+        document.documentElement.dataset.colour_scheme = localStorage.getItem("colour_scheme") || "auto"
+    </script>
+    <section id="pep-page-section">
+        <header>
+            <h1>Python Enhancement Proposals</h1>
+            <ul class="breadcrumbs">
+                <li><a href="https://www.python.org/" title="The Python Programming Language">Python</a> &raquo; </li>
+                <li><a href="../pep-0000/">PEP Index</a> &raquo; </li>
+                <li>PEP 9999</li>
+            </ul>
+            <button id="colour-scheme-cycler" onClick="setColourScheme(nextColourScheme())">
+                <svg aria-hidden="true" class="colour-scheme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+                <svg aria-hidden="true" class="colour-scheme-icon-when-dark"><use href="#svg-moon"></use></svg>
+                <svg aria-hidden="true" class="colour-scheme-icon-when-light"><use href="#svg-sun"></use></svg>
+                <span class="visually-hidden">Toggle light / dark / auto colour theme</span>
+            </button>
+        </header>
+        <article>
+            <section id="pep-content">
+<h1 class="page-title">PEP 9999 – Explicit Priority Choices Among Multiple Indexes</h1>
+<dl class="rfc2822 field-list simple">
+<dt class="field-odd">Author<span class="colon">:</span></dt>
+<dd class="field-odd">Michael Sarahan, msarahan&#32;&#97;t&#32;gmail.com</dd>
+<dt class="field-even">Sponsor<span class="colon">:</span></dt>
+<dd class="field-even">Barry Warsaw, barry&#32;&#97;t&#32;python.org</dd>
+<dt class="field-odd">PEP-Delegate<span class="colon">:</span></dt>
+<dd class="field-odd">&lt;PEP delegate’s real name&gt;</dd>
+<dt class="field-even">Discussions-To<span class="colon">:</span></dt>
+<dd class="field-even">&lt;REQUIRED: URL of current canonical discussion thread&gt;</dd>
+<dt class="field-odd">Status<span class="colon">:</span></dt>
+<dd class="field-odd"><abbr title="Proposal under active discussion and revision">Draft</abbr></dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><abbr title="Non-normative PEP containing background, guidelines or other information relevant to the Python ecosystem">Informational</abbr></dd>
+<dt class="field-odd">Topic<span class="colon">:</span></dt>
+<dd class="field-odd"><a class="reference external" href="../topic/packaging/">Packaging</a></dd>
+<dt class="field-even">Requires<span class="colon">:</span></dt>
+<dd class="field-even"><a class="reference external" href="../pep-0777/">777</a></dd>
+<dt class="field-odd">Created<span class="colon">:</span></dt>
+<dd class="field-odd">05-Nov-2024</dd>
+<dt class="field-even">Post-History<span class="colon">:</span></dt>
+<dd class="field-even">&lt;REQUIRED: dates, in dd-mmm-yyyy format, and corresponding links to PEP discussion threads&gt;</dd>
+</dl>
+<hr class="docutils" />
+<section id="contents">
+<details><summary>Table of Contents</summary><ul class="simple">
+<li><a class="reference internal" href="#abstract">Abstract</a></li>
+<li><a class="reference internal" href="#motivation">Motivation</a><ul>
+<li><a class="reference internal" href="#goals">Goals</a></li>
+<li><a class="reference internal" href="#non-goals">Non-goals</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#rationale">Rationale</a></li>
+<li><a class="reference internal" href="#specification">Specification</a><ul>
+<li><a class="reference internal" href="#version-priority">“Version priority”</a></li>
+<li><a class="reference internal" href="#index-priority">“Index priority”</a><ul>
+<li><a class="reference internal" href="#ways-that-a-request-falls-through-to-a-lower-priority-index">Ways that a request falls through to a lower priority index</a></li>
+<li><a class="reference internal" href="#priority-configuration">Priority configuration</a></li>
+<li><a class="reference internal" href="#ordering-source-types">Ordering source types</a></li>
+<li><a class="reference internal" href="#requirements-txt-file-inclusions">Requirements.txt file inclusions</a></li>
+<li><a class="reference internal" href="#proposed-deny-list-format">Proposed deny list format</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#backwards-compatibility">Backwards Compatibility</a></li>
+<li><a class="reference internal" href="#security-implications">Security Implications</a></li>
+<li><a class="reference internal" href="#how-to-teach-this">How to Teach This</a></li>
+<li><a class="reference internal" href="#reference-implementation">Reference Implementation</a></li>
+<li><a class="reference internal" href="#rejected-ideas">Rejected Ideas</a></li>
+<li><a class="reference internal" href="#open-issues">Open Issues</a></li>
+<li><a class="reference internal" href="#acknowledgements">Acknowledgements</a></li>
+<li><a class="reference internal" href="#copyright">Copyright</a></li>
+</ul>
+</details></section>
+<section id="abstract">
+<h2><a class="toc-backref" href="#abstract" role="doc-backlink">Abstract</a></h2>
+<p>Package resolution is a key part of the Python user experience as the
+means of extending Python’s core functionality. The experience of package
+resolution is mostly taken for granted until someone encounters a
+situation where the package installer does something they don’t expect.
+The installer behavior with multiple indexes has been <a class="reference external" href="https://github.com/pypa/pip/issues/8606">a common source of unexpected behavior</a>.
+Through its ubiquity, pip has long defined the standard expected behavior
+across other tools in the ecosystem, but Python installers are diverging
+with respect to how they handle multiple indexes. At the core of this
+divergence is whether index contents are combined before resolving distributions,
+or each index is handled individually in order. Pip merges all indexes
+before matching distributions, while uv matches distributions on one index
+before moving on to the next. Each approach has advantages and disadvantages.
+This PEP aims to describe each of these behaviors, which are referred to
+as “version priority” and “index priority” respectively, so that community
+discussions and troubleshooting can share a common vocabulary, and so that tools can
+implement predictable behavior based on these descriptions.</p>
+</section>
+<section id="motivation">
+<h2><a class="toc-backref" href="#motivation" role="doc-backlink">Motivation</a></h2>
+<section id="goals">
+<h3><a class="toc-backref" href="#goals" role="doc-backlink">Goals</a></h3>
+<ul class="simple">
+<li>Establish standard for evaluation order of various levels of priority
+between indexes and packages</li>
+<li>Standardize verbiage of different approaches, so that cross-tool
+discussions are talking “apples to apples”</li>
+<li>Suggest standard configuration options, to minimize user cognitive
+load between tools</li>
+<li>Provide guidelines for how ecosystem tools should implement index
+priority if they would like, and suggest reasons why they might want
+to do so</li>
+<li>Augment <a class="reference external" href="https://peps.python.org/pep-0708/">PEP 708</a> as a more
+user-configurable system for expressing different levels of trust
+among configured indexes</li>
+</ul>
+</section>
+<section id="non-goals">
+<h3><a class="toc-backref" href="#non-goals" role="doc-backlink">Non-goals</a></h3>
+<ul class="simple">
+<li>Do not relax the simplifying assumption that for a given distribution
+filename, all indexes must have the same file. This has been expressed
+as “all indexes are equal priority”, but can be more accurately
+described as “<a class="reference external" href="https://github.com/astral-sh/uv/issues/171#issuecomment-1952079681">pip considers all distributions with the same name and
+version to be interchangeable regardless of which index they came
+from</a>.”
+This is a key assumption for how pip behaves today, and changing this
+assumption is deemed too disruptive for this PEP.</li>
+<li>Do not dictate that every tool must implement every strategy</li>
+</ul>
+</section>
+</section>
+<section id="rationale">
+<h2><a class="toc-backref" href="#rationale" role="doc-backlink">Rationale</a></h2>
+<p>This PEP describes two modes of installer behavior when using multiple
+sources in the hopes that the user experience and expectations across
+tools can be more explicit and more predictable. Pip has long defined
+the de-facto standard installer behavior in the ecosystem, but new tools
+have been implementing new approaches in response to both security concerns
+and desire to prioritize one index over another. Uv and PDM have each
+added support for some notion of index priority.</p>
+<p>Index priority is <a class="reference external" href="https://docs.astral.sh/uv/pip/compatibility/#packages-that-exist-on-multiple-indexes">the default behavior in
+uv</a>,
+and supported, but <a class="reference external" href="https://pdm-project.org/latest/usage/config/#respect-the-order-of-the-sources">not default behavior in
+PDM</a>.
+In uv, <a class="reference external" href="https://github.com/astral-sh/uv/issues/2775">users have reported some
+issues</a> with the
+behavior and asked for keeping pip’s behavior. Uv provides this choice
+as a <code class="docutils literal notranslate"><span class="pre">--index-strategy</span></code> flag, with the <code class="docutils literal notranslate"><span class="pre">unsafe-best-match</span></code> value
+matching pip’s current behavior, and the <code class="docutils literal notranslate"><span class="pre">first-match</span></code> value matching
+this PEP’s proposed behavior. Defining index priority is expected to
+help with <a class="reference external" href="https://github.com/pypa/pip/issues/11624">situations where a local package has remote
+dependencies</a>, and the user
+wishes to prioritize local packages over remote dependencies, while
+still falling back to remote dependencies where needed.</p>
+<p>The topic of prioritizing indexes is being proposed as a PEP rather than
+as a change specifically to pip, because predictable index behavior
+across the many tools in our ecosystem is important for consistent,
+predictable package resolution between tools.</p>
+</section>
+<section id="specification">
+<h2><a class="toc-backref" href="#specification" role="doc-backlink">Specification</a></h2>
+<section id="version-priority">
+<h3><a class="toc-backref" href="#version-priority" role="doc-backlink">“Version priority”</a></h3>
+<p>This behavior is characterized by the installer always getting the
+latest version of a package, regardless of the index that it comes
+from. It is especially useful when all configured indexes are
+equally trusted and well-behaved regarding the distribution
+interchangeability assumption. That interchangeability assumption is
+what makes comparing distributions of a given package meaningful -
+without it, the installer is no longer comparing “apples to apples.” In
+practice, it is common for different indexes to have files that have
+different contents than other indexes, such as builds for special
+hardware, and this version priority behavior can lead to undesirable,
+unexpected outcomes, and this is when users generally look for some kind
+of index priority. Additionally, when there is a difference in trust among
+indexes, version priority does not provide a way to prefer more trusted
+indexes over less trusted indexes. This has been the subject of dependency
+confusion attacks, and <a class="pep reference internal" href="../pep-0708/" title="PEP 708 – Extending the Repository API to Mitigate Dependency Confusion Attacks">PEP 708</a> was
+proposed as a way of hard-coding a notion of trusted external indexes into
+the index.</p>
+<p>Version priority is pip’s current behavior. All distributions from all configured
+and enabled indexes are collated, and the “best” among them is selected. The
+criteria for what is “best” are:</p>
+<ul class="simple">
+<li><a class="reference external" href="https://github.com/pypa/pip/blob/111eed14b6e9fba7c78a5ec2b7594812d17b5d2b/src/pip/_internal/index/package_finder.py#L541">Match any specified
+hashes</a></li>
+<li><a class="reference external" href="https://github.com/pypa/pip/blob/111eed14b6e9fba7c78a5ec2b7594812d17b5d2b/src/pip/_internal/index/package_finder.py#L542">Absence of
+yanking</a></li>
+<li><a class="reference external" href="https://github.com/pypa/pip/blob/111eed14b6e9fba7c78a5ec2b7594812d17b5d2b/src/pip/_internal/index/package_finder.py#L504">Wheels over
+sdists</a></li>
+<li><a class="reference external" href="https://github.com/pypa/pip/blob/111eed14b6e9fba7c78a5ec2b7594812d17b5d2b/src/pip/_internal/index/package_finder.py#L544">Maximize
+version</a>
+(including <a class="reference external" href="https://peps.python.org/pep-0440/#local-version-identifiers">Local version
+tags</a>,
+<a class="reference external" href="https://discuss.python.org/t/lets-permit-local-version-label-in-version-specifiers/22781/2">restricted to locally patched private
+versions</a>)</li>
+<li><a class="reference external" href="https://github.com/pypa/pip/blob/111eed14b6e9fba7c78a5ec2b7594812d17b5d2b/src/pip/_internal/index/package_finder.py#L520">Maximize specificity of platform
+tag</a></li>
+<li><a class="reference external" href="https://github.com/pypa/pip/blob/111eed14b6e9fba7c78a5ec2b7594812d17b5d2b/src/pip/_internal/index/package_finder.py#L535">Build
+tags</a>
+with the first value being an integer interpreted as ascending values
+being “better”, and the second being a string with lexical sorting</li>
+</ul>
+<p>Uv refers to <a class="reference external" href="https://docs.astral.sh/uv/pip/compatibility/#packages-that-exist-on-multiple-indexes">its implementation of the version priority
+behavior</a>
+as “<code class="docutils literal notranslate"><span class="pre">unsafe-best-match</span></code>.” Naming is really hard here. On one hand, it
+isn’t accurate to call pip’s default behavior intrinsically “unsafe.”
+The addition of possibly malicious indexes is what
+introduces concern with this behavior. <a class="pep reference internal" href="../pep-0708/" title="PEP 708 – Extending the Repository API to Mitigate Dependency Confusion Attacks">PEP 708</a> added a way to restrict
+installers from drawing packages from unexpected, potentially insecure
+indexes. On the other hand, the term “best-match” is technically
+correct, but also misleading. The “best match” varies by user and by
+application. “Best” is technically correct in the sense that it is a
+global optimum according to the match criteria specified above, but that
+is not necessarily what is “best” in a user’s eyes. “Version priority”
+is a proposed term that avoids the concerns with the uv terminology,
+while approximating the behavior in the most user-identifiable way that
+packages are compared.</p>
+</section>
+<section id="index-priority">
+<h3><a class="toc-backref" href="#index-priority" role="doc-backlink">“Index priority”</a></h3>
+<p>In index priority, the resolver finds candidates for each index, one at a time.
+The resolver proceeds to subsequent indexes only if the current
+package request has no viable candidates. Index priority does not combine
+indexes into one global, flat namespace. Because indexes are searched in order,
+the package from an earlier index  will be preferred over a package from a later index, regardless of whether
+the later index had a better match. Uv’s calls this “first-match”
+behavior, and the version priority behavior “best-match”. The criteria and process for
+evaluating “best match” is the same for both index priority and version
+priority. It is only the treatment of multiple indexes that differs:
+all together for version priority, and individually for index priority.</p>
+<p>The index (or “source” in PDM terms) priority is
+explicitly defined by a configuration hierarchy. Each package’s finder
+starts at the beginning of the list of indexes, so each package
+starts over with the index list. In other words, if one package has
+no valid candidates on the first index, but finds a hit on the second
+index, subsequent packages still start their search on the first index,
+rather than starting on the second.</p>
+<p>One desirable behavior that the index priority strategy implies is that
+there are no “surprise” updates, where a version bump on a
+lower-priority index wins out over a curated, approved higher-priority
+index. This is related to the security improvement of <a class="pep reference internal" href="../pep-0708/" title="PEP 708 – Extending the Repository API to Mitigate Dependency Confusion Attacks">PEP 708</a>, where
+packages can restrict the external indexes that distributions can come
+from, but index priority is more configurable by end users. The package installs are
+only expected to change when either the higher-priority index or the
+index priority configuration change. This stability and predictability
+makes it viable to configure indexes as a more persistent property of an
+environment, rather than a one-off argument for one install command.</p>
+<p>One important implementation detail of index priority is that caching
+and lockfiles should now include the index from which distributions were downloaded.
+Without this aspect, it is possible that after changing the list of
+configured indexes, the cache or lockfile could provide a similarly-named
+distribution from a lower-priority index. If every index follows the
+recommended behavior of providing identical files across indexes for a
+given filename, this is not an issue. However, that recommendation is
+not readily enforceable, and augmenting the cache key with origin index
+would be a wise defensive change.</p>
+<section id="ways-that-a-request-falls-through-to-a-lower-priority-index">
+<h4><a class="toc-backref" href="#ways-that-a-request-falls-through-to-a-lower-priority-index" role="doc-backlink">Ways that a request falls through to a lower priority index</a></h4>
+<ul class="simple">
+<li>Package name is not present at all in higher priority index</li>
+<li>All distributions from higher priority index filtered out due to
+version specifier, compatible Python version, platform tag, yanking or otherwise</li>
+<li>A denylist specifies that a particular package name should be ignored
+on a given index</li>
+<li>A higher priority index is unreachable (e.g. blocked by firewall
+rules, temporarily unavailable due to maintenance, other miscellaneous
+and temporary networking issues). This is a less clear-cut detail that
+should be controllable by users. On one hand, this behavior would lead
+to less predictable, likely unreproducible results by unexpectedly
+falling through to lower priority indexes. On the other hand, graceful
+fallback may be more valuable to some users, especially if they can
+safely assume that all of their indexes are equally trusted. Pip’s
+behavior today is graceful fallback: you see warnings if an index is
+having connection issues, but the installation will proceed with any
+other available indexes. Because index priority can convey different
+trust levels between indexes, installers should default to raising
+errors and aborting on network issues, but there should be a flag to
+allow fall-through to lower-priority indexes.</li>
+</ul>
+<p>Treatment within a given index follows existing behavior, but stops at
+the bounds of one index and moves on to the next index only after all
+priority preferences within the one index are exhausted. This means that
+existing priorities among the unified collection of packages apply to
+each index individually before falling through to a lower priority
+index.</p>
+<ul class="simple">
+<li>wheel vs sdist: Wheels are preferred within one index. The resolution
+will use an sdist from a higher-priority index before trying a wheel
+from a lower-priority index.</li>
+<li>more platform-specific wheels before less specific ones. The
+resolution will use less specific wheels from higher-priority indexes
+before using more specific wheels from lower priority indexes.</li>
+</ul>
+</section>
+<section id="priority-configuration">
+<h4><a class="toc-backref" href="#priority-configuration" role="doc-backlink">Priority configuration</a></h4>
+<p>The order of specification of indexes determines their priority in the
+finding process. As a result, the way that installers load the index
+configuration must be predictable and reproducible. The configuration
+precedence hierarchy proposed here matches <a class="reference external" href="https://pip.pypa.io/en/stable/topics/configuration/#precedence-override-order">the existing pip
+configuration
+hierarchy</a>.
+Other tools should ideally conform to this hierarchy for predictable
+behavior, but ultimately are free to define or retain their existing
+configuration schemes to maintain idiomatic usage for themselves.
+Notably, some tools differ in whether multiple sources of configuration
+add to one another (conda), or preclude/clobber one another (pip).</p>
+<p>The order of specified URLs will follow:</p>
+<ol class="arabic">
+<li><div class="line-block">
+<div class="line">CLI arguments (if present), as in:</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">--extra-index-url</span> <span class="pre">&lt;highest&gt;</span> <span class="pre">--find-links</span> <span class="pre">&lt;next_priority&gt;</span> <span class="pre">--extra-index-url</span> <span class="pre">&lt;lowest&gt;</span></code></div>
+</div>
+</li>
+<li>Environment variables (if present), with ordered evaluation:<ol class="arabic simple">
+<li>PIP FIND_LINKS=”&lt;highest_links&gt; &lt;next_priority_links&gt; &lt;lowest_links&gt;”</li>
+<li>PIP_EXTRA_INDEX_URL=”&lt;highest_index&gt; &lt;next_priority_index&gt; &lt;lowest_index&gt;”</li>
+</ol>
+</li>
+<li>Configuration files, as in `pip.conf`:<div class="line-block">
+<div class="line">[global]</div>
+<div class="line">extra_index_url =</div>
+<div class="line">&lt;highest_index&gt;</div>
+<div class="line">&lt;next_priority_index&gt;</div>
+<div class="line">&lt;lowest_index&gt;</div>
+<div class="line">find_links =</div>
+<div class="line">&lt;highest_links&gt;</div>
+<div class="line">&lt;next_priority_links&gt;</div>
+<div class="line">&lt;lowest_links&gt;</div>
+</div>
+</li>
+</ol>
+</section>
+<section id="ordering-source-types">
+<h4><a class="toc-backref" href="#ordering-source-types" role="doc-backlink">Ordering source types</a></h4>
+<p>There are two “source types” supported by pip:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">find-links</span> <span class="pre">/</span> <span class="pre">PIP_FIND_LINKS</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">extra-index-url</span> <span class="pre">/</span> <span class="pre">PIP_EXTRA_INDEX_URL</span></code></li>
+</ul>
+<p>The <code class="docutils literal notranslate"><span class="pre">find-links</span></code> option specifies one or more paths to search for
+packages. It behaves very much like an index URL, except that it
+searches filesystems, rather than resolving distribution filenames from
+PEP 503 HTML or PEP 691 JSON data. This parameter is often passed with
+the `no-index` parameter as a way of forcing the local packages to be
+used. For the purposes of index priority, the <code class="docutils literal notranslate"><span class="pre">find-links</span></code> parameter
+takes precedence over the values from <code class="docutils literal notranslate"><span class="pre">extra-index-url</span></code>. The order of
+these flags in a configuration file must not affect this evaluation
+order. If both are defined, the value of <code class="docutils literal notranslate"><span class="pre">extra-index-url</span></code> is appended
+to the value of <code class="docutils literal notranslate"><span class="pre">find-links</span></code>. This is in keeping with <a class="reference external" href="https://github.com/pypa/pip/blob/e98cc5ce078d8c8afd6804ff4e61aa2b12d05715/src/pip/_internal/index/package_finder.py#L849">pip’s current
+handling</a>
+of these options.</p>
+<p>These source types can be specified in the three ways listed above: CLI,
+environment variables, and configuration files. Among these, CLI flags have an
+intrinsic evaluation order from left to right, and different source types can be
+interleaved. In contrast, configuration files and in environment variables, the
+state of several variables all exists simultaneously. There is no way to
+interleave source types. For the sake of consistency among the three places
+where configuration can be specified, the interleaving capability of the CLI
+should not be respected. Instead, entries from each of the two source types should
+be collected into their respective groups, and these groups should be evaluated
+in the same order as environment variables and configuration files.</p>
+<p>For example, the CLI example given above will evaluate with pseudocode:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">--</span><span class="n">extra</span><span class="o">-</span><span class="n">index</span><span class="o">-</span><span class="n">url</span> <span class="o">&lt;</span><span class="n">highest</span><span class="o">&gt;</span> <span class="o">--</span><span class="n">find</span><span class="o">-</span><span class="n">links</span> <span class="o">&lt;</span><span class="n">next_priority</span><span class="o">&gt;</span> <span class="o">--</span><span class="n">extra</span><span class="o">-</span><span class="n">index</span><span class="o">-</span><span class="n">url</span> <span class="o">&lt;</span><span class="n">lowest</span><span class="o">&gt;</span>
+<span class="c1"># ------------</span>
+<span class="n">find_links</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">extra_index_urls</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">argname</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">cli_args</span><span class="p">:</span>
+  <span class="k">match</span> <span class="n">argname</span><span class="p">:</span>
+    <span class="k">case</span> <span class="s2">&quot;find-links&quot;</span><span class="p">:</span>
+      <span class="n">find_links</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">case</span> <span class="s2">&quot;extra-index-url&quot;</span><span class="p">:</span>
+      <span class="n">extra_index_urls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+<span class="n">search_urls</span> <span class="o">=</span> <span class="n">find_links</span> <span class="o">+</span> <span class="n">extra_index_urls</span>
+</pre></div>
+</div>
+<p>The ultimate result of this evalution will be:</p>
+<ol class="arabic simple">
+<li>next_priority</li>
+<li>highest</li>
+<li>lowest</li>
+</ol>
+<p>The value of <code class="docutils literal notranslate"><span class="pre">index-url</span></code> (or its default value of PyPI) is always the
+lowest-priority entry in the search order.</p>
+</section>
+<section id="requirements-txt-file-inclusions">
+<h4><a class="toc-backref" href="#requirements-txt-file-inclusions" role="doc-backlink">Requirements.txt file inclusions</a></h4>
+<p>As a further complication, <a class="reference external" href="https://pip.pypa.io/en/stable/reference/requirements-file-format/#global-options">requirements.txt files can include index url
+options</a>,
+including <code class="docutils literal notranslate"><span class="pre">--extra-index-url</span></code> and <code class="docutils literal notranslate"><span class="pre">--find-links</span></code>. Requirements.txt
+can be included via an environment variable (PIP_REQUIREMENT) and <a class="reference external" href="https://pip.pypa.io/en/stable/cli/pip_install/#cmdoption-r">by
+command line
+arguments</a>.
+For the purposes of evaluating priority, these requirements files should
+be evaluated where they are specified (i.e. their position on the CLI
+args), and place their index url options at the priority of the
+originating file inclusion (either the env var or CLI args). For
+example, if a requirements.txt file has:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">--</span><span class="n">extra</span><span class="o">-</span><span class="n">index</span><span class="o">-</span><span class="n">url</span> <span class="o">&lt;</span><span class="n">req_file_index_url_1</span><span class="o">&gt;</span>
+<span class="o">--</span><span class="n">find</span><span class="o">-</span><span class="n">links</span> <span class="o">&lt;</span><span class="n">some_local_path</span><span class="o">&gt;</span>
+<span class="o">--</span><span class="n">extra</span><span class="o">-</span><span class="n">index</span><span class="o">-</span><span class="n">url</span> <span class="o">&lt;</span><span class="n">req_file_index_url_2</span><span class="o">&gt;</span>
+<span class="n">my</span><span class="o">-</span><span class="n">package</span>
+</pre></div>
+</div>
+<p>The CLI command of:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">--</span><span class="n">extra</span><span class="o">-</span><span class="n">index</span><span class="o">-</span><span class="n">url</span> <span class="o">&lt;</span><span class="n">something</span><span class="o">&gt;</span> <span class="o">-</span><span class="n">r</span> <span class="n">requirements</span><span class="o">.</span><span class="n">txt</span> <span class="o">--</span><span class="n">extra</span><span class="o">-</span><span class="n">index</span><span class="o">-</span><span class="n">url</span> <span class="o">&lt;</span><span class="n">another</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>Would expand to an index priority list of:</p>
+<ol class="arabic simple">
+<li>&lt;some_local_path&gt;</li>
+<li>&lt;something&gt;</li>
+<li>&lt;req_file_index_url_1&gt;</li>
+<li>&lt;req_file_index_url_2&gt;</li>
+<li>&lt;another&gt;</li>
+<li>&lt;fallback to value of index-url&gt;</li>
+</ol>
+<p>Because the requirements.txt file is parsed from top to bottom, it
+evaluates <code class="docutils literal notranslate"><span class="pre">--extra-index-url</span></code> and <code class="docutils literal notranslate"><span class="pre">--find-links</span></code> arguments in the
+order that they appear in the requirements.txt file, as opposed to
+reordering them such that <code class="docutils literal notranslate"><span class="pre">--find-links</span></code> arguments always come before
+any <code class="docutils literal notranslate"><span class="pre">--extra-index-url</span></code> arguments. Requirements files may also include
+other requirements files. In the general case, depth-first
+traversal of requirements files defines the collection and ordering
+of index-urls and find-links options.</p>
+</section>
+<section id="proposed-deny-list-format">
+<h4><a class="toc-backref" href="#proposed-deny-list-format" role="doc-backlink">Proposed deny list format</a></h4>
+<p>As described above, <a class="reference external" href="https://github.com/astral-sh/uv/issues/4753">it may be desirable to intentionally omit one or
+more packages from consideration on a given
+index</a>. For example, if
+a index includes builds of a package that introduces issues, but
+otherwise has more desirable packages, the one problematic package can
+be omitted. The configuration for this denylist should include a list of
+mappings from index URL to a list of package names with optional
+version constraints:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">index_package_exclusions</span><span class="p">:</span>
+  <span class="o">-</span> <span class="n">url</span><span class="p">:</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">some</span><span class="o">-</span><span class="n">index</span><span class="o">.</span><span class="n">com</span>
+    <span class="n">packages</span><span class="p">:</span>
+      <span class="o">-</span> <span class="n">some</span><span class="o">-</span><span class="n">problem</span><span class="o">-</span><span class="n">package</span><span class="o">-</span><span class="n">name</span><span class="o">&lt;=</span><span class="mf">3.5</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="backwards-compatibility">
+<h2><a class="toc-backref" href="#backwards-compatibility" role="doc-backlink">Backwards Compatibility</a></h2>
+<p>This PEP does not prescribe any changes as mandatory for any installer,
+so it only introduces compatibility concerns if tools choose to adopt an
+index behavior other than the behavior(s) they currently implement.</p>
+<p>This PEP’s language does not quite align with existing tools, including
+pip and uv. Either this PEP’s language can change during review, or if
+this PEP’s language is preferred, other projects could conform to it.
+The important thing is that all the projects are using the same language
+for the same concepts.</p>
+<p>As some tools rely on one or the other behavior, there are some possible
+issues that may emerge, where tailoring available resources/packages for
+a particular behavior may detract from the user experience for people
+who rely on the other behavior.</p>
+<ul class="simple">
+<li>Different indexes may have different metadata. For example, one cannot
+assume that the metadata for package “something” on index “A” has
+the same dependencies as “something” on index “B”. When an
+installer falls back to a different index in the search order, it
+implies refreshing the package metadata from the new index. This
+is both an improvement and a complication. It is a complication in the
+sense that a cached metadata entry must be keyed by both package name
+and index url, instead of just package name. It is a potential
+improvement in that different implementation variants of a package can
+differ in dependencies as long as their distributions are separated
+into different indexes.</li>
+<li>Users may not get updates as they expect, because some higher priority
+index has not updated/synchronized with PyPI to get the latest
+packages. If the higher priority index has a valid candidate, newer
+packages will not be found. This will need to be communicated
+verbosely, because it is counter to pip’s well-established behavior.</li>
+<li>Improving the predictability of which index will be selected may
+tempt people into using index priority as a way of having similarly
+named files that have different contents. It would be helpful if tools
+errored on mismatching hashes, or otherwise gave the user feedback
+that they are breaking a key assumption. This PEP does not mandate
+alternative fixes, such as augmenting the cache key with the index,
+because these changes have unknown unintended consequences. However,
+it is advisable to augment the cache key with the index, as doing so
+would remedy known “gotchas.”</li>
+</ul>
+</section>
+<section id="security-implications">
+<h2><a class="toc-backref" href="#security-implications" role="doc-backlink">Security Implications</a></h2>
+<p>Index priority creates a mechanism for users to explicitly specify a
+trust hierarchy among their indexes. As such, it limits the potential
+for dependency confusion attacks. Index priority was <a class="reference external" href="https://peps.python.org/pep-0708/#provide-a-mechanism-to-order-the-repositories">rejected by PEP
+708</a>
+as a solution for dependency confusion attacks. This PEP requests that
+the rejection be reconsidered, with index priority serving a different
+purpose. This PEP is primarily motivated by the desire to support
+implementation variants, which is the subject of <a class="reference external" href="https://discuss.python.org/t/selecting-variant-wheels-according-to-a-semi-static-specification/53446">another discussion
+that hopefully leads to a
+PEP</a>.
+It is not mutually exclusive with PEP 708, nor does it suggest reverting
+or withdrawing PEP 708. It is an answer to <a class="reference external" href="https://github.com/astral-sh/uv/issues/171#issuecomment-1952291242">how we could allow users
+to choose which index to use at a more fine grained level than “per
+install”.</a></p>
+<p>For a more thorough discussion of the PEP 708 rejection of index
+priority, please see the discuss.python.org thread for this PEP (TO BE POSTED).</p>
+</section>
+<section id="how-to-teach-this">
+<h2><a class="toc-backref" href="#how-to-teach-this" role="doc-backlink">How to Teach This</a></h2>
+<p>At the outset, the goal is not to convert pip or any other tool to
+change its default priority behavior. The best way to teach is perhaps
+to watch message boards, GitHub issue trackers and chat channels,
+keeping an eye out for problems that index priority could help solve.
+There are <a class="reference external" href="https://github.com/pypa/pip/issues/8606">several</a>
+<a class="reference external" href="https://stackoverflow.com/questions/67253141/python-pip-priority-order-with-index-url-and-extra-index-url">long-standing</a>
+<a class="reference external" href="https://github.com/pypa/pip/issues/5045">discussions</a>
+<a class="reference external" href="https://discuss.python.org/t/dependency-notation-including-the-index-url/5659">that</a>
+<a class="reference external" href="https://github.com/pypa/pip/issues/9612">would</a> be good places to
+start advertising the concepts. The topics of the two officially
+supported behaviors need documentation, and we, the authors of this
+PEP, would develop these as part of the review period of this PEP.
+These docs would likely consist of additions across several
+indexes, cross-linking the concepts between installers. At a
+minimum, we expect to add to the
+<a class="reference external" href="https://packaging.python.org/en/latest/">PyPUG</a> and to <a class="reference external" href="https://pip.pypa.io/en/stable/cli/pip_install/">pip’s
+documentation</a>.</p>
+<p>It will be important to advertise the active behavior, especially in
+error messaging, and that will provide ways to provide resources to
+users about these behaviors.</p>
+<p>Uv users are already experiencing index priority. Uv <a class="reference external" href="https://docs.astral.sh/uv/pip/compatibility/#packages-that-exist-on-multiple-indexes">documents this
+behavior</a>
+well, but it is always possible to <a class="reference external" href="https://github.com/astral-sh/uv/issues/4389">improve the
+discoverability</a> of that
+documentation from the command line, <a class="reference external" href="https://github.com/astral-sh/uv/issues/5146">where users will actually
+encounter the unexpected
+behavior</a>.</p>
+</section>
+<section id="reference-implementation">
+<h2><a class="toc-backref" href="#reference-implementation" role="doc-backlink">Reference Implementation</a></h2>
+<p>The uv project demonstrates index priority with its default behavior. Uv
+is implemented in Rust, though, so if a  reference implementation to a Python-based tool
+is necessary, we, the authors of this PEP, will provide one. For pip in
+particular, we see the implementation plan as something like:</p>
+<ul class="simple">
+<li>For users who don’t use <code class="docutils literal notranslate"><span class="pre">--extra-index-url</span></code> or <code class="docutils literal notranslate"><span class="pre">--find-links</span></code>,
+there will be no change, and no migration is necessary.</li>
+<li>Pip users would be able opt in to the index priority behavior with a
+new config setting in the CLI and in <code class="docutils literal notranslate"><span class="pre">pip.conf</span></code>. This proposal does not
+recommend any strategy as the default for any installer. It only
+recommends documenting the strategies that a tool provides.</li>
+<li>Enable extra info-level output for any pip operation where more than
+one index is used. In this output, state the current strategy setting,
+and a terse summary of implied behavior, as well as a link to docs
+that describe the different options</li>
+<li>Add debugging output that verbosely identifies the index being used at
+each step, including where the file is in the configuration hierarchy,
+and where it is being included (via config file, env var, or CLI
+flag).</li>
+<li>Plumb tracking of which index gets used for which
+package/distribution through the entire pip install process. Store
+this information so that it is available to tools like <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">freeze</span></code></li>
+<li>Supplement <a class="pep reference internal" href="../pep-0751/" title="PEP 751 – A file format to record Python dependencies for installation reproducibility">PEP 751</a> (lockfiles) with capture of index where a
+package/distribution came from</li>
+</ul>
+</section>
+<section id="rejected-ideas">
+<h2><a class="toc-backref" href="#rejected-ideas" role="doc-backlink">Rejected Ideas</a></h2>
+<ul>
+<li>Tell users to set up a proxy/mirror, such as <a class="reference external" href="https://github.com/devpi/devpi">devpi</a> or <a class="reference external" href="https://jfrog.com/help/r/jfrog-artifactory-documentation/pypi-repositories">artifactory</a> that
+serves local files if present, and forwards to another server (PyPI)
+if no local files match<p>This matches the behavior of this proposal very closely, except that
+this method requires hosting some server, and may be inaccessible or
+not configurable to users in some environments. It is also important
+to consider that for an organization that operates its own index
+(for overcoming PyPI size restrictions, for example), this does not
+solve the need for <code class="docutils literal notranslate"><span class="pre">--extra-index-url</span></code> or proxy/mirror for end
+users. That is, organizations get no improvement from this approach
+unless they proxy/mirror PyPI as a whole, and get users to configure
+their proxy/mirror as their sole index.</p>
+</li>
+<li>Provide tiers of priorities, but keep version priority within groups.
+For example, <a class="reference external" href="https://pip.pypa.io/en/stable/cli/pip_install/">Poetry specifies “primary” and “supplemental”
+tiers</a>.<p>This keeps control in the hands of the user, rather than an
+administrator, but adds complexity. Its behavior within a group is
+meant to mimic pip’s behavior without index priority, which is an
+anti-goal of this proposal. The granularity of <a class="reference external" href="https://python-poetry.org/docs/repositories/#package-source-constraint">specifying per-package
+sources</a>,
+solves the ambiguity problem, at the cost of flexibility/portability
+of those sources.</p>
+</li>
+<li>Are build tags and/or local version specifiers enough?<p>Build tags and local version specifiers will take precedence over
+packages without those tags and/or local version specifiers. In a pool
+of packages, builds that have these additions hosted on a server other
+than PyPI will take priority over packages on PyPI, which rarely use
+build tags, and forbid local version specifiers. This approach is
+viable when package providers want to provide their own local
+override, such as <a class="reference external" href="https://github.com/ComputeCanada/software-stack/blob/main/pip-which-version.md">HPC maintainers who provide optimized builds for
+their
+users</a>.
+It is less viable in some ways, such as build tags not showing up in
+<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">freeze</span></code> metadata, and <a class="reference external" href="https://discuss.python.org/t/lets-permit-local-version-label-in-version-specifiers/22781">local version specifiers not being
+allowed on
+PyPI</a>.
+There is also significant work entailed in building and maintaining
+package collections with local build tag variants.</p>
+<p><a class="reference external" href="https://discuss.python.org/t/dependency-notation-including-the-index-url/5659/21">https://discuss.python.org/t/dependency-notation-including-the-index-url/5659/21</a></p>
+</li>
+<li>What about <a class="reference external" href="https://peps.python.org/pep-0708">PEP 708</a>? Isn’t that
+enough?<p>PEP 708 is aimed specifically at addressing dependency confusion
+attacks, and doesn’t address the potential for implementation variants
+among indexes. It is a way of filtering external URLs and encoding an
+allow-list for external indexes in index metadata. It does not change
+the lack of priority or preference among channels that currently
+exists.</p>
+</li>
+<li><a class="reference external" href="https://discuss.python.org/t/dependency-notation-including-the-index-url/5659">Namespacing</a><p>Namespacing is a means of specifying a package such that the Python
+usage of the package does not change, but the package installation
+restricts where the package comes from. <a class="reference external" href="https://peps.python.org/pep-0752/">PEP
+752</a> recently proposed a way to
+multiplex a package’s owners in a flat package namespace (e.g.
+PyPI) by reserving prefixes as grouping elements. <a class="reference external" href="https://docs.npmjs.com/cli/v10/using-npm/scope">NPM’s concept
+of “scopes”</a> has
+been raised as another good example of how this might look. This PEP
+differs in that it is targeted to multiple index, not a flat package
+namespace. The net effect is roughly the same in terms of predictably
+choosing a particular package source, except that the namespacing
+approach relies more on naming packages with these namespace prefixes,
+whereas this PEP would be less granular, pulling in packages on
+whatever higher-priority index the user specifies. The namespacing
+approach relies on all configured indexes treating a given namespace
+similarly, which leaves the usual concern that not all configured
+indexes are trusted equally. The namespace idea is not incompatible
+with this PEP, but it also does not improve expression of trust of
+indexes in the way that this PEP does.</p>
+</li>
+</ul>
+</section>
+<section id="open-issues">
+<h2><a class="toc-backref" href="#open-issues" role="doc-backlink">Open Issues</a></h2>
+<p>[Any points that are still being decided/discussed.]</p>
+</section>
+<section id="acknowledgements">
+<h2><a class="toc-backref" href="#acknowledgements" role="doc-backlink">Acknowledgements</a></h2>
+<p>This work was supported financially by NVIDIA through employment of the author.
+NVIDIA teammates dramatically improved this PEP with their
+input.  Astral Software pioneered the behaviors of index priority and thus layed the
+foundation of this document. The Pip authors deserve great praise for their
+consistent direction and patient communication of the version priority behavior,
+especially in the face of contentious security concerns.</p>
+</section>
+<section id="copyright">
+<h2><a class="toc-backref" href="#copyright" role="doc-backlink">Copyright</a></h2>
+<p>This document is placed in the public domain or under the
+CC0-1.0-Universal license, whichever is more permissive.</p>
+</section>
+</section>
+<hr class="docutils" />
+<p>Source: <a class="reference external" href="https://github.com/python/peps/blob/main/peps/pep-9999.rst">https://github.com/python/peps/blob/main/peps/pep-9999.rst</a></p>
+<p>Last modified: <a class="reference external" href="https://github.com/python/peps/commits/main/peps/pep-9999.rst">2024-11-13 16:24:26 GMT</a></p>
+
+        </article>
+        <nav id="pep-sidebar">
+            <h2>Contents</h2>
+            <ul>
+<li><a class="reference internal" href="#abstract">Abstract</a></li>
+<li><a class="reference internal" href="#motivation">Motivation</a><ul>
+<li><a class="reference internal" href="#goals">Goals</a></li>
+<li><a class="reference internal" href="#non-goals">Non-goals</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#rationale">Rationale</a></li>
+<li><a class="reference internal" href="#specification">Specification</a><ul>
+<li><a class="reference internal" href="#version-priority">“Version priority”</a></li>
+<li><a class="reference internal" href="#index-priority">“Index priority”</a><ul>
+<li><a class="reference internal" href="#ways-that-a-request-falls-through-to-a-lower-priority-index">Ways that a request falls through to a lower priority index</a></li>
+<li><a class="reference internal" href="#priority-configuration">Priority configuration</a></li>
+<li><a class="reference internal" href="#ordering-source-types">Ordering source types</a></li>
+<li><a class="reference internal" href="#requirements-txt-file-inclusions">Requirements.txt file inclusions</a></li>
+<li><a class="reference internal" href="#proposed-deny-list-format">Proposed deny list format</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#backwards-compatibility">Backwards Compatibility</a></li>
+<li><a class="reference internal" href="#security-implications">Security Implications</a></li>
+<li><a class="reference internal" href="#how-to-teach-this">How to Teach This</a></li>
+<li><a class="reference internal" href="#reference-implementation">Reference Implementation</a></li>
+<li><a class="reference internal" href="#rejected-ideas">Rejected Ideas</a></li>
+<li><a class="reference internal" href="#open-issues">Open Issues</a></li>
+<li><a class="reference internal" href="#acknowledgements">Acknowledgements</a></li>
+<li><a class="reference internal" href="#copyright">Copyright</a></li>
+</ul>
+
+            <br>
+            <a id="source" href="https://github.com/python/peps/blob/main/peps/pep-9999.rst">Page Source (GitHub)</a>
+        </nav>
+    </section>
+    <script src="../_static/colour_scheme.js"></script>
+    <script src="../_static/wrap_tables.js"></script>
+    <script src="../_static/sticky_banner.js"></script>
+</body>
+</html>
