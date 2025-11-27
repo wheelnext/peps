@@ -799,7 +799,7 @@ Extended wheel filename
 This PEP changes the wheel filename template originally defined
 by `PEP 427 <https://peps.python.org/pep-0427/#file-name-convention>`_ to:
 
-.. code-block:: re
+.. code-block::
 
    {distribution}-{version}(-{build tag})?-{python tag}-{abi tag}-{platform tag}(-{variant label})?.whl
 
@@ -881,7 +881,7 @@ format is used in three locations, with slight variations:
 
 All three variants metadata files share a common JSON-compatible structure:
 
-.. code-block:: txt
+.. code-block::
 
    (root)
    |
@@ -1097,7 +1097,7 @@ contain:
 
 The variant.json file corresponding to the wheel built from the example pyproject.toml file for x86-64-v3 would look like:
 
-.. code-block:: jsonc
+.. code-block:: json5
 
    {
       // TODO: replace this with appendix URL for the PEP
@@ -1169,7 +1169,7 @@ results within a subset of variants do not change.
 The ``foo-1.2.3-variants.json`` corresponding to the package with two wheel variants, one of them listed in the
 previous example, would look like:
 
-.. code-block:: jsonc
+.. code-block:: json5
 
    {
       // TODO: replace this with appendix URL for the PEP
@@ -1414,7 +1414,7 @@ API endpoint
 The location of the plugin code is called an "API endpoint", and it is expressed using the object reference notation
 following the `entry point specification <https://packaging.python.org/en/latest/specifications/entry-points/>`_\ :
 
-.. code-block:: python
+.. code-block::
 
    {import path}(:{object path})?
 
@@ -1667,7 +1667,7 @@ Four new environment markers are introduced in dependency specifications:
 
 The markers evaluating to sets of strings must be matched via the ``in`` or ``not in`` operator, e.g.:
 
-.. code-block:: toml
+.. code-block::
 
    dep1; "foo" in variant_namespaces
    dep2; "foo :: bar" in variant_features
@@ -1675,7 +1675,7 @@ The markers evaluating to sets of strings must be matched via the ``in`` or ``no
 
 The ``variant_label`` marker is a plain string:
 
-.. code-block:: toml
+.. code-block::
 
    dep4; variant_label == "foobar"
    dep5; variant_label != "null"
