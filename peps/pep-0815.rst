@@ -520,12 +520,12 @@ at the end to ensure that the existing filename validation algorithms reject it:
     Example: ``numpy-2.3.2-cp313-cp313t-musllinux_1_2_x86_64-x86_64_v3.whl``
 
 This behavior was confirmed for a number of existing tools:
-`auditwheel <https://github.com/pypa/auditwheel/blob/6839107e9b918e035ab2df4927a25a5f81f1b8b6/src/auditwheel/repair.py#L61-L64>`_\ ,
-`packaging <https://github.com/pypa/packaging/blob/78c2a5e4f5c04fd782a5729d93892c3a3eafe365/src/packaging/utils.py#L94-L134>`_\ ,
-`pdm <https://github.com/pdm-project/pdm/blob/66c86908c9b9d07ad8d101d07879d69a55de5c54/src/pdm/models/requirements.py#L259-L286>`_\ ,
-`pip <https://github.com/pypa/pip/blob/c46141c29c3646a3328bc4e51d354cc732fb1432/src/pip/_internal/models/wheel.py#L38-L46>`_\ ,
-`poetry <https://github.com/python-poetry/poetry/blob/1c04c65149776ae4993fa508bef53373f45c66eb/src/poetry/utils/wheel.py#L23-L27>`_\ ,
-`uv <https://github.com/astral-sh/uv/blob/f6a9b55eb73be4f1fb9831362a192cdd8312ab96/crates/uv-distribution-filename/src/wheel.rs#L182-L299>`_.
+`auditwheel's implementation <https://github.com/pypa/auditwheel/blob/6839107e9b918e035ab2df4927a25a5f81f1b8b6/src/auditwheel/repair.py#L61-L64>`_\ ,
+`packaging's implementation <https://github.com/pypa/packaging/blob/78c2a5e4f5c04fd782a5729d93892c3a3eafe365/src/packaging/utils.py#L94-L134>`_\ ,
+`pdm's implementation <https://github.com/pdm-project/pdm/blob/66c86908c9b9d07ad8d101d07879d69a55de5c54/src/pdm/models/requirements.py#L259-L286>`_\ ,
+`pip's implementation <https://github.com/pypa/pip/blob/c46141c29c3646a3328bc4e51d354cc732fb1432/src/pip/_internal/models/wheel.py#L38-L46>`_\ ,
+`poetry's implementation <https://github.com/python-poetry/poetry/blob/1c04c65149776ae4993fa508bef53373f45c66eb/src/poetry/utils/wheel.py#L23-L27>`_\ ,
+`uv's implementation <https://github.com/astral-sh/uv/blob/f6a9b55eb73be4f1fb9831362a192cdd8312ab96/crates/uv-distribution-filename/src/wheel.rs#L182-L299>`_.
 
 Variant properties system
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -680,7 +680,7 @@ PyTorch versions, e.g.:
 Specification
 -------------
 
-This PEP proposes a set of backward-compatible extensions to the `binary distribution format <https://packaging.python.org/en/latest/specifications/binary-distribution-format/>`_ specification,
+This PEP proposes a set of backward-compatible extensions to the `binary distribution format specification <https://packaging.python.org/en/latest/specifications/binary-distribution-format/>`_,
 and the packaging ecosystem version while maintaining complete backward
 compatibility with existing package managers and tools. The design was made with the intent to protect
 non-variant-aware tools from failure when a new type of wheel appears that they don't know how to manage.
@@ -1157,7 +1157,7 @@ The variant.json file corresponding to the wheel built from the example pyprojec
 For every package version that includes at least one variant wheel, there must exist a corresponding
 ``{name}-{version}-variants.json`` file, hosted and served by the package index. The ``{name}`` and ``{version}`` placeholders
 correspond to the package name and version, normalized according to the same rules as wheel files, as found in the
-`Binary Distribution Format specification <https://packaging.python.org/en/latest/specifications/binary-distribution-format/#escaping-and-unicode>`_.
+`Binary Distribution Format specification "escaping and unicode" section <https://packaging.python.org/en/latest/specifications/binary-distribution-format/#escaping-and-unicode>`_.
 The link to this file must be present on all index pages where the variant wheels are linked.
 
 This file uses the same structure as ``variant.json`` described above, except that the variants object must list all
