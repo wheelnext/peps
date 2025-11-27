@@ -91,8 +91,7 @@ a package for a specific architecture can lead to significant performance improv
 requirements, etc.).
 
 
-.. image:: ../assets/wheel_variants/avx512_gromacs_benchmark.png
-   :target: ../assets/wheel_variants/avx512_gromacs_benchmark.png
+.. image:: pep-0815/avx512_gromacs_benchmark.png
    :alt: GROMACS AVX512 Benchmark
 
 
@@ -171,8 +170,7 @@ selector provided by the PyTorch team. This complexity represents a fundamental 
 system.
 
 
-.. image:: ../assets/wheel_variants/pytorch_variant_selector.png
-   :target: ../assets/wheel_variants/pytorch_variant_selector.png
+.. image:: pep-0815/pytorch_variant_selector.png
    :alt: PyTorch Wheel Selector
 
 
