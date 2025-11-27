@@ -1,20 +1,21 @@
-
-PEP ### - Wheel Variants - extending platform awareness
-=======================================================
-
-.. list-table::
-   :header-rows: 1
-
-   * - Resource
-     - Link
-   * - ``PEP Link``
-     - ``To Be Published``
-   * - ``DPO Discussion``
-     - `Implementation variants: rehashing and refocusing <https://discuss.python.org/t/implementation-variants-rehashing-and-refocusing/54884>`_
-   * - ``Github Repository``
-     - https://github.com/wheelnext/pep_xxx_wheel_variants
-   * - ``Demo / Wheel Index``
-     - https://wheelnext.github.io/variants-index/
+PEP: 815
+Title: Wheel Variants - extending platform awareness
+Author: Jonathan DEKHTIAR <jonathan@dekhtiar.com>,
+        Michał Górny <mgorny@quansight.com>,
+        konsti <konstin@mailbox.org>,
+        Ralf Gommers <ralf.gommers@gmail.com>,
+        Andrey Talman <atalman@meta.com>,
+        Charlie Marsh <crmarsh416@gmail.com>,
+        Michael Sarahan <msarahan@gmail.com>,
+        Eli Uriegas <eliuriegas@meta.com>,
+        Barry Warsaw <barry@python.org>,
+        Donald Stufft <donald@stufft.io>
+Discussions-To:
+Status: Draft
+Type: Standards Track
+Topic: Packaging
+Created: dd-mmm-yyyy
+Post-History:
 
 
 Abstract
