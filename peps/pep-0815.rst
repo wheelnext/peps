@@ -10,11 +10,11 @@ Author: Jonathan DEKHTIAR <jonathan@dekhtiar.com>,
         Eli Uriegas <eliuriegas@meta.com>,
         Barry Warsaw <barry@python.org>,
         Donald Stufft <donald@stufft.io>
-Discussions-To:
+Discussions-To: Pending
 Status: Draft
 Type: Standards Track
 Topic: Packaging
-Created: dd-mmm-yyyy
+Created: 03-Dec-2025
 Post-History:
 
 
@@ -37,11 +37,11 @@ automatically select the most appropriate variant based on system hardware and s
 characteristics. More specifically, it proposes:
 
 
-* 
+*
   An evolution of the wheel format called **Wheel Variant** that allows wheels to be distinguished by hardware or
   software attributes.
 
-* 
+*
   A **variant provider plugin** interface allowing to dynamically detect platform attributes and select the most
   suitable wheel.
 
@@ -52,11 +52,10 @@ installers, ensures backward compatibility, and minimizes the burden on package 
 Definitions
 -----------
 
-Most of the definitions are borrowed from `PEP 440 <https://peps.python.org/pep-0440/#definitions>`_
+Most of the definitions are borrowed from :pep:`440`.
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
-"OPTIONAL" in this document are to be interpreted as described in
-`RFC 2119 <https://datatracker.ietf.org/doc/html/rfc2119.html>`_.
+"OPTIONAL" in this document are to be interpreted as described in :rfc:`2119`.
 
 Motivation
 ----------
@@ -86,7 +85,7 @@ affects the installation process for users and increases the maintenance burden 
 compiler flags further emphasizes the urgent need for a more expressive and efficient solution in the Python packaging
 ecosystem.
 
-As illustrated by `\ ``archspec`` <https://github.com/archspec/archspec>`_\ 's authors and maintainers, the ability to optimize
+As illustrated by `archspec <https://github.com/archspec/archspec>`_'s authors and maintainers, the ability to optimize
 a package for a specific architecture can lead to significant performance improvement (and often also reduce power
 requirements, etc.).
 
@@ -112,27 +111,27 @@ User stories
 ^^^^^^^^^^^^
 
 
-* 
+*
   A user wants to install a version of NumPy that is specialized for their CPU architecture.
 
-* 
+*
   A user wants to install a version of PyTorch that is specialized for their GPU architecture.
 
-* 
+*
   A user wants to install a version of mpi4py that has certain features enabled
   (e.g. specific MPI implementations for their hardware).
 
-* 
+*
   A library maintainer wants to build their library for wasm32-wasi with and without pthreads support.
 
-* 
+*
   A library maintainer wants to build their library for an Emscripten platform for Pyodide with extensions for graphics
   compiled in.
 
-* 
+*
   A library maintainer wants to provide packages of their game library using different graphics backends.
 
-* 
+*
   SciPy wants to provide packages built against different BLAS libraries, like OpenBLAS and Accelerate on macOS. This is
   something they indirectly do today
 
@@ -219,7 +218,7 @@ custom URLs.
 **Induced Security Risk:** This approach has unfortunately led to supply chain attacks - More details on
 `PyTorch Blog <https://pytorch.org/blog/compromised-nightly-dependency/>`_.  It's a non-trivial problem to address which
 has forced the PyTorch to create a complete mirror of all their dependencies. Which is one of the core motivations
-behind `PEP 766 <https://peps.python.org/pep-0766/>`_.
+behind :pep:`766`.
 
 The complexity of configuration often leads to projects providing ad-hoc installation instructions rather than covering
 permanent settings. This can lead to users being unable to cleanly upgrade the packages, or the upgraded packages being
@@ -229,7 +228,7 @@ reverted to the default variant on upgrades.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Some packages use different names for variants (e.g.,
-`\ ``xgboost`` - NVIDIA CUDA accelerated, ``xgboost-cpu`` <https://xgboost.readthedocs.io/en/stable/install.html>`_\ ). However,
+`xgboost <https://xgboost.readthedocs.io/en/stable/install.html>`_ - NVIDIA CUDA accelerated, ``xgboost-cpu``). However,
 this creates dependency management challenges when multiple packages require the same underlying library with different
 acceleration support.
 
@@ -239,7 +238,7 @@ overwriting files from the one installed first. This could lead to unpredictable
 incidentally switching between variants depending on upgrade ordering.
 
 Additional limitation of this approach is that publishing a new release synchronously across multiple package names is
-not currently possible. `PEP 694 <https://peps.python.org/pep-0694/>`_ proposes adding such a mechanism for multiple
+not currently possible. :pep:`694` proposes adding such a mechanism for multiple
 wheels within a single package, but extending it to multiple packages is not a goal.
 
 **Induced Security Risk:** proliferation of suffixed variant packages leads users to expect these suffixes in other
@@ -448,7 +447,7 @@ detection (CUDA version, glibc, CPU features) as solver constraints. Built packa
 Spack / Archspec
 ~~~~~~~~~~~~~~~~
 
-`\ ``archspec`` <https://github.com/archspec/archspec>`_ is a library for detecting, labeling, and reasoning about CPU
+`archspec <https://github.com/archspec/archspec>`_ is a library for detecting, labeling, and reasoning about CPU
 microarchitecture variants, developed from the `Spack <https://spack.io/>`_ package manager.
 
 **Variant Model:** CPU Microarchitectures (e.g., ``haswell``\ , ``skylake``\ , ``zen2``\ , ``armv8.1a``\ ) form a
@@ -505,12 +504,12 @@ is kept short and lowercase to avoid issues with different filesystems. It is ad
 at the end to ensure that the existing filename validation algorithms reject it:
 
 
-* 
+*
   If both the build tag and the variant label are present, the filename contains too many components.
 
     Example: ``numpy-2.3.2-1-cp313-cp313t-musllinux_1_2_x86_64-x86_64_v3.whl``
 
-* 
+*
   If only the variant label is present, the Python tag at third position will be misinterpreted as a build number.
   Since the build number must start with a digit and no Python tags at the time start with digits, the filename is
   considered invalid.
@@ -541,7 +540,7 @@ disjunction, i.e. only a single value needs to be supported. Features are treate
 to be supported. This provides some flexibility in designating variant compatibility while avoiding having to implement
 a complete boolean logic.
 
-Variant properties are serialized into a structured 3-tuple format inspired by `PEP 301 for Trove Classifiers <https://peps.python.org/pep-0301/#distutils-trove-classification>`_\ :
+Variant properties are serialized into a structured 3-tuple format inspired by Trove Classiers from :pep:`301`.
 
 .. code-block::
 
@@ -555,14 +554,14 @@ published for backwards compatibility. For example, a package that features opti
 following wheels:
 
 
-* 
+*
   One or more wheel variants built for specific hardware for wheel variant enabled systems with
   suitable hardware.
 
-* 
+*
   A CPU-only null variant for systems with wheel variant support but without suitable hardware.
 
-* 
+*
   A GPU+CPU regular wheel for systems without wheel variant support (i.e. the “mega-wheel” approach)
 
 The null variant uses a reserved ``null`` label to make it clearly distinguishable from regular variants.
@@ -689,37 +688,37 @@ Wheel variant glossary
 This section focuses specifically on the vocabulary used by the proposed "Wheel Variant" standard:
 
 
-* 
+*
   **Variant Wheels**\ : Wheels that share the same distribution name, version, build number, and platform compatibility
   tags, but are distinctly identified by an arbitrary set of variant properties.
 
-* 
+*
   **Variant Namespace**\ : An identifier used to group related features provided by a single provider (e.g., ``nvidia``\ ,
   ``x86_64``\ , ``arm``\ , etc.).
 
-* 
+*
   **Variant Feature**\ : A specific characteristic (key) within a namespace (e.g., ``version``\ , ``avx512_bf16``\ , etc.) that
   can have one or more values.
 
-* 
+*
   **Variant Property**\ : A 3-tuple (\ ``namespace :: feature-name :: feature-value``\ ) describing a single specific feature
   and its value. If a feature has multiple values, each is represented by a separate property.
 
-* 
+*
   **Variant Label**\ : A string added to the wheel filename to uniquely identify variants. A string up to 16 characters.
 
-* 
+*
   **Null Variant**\ : A special variant with zero variant properties and the reserved label ``null``. Always considered
   supported but has the lowest priority among wheel variants, while being preferably chosen over non-variant wheels.
 
-* 
+*
   **Variant Provider**\ : A provider of supported and valid variant properties for a specific namespace, usually
   in the form of a Python package that implements system detection.
 
-* 
+*
   **Install-time Provider**\ : A provider implemented as a plugin that can be queried during wheel installation.
 
-* 
+*
   **Ahead-of-Time Provider**\ : A provider that features a static list of supported properties which is then embedded
   in the wheel metadata. Such a list can either be embedded in ``pyproject.toml`` or provided by a plugin queried at build
   time.
@@ -767,14 +766,14 @@ Overview of changes
 The Wheel Variant PEP introduces four key components:
 
 
-#. 
+#.
    **Extended Wheel Filenames**\ : Variant wheels include a variant label in their filename to ensure:
 
 
    #. that every distinct variant has a unique filename
    #. that variant wheels are not accidentally installed by non-variant-aware tools.
 
-#. 
+#.
    **Variant Metadata Format**\ : Standardized metadata describing variant properties and provider requirements.
 
 
@@ -784,18 +783,17 @@ The Wheel Variant PEP introduces four key components:
       #. ``*.dist-info/variant.json``\ : Individual wheel variant metadata.
       #. ``*-variants.json``\ : Variant metadata file aggregated on the package index.
 
-#. 
+#.
    **Provider Plugin System**\ : Plugin interface to allow detection of system capabilities and validate variant
    compatibility.
 
-#. 
+#.
    **Environment Markers**\ : New environment markers to declare dependencies that are applicable to a subset of variants only.
 
 Extended wheel filename
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-This PEP changes the wheel filename template originally defined
-by `PEP 427 <https://peps.python.org/pep-0427/#file-name-convention>`_ to:
+This PEP changes the wheel filename template originally defined by :pep:`427` to:
 
 .. code-block::
 
@@ -926,26 +924,26 @@ providers that are not used in the particular wheel.
 A provider information dictionary may contain the following keys:
 
 
-* 
+*
   ``enable-if: str``\ : An environment marker defining when the plugin should be used. If the environment marker
   does not match the running environment, the provider will be disabled and the variants using its properties
   will be deemed incompatible. If not provided, the plugin will be used in all environments.
 
-* 
+*
   ``install-time: bool``\ : Whether this is an install-time provider. Defaults to ``true``. ``false`` means that it is
   an AoT provider instead.
 
-* 
+*
   ``optional: bool``\ : Whether the provider is optional, as a boolean value. Defaults to ``false``. If it is true, the provider
   is considered optional and should not be used unless the user opts in to it, effectively rendering the variants
   using its properties incompatible. If it is false or missing, the provider is considered obligatory.
 
-* 
+*
   ``plugin-api: str``\ : The API endpoint for the plugin. If it is specified, it must be an object reference
   as explained in the `API endpoint <#api-endpoint>`_ section. If it is missing, the package name from the first dependency specifier
   in ``requires`` is used, after replacing all ``-`` characters with ``_`` in the normalized package name.
 
-* 
+*
   ``requires: list[str]``\ : A list of zero or more package dependency specifiers, that are used to install the provider
   plugin. If the dependency specifiers include environment markers, these are evaluated against the environment where
   the plugin is being installed and the requirements for which the markers evaluate to false are filtered out.
@@ -955,19 +953,19 @@ A provider information dictionary may contain the following keys:
 All the fields are optional, except that:
 
 
-#. 
+#.
    If ``install-time`` is true, the dictionary describes an install-time provider and the ``requires`` key must be present
    and specify at least one dependency.
 
-#. 
+#.
    If ``install-time`` is false, it describes an AoT provider and the ``requires`` key is optional. In that case:
 
 
-   #. 
+   #.
       If ``requires`` is provided and non-empty, the provider dictionary must reference an AOT provider plugin that
       will be queried at build time to fill ``static-properties``.
 
-   #. 
+   #.
       Otherwise, ``static-properties`` must be specified in ``pyproject.toml``.
 
 Default priorities
@@ -985,13 +983,13 @@ It has a single required key:
 It may have the following optional keys:
 
 
-* 
+*
   ``feature: dict[str, list[str]]``\ : A dictionary with namespaces as keys, and ordered list of corresponding feature names
   as values. The values in each list override the default ordering from the provider output. They are listed
   from the highest priority to the lowest priority. Features not present on the list are considered of lower priority
   than those present, and their relative priority is defined by the plugin.
 
-* 
+*
   ``property: dict[str, dict[str, list[str]]]``\ : A nested dictionary with namespaces as first-level keys, feature names as
   second-level keys and ordered lists of corresponding property values as second-level values. The values present in the
   list override the default ordering from the provider output. They are listed from the the highest priority to the
@@ -1085,12 +1083,12 @@ metadata present in ``pyproject.toml``\ , copied as indicated in the individual 
 contain:
 
 
-* 
+*
   a ``$schema`` key whose value is the URL corresponding to the schema file supplied in the appendix of this PEP. The URL
   contains the version of the format, and a new version must be added to the appendix whenever the format changes
   in the future,
 
-* 
+*
   a ``variants`` object listing exactly one variant - the variant provided by the wheel.
 
 The variant.json file corresponding to the wheel built from the example pyproject.toml file for x86-64-v3 would look like:
@@ -1212,45 +1210,45 @@ For the purpose of ordering, variant properties are grouped into features, and f
 must be equivalent to the following algorithm:
 
 
-#. 
+#.
    Construct the ordered list of namespaces by copying the value of the ``default-priorities.namespace`` key.
 
-#. 
+#.
    For every namespace:
 
 
-   #. 
+   #.
       Construct the initial ordered list of feature names by copying the value of the respective
       ``default-priorities.feature.{namespace}`` key.
 
-   #. 
+   #.
       Obtain the supported feature names from the provider, in order. For every feature name that is not present in
       the constructed list, append it to the end.
 
       After this step, a list of ordered feature names is available for every namespace.
 
-#. 
+#.
    For every feature:
 
 
-   #. 
+   #.
       Construct the initial ordered list of values by copying the value of the respective
       ``default-priorities.property.{namespace}.{feature_name}`` key.
 
-   #. 
+   #.
       Obtain the supported values from the provider, in order. For every value that is not present in the constructed
       list, append it to the end.
 
       After this step, a list of ordered property values is available for every feature.
 
-#. 
+#.
    For every variant property present in at least one of the compatible variant wheels, construct a sort key that is
    a 3-tuple consisting of its namespace, feature name and feature value indices in the respective ordered lists.
 
-#. 
+#.
    For every compatible variant wheel, order its properties by their sort keys, in ascending order.
 
-#. 
+#.
    To order variant wheels, compare their sorted properties. If the properties at the first position are different,
    the variant with the lower 3-tuple of the respective property is sorted earlier. If they are the same,
    compare the properties at the second position, and so on, until either a tie-breaker is found or the list
@@ -1354,7 +1352,7 @@ The following section is added to the ``pylock.toml`` specification:
      mutually-exclusive with :ref:`pylock-packages-vcs`,
      :ref:`pylock-packages-directory`, and :ref:`pylock-packages-archive`.
    - **Inspiration**: uv_
-   - The URL or path to the `variants.json` file.
+   - The URL or path to the ``variants.json`` file.
    - Only used if the project uses :ref:`wheel variants <wheel-variants>`.
 
    .. _pylock-packages-variants-json-url:
@@ -1472,14 +1470,14 @@ Depending on the context, the order of values may be significant. It is defined 
 A "variant feature config" must provide three properties or attributes:
 
 
-* 
+*
   ``name`` specifying the feature name, as a string.
 
-* 
+*
   ``multi_value`` specifying whether the feature is allowed to have multiple corresponding values within a single variant
   wheel. If it is ``False``\ , then it is an error to specify multiple values for the feature.
 
-* 
+*
   ``values`` specifying feature values, as a list of strings. In contexts where the order is significant, the values must
   be ordered from the most preferred to the least preferred.
 
@@ -1526,10 +1524,10 @@ The plugin interface must follow the following protocol:
 The plugin interface must define the following attributes:
 
 
-* 
+*
   ``namespace: str`` specifying the plugin's namespace.
 
-* 
+*
   ``is_aot_plugin: bool`` indicating whether the plugin is a valid AoT plugin. If that is the case,
   ``get_supported_configs()`` must always return the same value as ``get_all_configs()`` (modulo ordering), which must be a
   fixed list independent of the platform on which the plugin is running. Defaults to ``False`` if unspecified.
@@ -1537,13 +1535,13 @@ The plugin interface must define the following attributes:
 The plugin interface must provide the following functions:
 
 
-* 
+*
   ``get_all_config() -> list[VariantFeatureConfigType]`` that returns a list of "variant feature configs" describing
   all valid variant features within the plugin's namespace, along with all their permitted values. The ordering
   of the lists is insignificant here. A particular plugin version must always return the same value (modulo ordering),
   irrespective of any runtime conditions.
 
-* 
+*
   ``get_supported_configs() -> list[VariantFeatureConfigType]`` that returns a list of "variant feature configs"
   describing the variant features within the plugin's namespace that are compatible with this particular system, along
   with their values that are supported. The variant feature and value lists must be ordered from the most preferred
@@ -1743,17 +1741,17 @@ not require any special variant awareness. Advanced users would specifically nee
 the installer in question implements these features):
 
 
-* 
+*
   enabling untrusted provider plugins and the security implications of that
 
-* 
+*
   controlling provider usage, in particular enabling optional providers, disabling undesirable plugins or disabling
   variant usage in general
 
-* 
+*
   explicitly selecting variants, as well as controlling variant selection process
 
-* 
+*
   configuring variant selection for remote deployment targets, for example using a static file generated on the target
 
 The installer documentation may also be supplemented by documentation specific to Python projects, in particular
@@ -1769,16 +1767,16 @@ The primary source of information for maintainers of Python packages should be b
 supplemented by tutorials. The documentation needs to indicate:
 
 
-* 
+*
   how to declare variant support in ``pyproject.toml``
 
-* 
+*
   how to use variant environment markers to specify dependencies
 
-* 
+*
   how to build variant wheels
 
-* 
+*
   how to publish them and generate the ``*-variants.json`` file on local indexes
 
 The maintainers will also need to peruse provider plugin documentation. They should also be aware which provider plugins
