@@ -52,8 +52,6 @@ installers, ensures backward compatibility, and minimizes the burden on package 
 Definitions
 -----------
 
-Most of the definitions are borrowed from :pep:`440`.
-
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in :rfc:`2119`.
 
