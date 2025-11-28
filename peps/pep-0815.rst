@@ -998,21 +998,21 @@ The Wheel Variant PEP introduces four key components:
 1. **Extended Wheel Filenames**: Variant wheels include a variant label
    in their filename to ensure:
 
-   1. that every distinct variant has a unique filename
-   2. that variant wheels are not accidentally installed by
+   a. that every distinct variant has a unique filename
+   b. that variant wheels are not accidentally installed by
       non-variant-aware tools.
 
 2. **Variant Metadata Format**: Standardized metadata describing variant
    properties and provider requirements.
 
-   1. Metadata specification at “project level” inside
+   a. Metadata specification at “project level” inside
       ``pyproject.toml``
-   2. Metadata specification of “built packages” inside two JSON files:
+   b. Metadata specification of “built packages” inside two JSON files:
 
-      1. ``*.dist-info/variant.json``: Individual wheel variant
+      i. ``*.dist-info/variant.json``: Individual wheel variant
          metadata.
-      2. ``*-variants.json``: Variant metadata file aggregated on the
-         package index.
+      ii. ``*-variants.json``: Variant metadata file aggregated on the
+          package index.
 
 3. **Provider Plugin System**: Plugin interface to allow detection of
    system capabilities and validate variant compatibility.
@@ -1218,11 +1218,11 @@ All the fields are optional, except that:
 2. If ``install-time`` is false, it describes an AoT provider and the
    ``requires`` key is optional. In that case:
 
-   1. If ``requires`` is provided and non-empty, the provider dictionary
+   a. If ``requires`` is provided and non-empty, the provider dictionary
       must reference an AOT provider plugin that will be queried at
       build time to fill ``static-properties``.
 
-   2. Otherwise, ``static-properties`` must be specified in
+   b. Otherwise, ``static-properties`` must be specified in
       ``pyproject.toml``.
 
 
@@ -1504,26 +1504,26 @@ to the following algorithm:
 
 2. For every namespace:
 
-   1. Construct the initial ordered list of feature names by copying the
+   i. Construct the initial ordered list of feature names by copying the
       value of the respective ``default-priorities.feature.{namespace}``
       key.
 
-   2. Obtain the supported feature names from the provider, in order.
-      For every feature name that is not present in the constructed
-      list, append it to the end.
+   ii. Obtain the supported feature names from the provider, in order.
+       For every feature name that is not present in the constructed
+       list, append it to the end.
 
    After this step, a list of ordered feature names is available for
    every namespace.
 
 3. For every feature:
 
-   1. Construct the initial ordered list of values by copying the value
+   i. Construct the initial ordered list of values by copying the value
       of the respective
       ``default-priorities.property.{namespace}.{feature_name}`` key.
 
-   2. Obtain the supported values from the provider, in order. For every
-      value that is not present in the constructed list, append it to
-      the end.
+   ii. Obtain the supported values from the provider, in order. For every
+       value that is not present in the constructed list, append it to
+       the end.
 
    After this step, a list of ordered property values is available for
    every feature.
