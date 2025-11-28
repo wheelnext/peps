@@ -2,7 +2,7 @@ PEP: 815
 Title: Wheel Variants - extending platform awareness
 Author: Jonathan DEKHTIAR <jonathan@dekhtiar.com>,
         Michał Górny <mgorny@quansight.com>,
-        konsti <konstin@mailbox.org>,
+        Konstantin Schütze <konstin@mailbox.org>,
         Ralf Gommers <ralf.gommers@gmail.com>,
         Andrey Talman <atalman@meta.com>,
         Charlie Marsh <crmarsh416@gmail.com>,
