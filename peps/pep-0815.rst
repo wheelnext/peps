@@ -1028,7 +1028,7 @@ Extended wheel filename
 This PEP changes the wheel filename template originally defined by
 :pep:`427` to:
 
-.. code:: re
+.. code::
 
    {distribution}-{version}(-{build tag})?-{python tag}-{abi tag}-{platform tag}(-{variant label})?.whl
 
@@ -1125,7 +1125,7 @@ locations, with slight variations:
 All three variants metadata files share a common JSON-compatible
 structure:
 
-.. code:: txt
+.. code::
 
    (root)
    |
@@ -1318,38 +1318,38 @@ Example Structure:
 .. code:: toml
 
    [variant.default-priorities]
-    prefer CPU features over BLAS/LAPACK variants
+   # prefer CPU features over BLAS/LAPACK variants
    namespace = ["x86_64", "aarch64", "blas_lapack"]
 
-    prefer aarch64 version and x86_64 level features over other features
-    (specific CPU extensions like "sse4.1")
+   # prefer aarch64 version and x86_64 level features over other features
+   # (specific CPU extensions like "sse4.1")
    feature.aarch64 = ["version"]
    feature.x86_64 = ["level"]
 
-    prefer x86-64-v3 and then older (even if CPU is newer)
+   # prefer x86-64-v3 and then older (even if CPU is newer)
    property.x86_64.level = ["v3", "v2", "v1"]
 
    [variant.providers.aarch64]
-    example using different package based on Python version
+   # example using different package based on Python version
    requires = [
        "provider-variant-aarch64 >=0.0.1; python_version >= '3.12'",
        "legacy-provider-variant-aarch64 >=0.0.1; python_version < '3.12'",
    ]
-    use only on aarch64/arm machines
+   # use only on aarch64/arm machines
    enable-if = "platform_machine == 'aarch64' or 'arm' in platform_machine"
    plugin-api = "provider_variant_aarch64.plugin:AArch64Plugin"
 
    [variant.providers.x86_64]
    requires = ["provider-variant-x86-64 >=0.0.1"]
-    use only on x86_64 machines
+   # use only on x86_64 machines
    enable-if = "platform_machine == 'x86_64' or platform_machine == 'AMD64'"
    plugin-api = "provider_variant_x86_64.plugin:X8664Plugin"
 
    [variant.providers.blas_lapack]
-    plugin-api inferred from requires
+   # plugin-api inferred from requires
    requires = ["blas-lapack-variant-provider"]
-    plugin used only when building package, properties will be inlined
-    into variant.json
+   # plugin used only when building package, properties will be inlined
+   # into variant.json
    install-time = false
 
 
@@ -1373,7 +1373,7 @@ in the individual key sections. In addition to that, it must contain:
 The variant.json file corresponding to the wheel built from the example
 pyproject.toml file for x86-64-v3 would look like:
 
-.. code:: jsonc
+.. code:: json5
 
    {
       // TODO: replace this with appendix URL for the PEP
@@ -1454,7 +1454,7 @@ The ``foo-1.2.3-variants.json`` corresponding to the package with two
 wheel variants, one of them listed in the previous example, would look
 like:
 
-.. code:: jsonc
+.. code:: json5
 
    {
       // TODO: replace this with appendix URL for the PEP
@@ -1720,7 +1720,7 @@ The location of the plugin code is called an “API endpoint”, and it is
 expressed using the object reference notation following the `entry point
 specification <https://packaging.python.org/en/latest/specifications/entry-points/>`__:
 
-.. code:: python
+.. code::
 
    {import path}(:{object path})?
 
@@ -1992,7 +1992,7 @@ specifications:
 The markers evaluating to sets of strings must be matched via the ``in``
 or ``not in`` operator, e.g.:
 
-.. code:: toml
+.. code::
 
    dep1; "foo" in variant_namespaces
    dep2; "foo :: bar" in variant_features
@@ -2000,7 +2000,7 @@ or ``not in`` operator, e.g.:
 
 The ``variant_label`` marker is a plain string:
 
-.. code:: toml
+.. code::
 
    dep4; variant_label == "foobar"
    dep5; variant_label != "null"
