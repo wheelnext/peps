@@ -112,21 +112,20 @@ architecture can lead to significant performance improvement (and often
 also reduce power requirements, etc.).
 
 .. figure:: pep-0815/avx512_gromacs_benchmark.png
-   :alt: GROMACS AVX512 Benchmark
+    :alt: GROMACS AVX512 Benchmark
 
-   GROMACS AVX512 Benchmark
+    GROMACS AVX512 Benchmark
 
 ..
 
-   “Compiling `GROMACS <https://www.gromacs.org/>`__ for architectures
-   that can exploit the AVX-512 instructions supported by the Intel
-   Cascade Lake microarchitecture gives an additional 18% performance
-   improvement relative to using AVX2 instructions, with a speedup of
-   about 70% compared to a generic GROMACS installation with only SSE2.”
+    “Compiling `GROMACS <https://www.gromacs.org/>`__ for architectures
+    that can exploit the AVX-512 instructions supported by the Intel
+    Cascade Lake microarchitecture gives an additional 18% performance
+    improvement relative to using AVX2 instructions, with a speedup of
+    about 70% compared to a generic GROMACS installation with only SSE2.”
 
-   Source: `archspec: A library for detecting, labeling, and reasoning
-   about
-   microarchitectures <https://tgamblin.github.io/pubs/archspec-canopie-hpc-2020.pdf>`__
+    — `archspec: A library for detecting, labeling, and reasoning about
+    microarchitectures <https://tgamblin.github.io/pubs/archspec-canopie-hpc-2020.pdf>`__
 
 This PEP proposes a systematic and scalable approach to selecting
 optimized wheels based on platform characteristics, which will help
@@ -209,9 +208,9 @@ PyTorch team. This complexity represents a fundamental scalability issue
 with the current tag system.
 
 .. figure:: pep-0815/pytorch_variant_selector.png
-   :alt: PyTorch Wheel Selector
+    :alt: PyTorch Wheel Selector
 
-   PyTorch Wheel Selector
+    PyTorch Wheel Selector
 
 **Source:** https://pytorch.org/get-started/locally/ (screen capture
 date: 2025/08/22)
@@ -251,7 +250,7 @@ separate package indexes with custom URLs.
 
 .. code:: bash
 
-   pip install torch --index-url="https://download.pytorch.org/whl/cu129"
+    pip install torch --index-url="https://download.pytorch.org/whl/cu129"
 
 **This approach requires:**
 
@@ -309,8 +308,8 @@ variant of NumPy.
 
 .. code:: bash
 
-   pip install xgboost      # NVIDIA GPU variant
-   pip install xgboost-cpu  # CPU-only variant
+    pip install xgboost      # NVIDIA GPU variant
+    pip install xgboost-cpu  # CPU-only variant
 
 `cupy <https://github.com/cupy/cupy>`__ for diverse reasons had to build
 a total of 52 different packages - all with different names - which
@@ -321,14 +320,14 @@ continuously have to create new PyPI packages, ask for limit increases,
 and keep their wheel build infrastructure and documentation in sync with
 those new package names.
 
-.. code:: bash
+.. code:: text
 
-   cupy-cuda100 cupy-cuda101 cupy-cuda102 cupy-cuda110 cupy-cuda111 cupy-cuda112 cupy-cuda113 cupy-cuda114 cupy-cuda115
-   cupy-cuda116 cupy-cuda117 cupy-cuda118 cupy-cuda119 cupy-cuda11x cupy-cuda120 cupy-cuda121 cupy-cuda122 cupy-cuda123
-   cupy-cuda124 cupy-cuda125 cupy-cuda126 cupy-cuda127 cupy-cuda128 cupy-cuda129 cupy-cuda12x cupy-cuda13x cupy-cuda70
-   cupy-cuda75 cupy-cuda80 cupy-cuda90 cupy-cuda91 cupy-cuda92 cupy-rocm-4-0 cupy-rocm-4-1 cupy-rocm-4-2 cupy-rocm-4-3
-   cupy-rocm-4-4 cupy-rocm-4-5 cupy-rocm-5-0 cupy-rocm-5-1 cupy-rocm-5-2 cupy-rocm-5-3 cupy-rocm-5-4 cupy-rocm-5-5
-   cupy-rocm-5-6 cupy-rocm-5-7 cupy-rocm-5-8 cupy-rocm-5-9 cupy-rocm-6-0 cupy-rocm-6-1 cupy-rocm-6-2 cupy-rocm-6-3
+    cupy-cuda100 cupy-cuda101 cupy-cuda102 cupy-cuda110 cupy-cuda111 cupy-cuda112 cupy-cuda113 cupy-cuda114 cupy-cuda115
+    cupy-cuda116 cupy-cuda117 cupy-cuda118 cupy-cuda119 cupy-cuda11x cupy-cuda120 cupy-cuda121 cupy-cuda122 cupy-cuda123
+    cupy-cuda124 cupy-cuda125 cupy-cuda126 cupy-cuda127 cupy-cuda128 cupy-cuda129 cupy-cuda12x cupy-cuda13x cupy-cuda70
+    cupy-cuda75 cupy-cuda80 cupy-cuda90 cupy-cuda91 cupy-cuda92 cupy-rocm-4-0 cupy-rocm-4-1 cupy-rocm-4-2 cupy-rocm-4-3
+    cupy-rocm-4-4 cupy-rocm-4-5 cupy-rocm-5-0 cupy-rocm-5-1 cupy-rocm-5-2 cupy-rocm-5-3 cupy-rocm-5-4 cupy-rocm-5-5
+    cupy-rocm-5-6 cupy-rocm-5-7 cupy-rocm-5-8 cupy-rocm-5-9 cupy-rocm-6-0 cupy-rocm-6-1 cupy-rocm-6-2 cupy-rocm-6-3
 
 
 “Extra-Dependency” as variants
@@ -350,20 +349,20 @@ It should be noted that most of these “extras” are technically mutually
 exclusive, though it is currently impossible to correctly express this
 incompatibility within the package metadata.
 
-.. code:: yaml
+.. code:: email
 
-   Provides-Extra: minimum-jaxlib
-   Provides-Extra: cpu
-   Provides-Extra: ci
-   Provides-Extra: tpu
-   Provides-Extra: cuda
-   Provides-Extra: cuda12
-   Provides-Extra: cuda13
-   Provides-Extra: cuda12-local
-   Provides-Extra: cuda13-local
-   Provides-Extra: rocm
-   Provides-Extra: k8s
-   Provides-Extra: xprof
+    Provides-Extra: minimum-jaxlib
+    Provides-Extra: cpu
+    Provides-Extra: ci
+    Provides-Extra: tpu
+    Provides-Extra: cuda
+    Provides-Extra: cuda12
+    Provides-Extra: cuda13
+    Provides-Extra: cuda12-local
+    Provides-Extra: cuda13-local
+    Provides-Extra: rocm
+    Provides-Extra: k8s
+    Provides-Extra: xprof
 
 
 Bundled universal packages - monolithic builds
@@ -421,17 +420,17 @@ Impact on scientific computing and AI/ML workflows
 The packaging limitations particularly affect scientific computing and
 AI/ML applications where performance optimization is critical.
 
-   The current wheel format’s lack of hardware awareness creates a
-   suboptimal experience for hardware-dependent packages. While plugins
-   help with smaller and well scoped packages, users must currently
-   manually identify the correct variant (e.g., ``jax[cuda13]``) to
-   avoid generic defaults or incompatible combinations. We need a system
-   where ``pip install jax`` automatically selects packages matching the
-   user’s hardware, unless explicitly overridden.
+    The current wheel format’s lack of hardware awareness creates a
+    suboptimal experience for hardware-dependent packages. While plugins
+    help with smaller and well scoped packages, users must currently
+    manually identify the correct variant (e.g., ``jax[cuda13]``) to
+    avoid generic defaults or incompatible combinations. We need a system
+    where ``pip install jax`` automatically selects packages matching the
+    user’s hardware, unless explicitly overridden.
 
-   WheelNext is a clear step in the right direction in this regard.
+    WheelNext is a clear step in the right direction in this regard.
 
-   — *Michael Hudgins, Jax Developer Infrastructure Lead*
+    — Michael Hudgins, Jax Developer Infrastructure Lead
 
 
 Heterogeneous computing environments
@@ -523,9 +522,9 @@ name/version but different dependencies.
 
 .. code:: bash
 
-   pytorch-2.8.0-cpu_mkl_py313_he1d8d61_100.conda      # CPU + MKL variant
-   pytorch-2.8.0-cuda128_mkl_py313_hf206996_300.conda  # CUDA 12.8 + MKL variant
-   pytorch-2.8.0-cuda129_mkl_py313_he100a2c_300.conda  # CUDA 12.9 + MKL variant
+    pytorch-2.8.0-cpu_mkl_py313_he1d8d61_100.conda      # CPU + MKL variant
+    pytorch-2.8.0-cuda128_mkl_py313_hf206996_300.conda  # CUDA 12.8 + MKL variant
+    pytorch-2.8.0-cuda129_mkl_py313_he100a2c_300.conda  # CUDA 12.9 + MKL variant
 
 A hash (computed from variant metadata) prevents filename collisions;
 actual variant selection happens via standard dependency constraints in
@@ -534,7 +533,7 @@ resolve dependencies like:
 
 .. code:: bash
 
-   conda install pytorch mkl
+    conda install pytorch mkl
 
 **Mutex Metapackages**: Python metadata and conda metadata do not have
 good ways to express ideas like “this package conflicts with that one.”
@@ -703,7 +702,7 @@ inspired by Trove Classifiers in :pep:`301`:
 
 ::
 
-   {namespace} :: {feature_name} :: {feature_value}
+    {namespace} :: {feature_name} :: {feature_value}
 
 
 Null variant
@@ -1030,7 +1029,7 @@ This PEP changes the wheel filename template originally defined by
 
 .. code::
 
-   {distribution}-{version}(-{build tag})?-{python tag}-{abi tag}-{platform tag}(-{variant label})?.whl
+    {distribution}-{version}(-{build tag})?-{python tag}-{abi tag}-{platform tag}(-{variant label})?.whl
 
 Wheels using extensions introduced by this PEP must feature the variant
 label component. It must adhere to the following rules:
@@ -1074,7 +1073,7 @@ the following format:
 
 ::
 
-   {namespace} :: {feature_name} :: {feature_value}
+    {namespace} :: {feature_name} :: {feature_value}
 
 The namespace must consist only of ``0-9``, ``a-z`` and ``_`` ASCII
 characters (``^[a-z0-9_]+$``). It must correspond to a single variant
@@ -1100,15 +1099,15 @@ must be compatible.
 
 Examples:
 
-::
+.. code:: text
 
-    all of the following must be supported
-   x86_64 :: level :: v3
-   x86_64 :: avx512_bf16 :: on
-   nvidia :: cuda_version_lower_bound :: 12.8
-    additionally, at least one of the following must be supported
-   nvidia :: sm_arch :: 120_real
-   nvidia :: sm_arch :: 110_real
+    # all of the following must be supported
+    x86_64 :: level :: v3
+    x86_64 :: avx512_bf16 :: on
+    nvidia :: cuda_version_lower_bound :: 12.8
+    # additionally, at least one of the following must be supported
+    nvidia :: sm_arch :: 120_real
+    nvidia :: sm_arch :: 110_real
 
 
 Variant metadata
@@ -1125,31 +1124,31 @@ locations, with slight variations:
 All three variants metadata files share a common JSON-compatible
 structure:
 
-.. code::
+.. code:: text
 
-   (root)
-   |
-   +- providers
-   |  +- {namespace}
-   |     +- enable-if     : str | None = None
-   |     +- install-time  : bool       = True
-   |     +- optional      : bool       = False
-   |     +- plugin-api    : str | None = None
-   |     +- requires      : list[str]  = []
-   |
-   +- default-priorities
-   |  +- namespace        : list[str]
-   |  +- feature
-   |     +- {namespace}   : list[str]  = []
-   |  +- property
-   |     +- {namespace}
-   |        +- {feature}  : list[str]  = []
-   |
-   +- static-properties
-   |  +- {namespace}
-   |     +- {feature}     : list[str]  = []
-   |
-   +- variants
+    (root)
+    |
+    +- providers
+    |  +- {namespace}
+    |     +- enable-if     : str | None = None
+    |     +- install-time  : bool       = True
+    |     +- optional      : bool       = False
+    |     +- plugin-api    : str | None = None
+    |     +- requires      : list[str]  = []
+    |
+    +- default-priorities
+    |  +- namespace        : list[str]
+    |  +- feature
+    |     +- {namespace}   : list[str]  = []
+    |  +- property
+    |     +- {namespace}
+    |        +- {feature}  : list[str]  = []
+    |
+    +- static-properties
+    |  +- {namespace}
+    |     +- {feature}     : list[str]  = []
+    |
+    +- variants
       +- {variant_label}
          +- {namespace}
             +- {feature}  : list[str]  = []
@@ -1317,40 +1316,40 @@ Example Structure:
 
 .. code:: toml
 
-   [variant.default-priorities]
-   # prefer CPU features over BLAS/LAPACK variants
-   namespace = ["x86_64", "aarch64", "blas_lapack"]
+    [variant.default-priorities]
+    # prefer CPU features over BLAS/LAPACK variants
+    namespace = ["x86_64", "aarch64", "blas_lapack"]
 
-   # prefer aarch64 version and x86_64 level features over other features
-   # (specific CPU extensions like "sse4.1")
-   feature.aarch64 = ["version"]
-   feature.x86_64 = ["level"]
+    # prefer aarch64 version and x86_64 level features over other features
+    # (specific CPU extensions like "sse4.1")
+    feature.aarch64 = ["version"]
+    feature.x86_64 = ["level"]
 
-   # prefer x86-64-v3 and then older (even if CPU is newer)
-   property.x86_64.level = ["v3", "v2", "v1"]
+    # prefer x86-64-v3 and then older (even if CPU is newer)
+    property.x86_64.level = ["v3", "v2", "v1"]
 
-   [variant.providers.aarch64]
-   # example using different package based on Python version
-   requires = [
+    [variant.providers.aarch64]
+    # example using different package based on Python version
+    requires = [
        "provider-variant-aarch64 >=0.0.1; python_version >= '3.12'",
        "legacy-provider-variant-aarch64 >=0.0.1; python_version < '3.12'",
-   ]
-   # use only on aarch64/arm machines
-   enable-if = "platform_machine == 'aarch64' or 'arm' in platform_machine"
-   plugin-api = "provider_variant_aarch64.plugin:AArch64Plugin"
+    ]
+    # use only on aarch64/arm machines
+    enable-if = "platform_machine == 'aarch64' or 'arm' in platform_machine"
+    plugin-api = "provider_variant_aarch64.plugin:AArch64Plugin"
 
-   [variant.providers.x86_64]
-   requires = ["provider-variant-x86-64 >=0.0.1"]
-   # use only on x86_64 machines
-   enable-if = "platform_machine == 'x86_64' or platform_machine == 'AMD64'"
-   plugin-api = "provider_variant_x86_64.plugin:X8664Plugin"
+    [variant.providers.x86_64]
+    requires = ["provider-variant-x86-64 >=0.0.1"]
+    # use only on x86_64 machines
+    enable-if = "platform_machine == 'x86_64' or platform_machine == 'AMD64'"
+    plugin-api = "provider_variant_x86_64.plugin:X8664Plugin"
 
-   [variant.providers.blas_lapack]
-   # plugin-api inferred from requires
-   requires = ["blas-lapack-variant-provider"]
-   # plugin used only when building package, properties will be inlined
-   # into variant.json
-   install-time = false
+    [variant.providers.blas_lapack]
+    # plugin-api inferred from requires
+    requires = ["blas-lapack-variant-provider"]
+    # plugin used only when building package, properties will be inlined
+    # into variant.json
+    install-time = false
 
 
 ``*.dist-info/variant.json``: the packaged variant metadata file
@@ -1375,7 +1374,7 @@ pyproject.toml file for x86-64-v3 would look like:
 
 .. code:: json5
 
-   {
+    {
       // TODO: replace this with appendix URL for the PEP
       "$schema": "https://variants-schema.wheelnext.dev/v0.0.3.json",
       "default-priorities": {
@@ -1425,7 +1424,7 @@ pyproject.toml file for x86-64-v3 would look like:
             }
          }
       }
-   }
+    }
 
 
 ``{name}-{version}-variants.json``: the index level variant metadata file
@@ -1456,7 +1455,7 @@ like:
 
 .. code:: json5
 
-   {
+    {
       // TODO: replace this with appendix URL for the PEP
       "$schema": "https://variants-schema.wheelnext.dev/v0.0.3.json",
       "default-priorities": {
@@ -1487,7 +1486,7 @@ like:
             }
          }
      }
-   }
+    }
 
 
 Variant ordering
@@ -1553,80 +1552,80 @@ pseudocode:
 
 .. code:: python
 
-   from typing import Self
+    from typing import Self
 
 
-   def get_supported_feature_names(namespace: str) -> list[str]:
-       """Get feature names from plugin's get_supported_configs()"""
-       ...
+    def get_supported_feature_names(namespace: str) -> list[str]:
+        """Get feature names from plugin's get_supported_configs()"""
+        ...
 
 
-   def get_supported_feature_values(namespace: str, feature_name: str) -> list[str]:
-       """Get feature values from plugin's get_supported_configs()"""
-       ...
+    def get_supported_feature_values(namespace: str, feature_name: str) -> list[str]:
+        """Get feature values from plugin's get_supported_configs()"""
+        ...
 
 
-    default-priorities dict from variant metadata
-   default_priorities = {
-       "namespace": [...],  # : list[str]
-       "feature": {...},    # : dict[str, list[str]]
-       "property": {...},   # : dict[str, dict[str, list[str]]]
-   }
+    # default-priorities dict from variant metadata
+    default_priorities = {
+        "namespace": [...],  # : list[str]
+        "feature": {...},    # : dict[str, list[str]]
+        "property": {...},   # : dict[str, dict[str, list[str]]]
+    }
 
 
-    1. Construct the ordered list of namespaces.
-   namespace_order = default_priorities["namespace"]
-   feature_order = {}
-   value_order = {}
+    # 1. Construct the ordered list of namespaces.
+    namespace_order = default_priorities["namespace"]
+    feature_order = {}
+    value_order = {}
 
-   for namespace in namespace_order:
-       # 2. Construct the ordered lists of feature names.
-       feature_order[namespace] = default_priorities["feature"].get(namespace, [])
-       for feature_name in get_supported_feature_names(namespace):
-           if feature_name not in feature_order[namespace]:
-               feature_order[namespace].append(feature_name)
+    for namespace in namespace_order:
+        # 2. Construct the ordered lists of feature names.
+        feature_order[namespace] = default_priorities["feature"].get(namespace, [])
+        for feature_name in get_supported_feature_names(namespace):
+            if feature_name not in feature_order[namespace]:
+                feature_order[namespace].append(feature_name)
 
        value_order[namespace] = {}
        for feature_name in feature_order[namespace]:
-           # 3. Construct the ordered lists of feature values.
-           value_order[namespace][feature_name] = default_priorities["property"].get(namespace, {}).get(feature_name, [])
-           for feature_value in get_supported_feature_values(namespace, feature_name):
-               if feature_value not in value_order[namespace][feature_name]:
-                   value_order[namespace][feature_name].append(feature_value)
+            # 3. Construct the ordered lists of feature values.
+            value_order[namespace][feature_name] = default_priorities["property"].get(namespace, {}).get(feature_name, [])
+            for feature_value in get_supported_feature_values(namespace, feature_name):
+                if feature_value not in value_order[namespace][feature_name]:
+                    value_order[namespace][feature_name].append(feature_value)
 
 
-   def property_key(prop: tuple[str, str, str]) -> tuple[int, int, int]:
-       """Construct a sort key for variant property (akin to step 4.)"""
-       namespace, feature_name, feature_value = prop
-       return (
-           namespace_order.index(namespace),
-           feature_order[namespace].index(feature_name),
-           value_order[namespace][feature_name].index(feature_value),
-       )
+    def property_key(prop: tuple[str, str, str]) -> tuple[int, int, int]:
+        """Construct a sort key for variant property (akin to step 4.)"""
+        namespace, feature_name, feature_value = prop
+        return (
+            namespace_order.index(namespace),
+            feature_order[namespace].index(feature_name),
+            value_order[namespace][feature_name].index(feature_value),
+        )
 
 
-   class VariantWheel:
-       """Example class exposing properties of a variant wheel"""
-       properties: list[tuple[str, str, str]]
+    class VariantWheel:
+        """Example class exposing properties of a variant wheel"""
+        properties: list[tuple[str, str, str]]
 
-       def __lt__(self: Self, other: Self) -> bool:
-           """Variant comparison function for sorting (akin to step 6.)"""
-           for self_prop, other_prop in zip(self.properties, other.properties):
-               if self_prop != other_prop:
-                   return property_key(self_prop) < property_key(other_prop)
-           return len(self.properties) > len(other.properties)
-
-
-    A list of variant wheels to sort.
-   wheels: list[VariantWheel] = [...]
+        def __lt__(self: Self, other: Self) -> bool:
+            """Variant comparison function for sorting (akin to step 6.)"""
+            for self_prop, other_prop in zip(self.properties, other.properties):
+                if self_prop != other_prop:
+                    return property_key(self_prop) < property_key(other_prop)
+            return len(self.properties) > len(other.properties)
 
 
-   for wheel in wheels:
-       # 5. Order variant wheel properties by their sort keys.
-       wheel.properties.sort(key=property_key)
-    6. Order variant wheels by comparing their sorted properties
-    (see VariantWheel.__lt__())
-   wheels.sort()
+    # A list of variant wheels to sort.
+    wheels: list[VariantWheel] = [...]
+
+
+    for wheel in wheels:
+        # 5. Order variant wheel properties by their sort keys.
+        wheel.properties.sort(key=property_key)
+    # 6. Order variant wheels by comparing their sorted properties
+    # (see VariantWheel.__lt__())
+    wheels.sort()
 
 
 Integration with ``pylock.toml``
@@ -1636,37 +1635,37 @@ The following section is added to the ``pylock.toml`` specification:
 
 .. code:: rst
 
-   .. _pylock-packages-variants-json:
+    .. _pylock-packages-variants-json:
 
-   ``[packages.variants-json]``
-   ----------------------------
+    ``[packages.variants-json]``
+    ----------------------------
 
-   - **Type**: table
-   - **Required?**: no; requires that :ref:`pylock-packages-wheels` is used,
+    - **Type**: table
+    - **Required?**: no; requires that :ref:`pylock-packages-wheels` is used,
      mutually-exclusive with :ref:`pylock-packages-vcs`,
      :ref:`pylock-packages-directory`, and :ref:`pylock-packages-archive`.
-   - **Inspiration**: uv_
-   - The URL or path to the ``variants.json`` file.
-   - Only used if the project uses :ref:`wheel variants <wheel-variants>`.
+    - **Inspiration**: uv_
+    - The URL or path to the ``variants.json`` file.
+    - Only used if the project uses :ref:`wheel variants <wheel-variants>`.
 
-   .. _pylock-packages-variants-json-url:
+    .. _pylock-packages-variants-json-url:
 
-   ``packages.variants-json.url``
-   ''''''''''''''''''''''''''''''
+    ``packages.variants-json.url``
+    ''''''''''''''''''''''''''''''
 
-   See :ref:`pylock-packages-archive-url`.
+    See :ref:`pylock-packages-archive-url`.
 
-   .. _pylock-packages-variants-json-path:
+    .. _pylock-packages-variants-json-path:
 
-   ``packages.variants-json.path``
-   '''''''''''''''''''''''''''''''
+    ``packages.variants-json.path``
+    '''''''''''''''''''''''''''''''
 
-   See :ref:`pylock-packages-archive-path`.
+    See :ref:`pylock-packages-archive-path`.
 
-   .. _pylock-packages-variants-json-hashes:
+    .. _pylock-packages-variants-json-hashes:
 
-   ``packages.variants-json.hashes``
-   '''''''''''''''''''''''''''''''''
+    ``packages.variants-json.hashes``
+    '''''''''''''''''''''''''''''''''
 
 If there is a ``[packages.variants-json]`` section, the installer should
 resolve variants to select the best wheel file.
@@ -1722,20 +1721,20 @@ specification <https://packaging.python.org/en/latest/specifications/entry-point
 
 .. code::
 
-   {import path}(:{object path})?
+    {import_path}(:{object_path})?
 
 An API endpoint specification is equivalent to the following Python
 pseudocode:
 
 .. code:: python
 
-   import inspect
-   import {import path}
+    import inspect
+    import {import_path}
 
-   if "{object path}":
-       plugin = {import path}.{object path}
-   else:
-       plugin = {import path}
+    if "{object_path}":
+        plugin = {import_path}.{object_path}
+    else:
+        plugin = {import_path}
 
 API endpoints are used in two contexts:
 
@@ -1760,28 +1759,28 @@ significant. It is defined using the following protocol:
 
 .. code:: python
 
-   from abc import abstractmethod
-   from typing import Protocol
+    from abc import abstractmethod
+    from typing import Protocol
 
 
-   class VariantFeatureConfigType(Protocol):
-       @property
-       @abstractmethod
-       def name(self) -> str:
-           """Feature name"""
-           raise NotImplementedError
+    class VariantFeatureConfigType(Protocol):
+        @property
+        @abstractmethod
+        def name(self) -> str:
+            """Feature name"""
+            raise NotImplementedError
 
-       @property
-       @abstractmethod
-       def multi_value(self) -> bool:
-           """Does this property allow multiple values per variant?"""
-           raise NotImplementedError
+        @property
+        @abstractmethod
+        def multi_value(self) -> bool:
+            """Does this property allow multiple values per variant?"""
+            raise NotImplementedError
 
-       @property
-       @abstractmethod
-       def values(self) -> list[str]:
-           """List of values, possibly ordered from most preferred to least"""
-           raise NotImplementedError
+        @property
+        @abstractmethod
+        def values(self) -> list[str]:
+            """List of values, possibly ordered from most preferred to least"""
+            raise NotImplementedError
 
 A “variant feature config” must provide three properties or attributes:
 
@@ -1806,36 +1805,36 @@ The plugin interface must follow the following protocol:
 
 .. code:: python
 
-   from abc import abstractmethod
-   from typing import Protocol
+    from abc import abstractmethod
+    from typing import Protocol
 
 
-   class PluginType(Protocol):
-       # Note: properties are used here for docstring purposes, these must
-       # be actually implemented as attributes.
+    class PluginType(Protocol):
+        # Note: properties are used here for docstring purposes, these must
+        # be actually implemented as attributes.
 
-       @property
-       @abstractmethod
-       def namespace(self) -> str:
-           """The provider namespace"""
-           raise NotImplementedError
+        @property
+        @abstractmethod
+        def namespace(self) -> str:
+            """The provider namespace"""
+            raise NotImplementedError
 
-       @property
-       def is_aot_plugin(self) -> bool:
-           """Is this plugin valid for `install-time = false`?"""
-           return False
+        @property
+        def is_aot_plugin(self) -> bool:
+            """Is this plugin valid for `install-time = false`?"""
+            return False
 
-       @classmethod
-       @abstractmethod
-       def get_all_configs(cls) -> list[VariantFeatureConfigType]:
-           """Get all valid configs for the plugin"""
-           raise NotImplementedError
+        @classmethod
+        @abstractmethod
+        def get_all_configs(cls) -> list[VariantFeatureConfigType]:
+            """Get all valid configs for the plugin"""
+            raise NotImplementedError
 
-       @classmethod
-       @abstractmethod
-       def get_supported_configs(cls) -> list[VariantFeatureConfigType]:
-           """Get supported configs for the current system"""
-           raise NotImplementedError
+        @classmethod
+        @abstractmethod
+        def get_supported_configs(cls) -> list[VariantFeatureConfigType]:
+            """Get supported configs for the current system"""
+            raise NotImplementedError
 
 The plugin interface must define the following attributes:
 
@@ -1874,80 +1873,80 @@ Example implementation
 
 .. code:: python
 
-   from dataclasses import dataclass
+    from dataclasses import dataclass
 
 
-   @dataclass
-   class VariantFeatureConfig:
-       name: str
-       values: list[str]
-       multi_value: bool
+    @dataclass
+    class VariantFeatureConfig:
+        name: str
+        values: list[str]
+        multi_value: bool
 
 
     internal -- provided for illustrative purpose
-   _MAX_VERSION = 4
-   _ALL_GPUS = ["narf", "poit", "zort"]
+    _MAX_VERSION = 4
+    _ALL_GPUS = ["narf", "poit", "zort"]
 
 
-   def _get_current_version() -> int:
-       """Returns currently installed runtime version"""
-       ...  # implementation not provided
+    def _get_current_version() -> int:
+        """Returns currently installed runtime version"""
+        ...  # implementation not provided
 
 
-   def _is_gpu_available(codename: str) -> bool:
-       """Is specified GPU installed?"""
-       ...  # implementation not provided
+    def _is_gpu_available(codename: str) -> bool:
+        """Is specified GPU installed?"""
+        ...  # implementation not provided
 
 
-   class MyPlugin:
-       namespace = "example"
+    class MyPlugin:
+        namespace = "example"
 
-       # optional, defaults to False
-       is_aot_plugin = False
+        # optional, defaults to False
+        is_aot_plugin = False
 
-       # all valid properties
-       @staticmethod
-       def get_all_configs() -> list[VariantFeatureConfig]:
-           return [
-               VariantFeatureConfig(
-                  # example :: gpu -- multi-valued, since the package can target multiple GPUs
-                  name="gpu",
-                  # [narf, poit, zort]
-                  values=_ALL_GPUS,
-                  multi_value=True,
-               ),
-               VariantFeatureConfig(
-                  # example :: min_version -- single-valued, since there is always one minimum
-                  name="min_version",
-                  # [1, 2, 3, 4] (order doesn't matter)
-                  values=[str(x) for x in range(1, _MAX_VERSION + 1)],
-                  multi_value=False,
-               ),
-           ]
+        # all valid properties
+        @staticmethod
+        def get_all_configs() -> list[VariantFeatureConfig]:
+            return [
+                VariantFeatureConfig(
+                    # example :: gpu -- multi-valued, since the package can target multiple GPUs
+                    name="gpu",
+                    # [narf, poit, zort]
+                    values=_ALL_GPUS,
+                    multi_value=True,
+                ),
+                VariantFeatureConfig(
+                    # example :: min_version -- single-valued, since there is always one minimum
+                    name="min_version",
+                    # [1, 2, 3, 4] (order doesn't matter)
+                    values=[str(x) for x in range(1, _MAX_VERSION + 1)],
+                    multi_value=False,
+                ),
+            ]
 
-       # properties compatible with the system
-       @staticmethod
-       def get_supported_configs() -> list[VariantFeatureConfig]:
-           current_version = _get_current_version()
-           if current_version is None:
-               # no runtime found, system not supported at all
-               return []
+        # properties compatible with the system
+        @staticmethod
+        def get_supported_configs() -> list[VariantFeatureConfig]:
+            current_version = _get_current_version()
+            if current_version is None:
+                # no runtime found, system not supported at all
+                return []
 
-           return [
-               VariantFeatureConfig(
-                  name="min_version",
-                  # [current, current - 1, ..., 1]
-                  values=[str(x) for x in range(current_version, 0, -1)],
-                  multi_value=False,
-               ),
-               VariantFeatureConfig(
-                  name="gpu",
-                  # this may be empty if no GPUs are supported -- 'example :: gpu feature' is not supported then
-                  # but wheels with no GPU-specific code and only 'example :: min_version' could still be installed
-                  values=[x for x in _ALL_GPUS if _is_gpu_available(x)],
-                  multi_value=True,
-               ),
-           ]
+            return [
+                VariantFeatureConfig(
+                    name="min_version",
+                    # [current, current - 1, ..., 1]
+                    values=[str(x) for x in range(current_version, 0, -1)],
+                    multi_value=False,
+                ),
+                VariantFeatureConfig(
+                    name="gpu",
+                    # this may be empty if no GPUs are supported -- 'example :: gpu feature' is not supported then
+                    # but wheels with no GPU-specific code and only 'example :: min_version' could still be installed
+                    values=[x for x in _ALL_GPUS if _is_gpu_available(x)],
+                    multi_value=True,
+                ),
+            ]
 
 
 Future extensions
@@ -1994,17 +1993,17 @@ or ``not in`` operator, e.g.:
 
 .. code::
 
-   dep1; "foo" in variant_namespaces
-   dep2; "foo :: bar" in variant_features
-   dep3; "foo :: bar :: baz" in variant_properties
+    dep1; "foo" in variant_namespaces
+    dep2; "foo :: bar" in variant_features
+    dep3; "foo :: bar :: baz" in variant_properties
 
 The ``variant_label`` marker is a plain string:
 
 .. code::
 
-   dep4; variant_label == "foobar"
-   dep5; variant_label != "null"
-   dep6; variant_label == ""
+    dep4; variant_label == "foobar"
+    dep5; variant_label != "null"
+    dep6; variant_label == ""
 
 Implementations must ignore differences in whitespace while matching the
 features and properties.
@@ -2059,10 +2058,10 @@ Multiple variant properties with the same feature name can be used to
 indicate wheels compatible with multiple providing package versions,
 e.g.:
 
-::
+.. code:: text
 
-   abi_dependency :: torch :: 2.8.0
-   abi_dependency :: torch :: 2.9.0
+    abi_dependency :: torch :: 2.8.0
+    abi_dependency :: torch :: 2.9.0
 
 This means the wheel is compatible with both PyTorch 2.8.0 and 2.9.0.
 
