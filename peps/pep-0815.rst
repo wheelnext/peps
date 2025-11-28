@@ -165,18 +165,18 @@ The limitations of platform compatibility tags
 The current wheel format encodes compatibility through three platform
 tags:
 
-- **Python tag:** `The Python tag indicates the implementation and
-  version required by a
-  distribution <https://packaging.python.org/en/latest/specifications/platform-compatibility-tags/#python-tag>`__
-  (e.g., ``cp313``)
-- **ABI tag:** `The ABI tag indicates which Python ABI is required by
-  any included extension
-  modules <https://packaging.python.org/en/latest/specifications/platform-compatibility-tags/#abi-tag>`__
-  (e.g., ``cp313``, ``none``)
-- **Platform tag**: `Operating system and architecture - In its simplest
-  form:
-  sysconfig.get_platform() <https://packaging.python.org/en/latest/specifications/platform-compatibility-tags/#platform-tag>`__
-  (e.g., ``linux_x86_64``)
+1. **Python tag:** `The Python tag indicates the implementation and
+   version required by a
+   distribution <https://packaging.python.org/en/latest/specifications/platform-compatibility-tags/#python-tag>`__
+   (e.g., ``cp313``)
+2. **ABI tag:** `The ABI tag indicates which Python ABI is required by
+   any included extension
+   modules <https://packaging.python.org/en/latest/specifications/platform-compatibility-tags/#abi-tag>`__
+   (e.g., ``cp313``, ``none``)
+3. **Platform tag**: `Operating system and architecture - In its simplest
+   form:
+   sysconfig.get_platform() <https://packaging.python.org/en/latest/specifications/platform-compatibility-tags/#platform-tag>`__
+   (e.g., ``linux_x86_64``)
 
 While these tags effectively handle traditional compatibility
 dimensions, they cannot express modern requirements:
@@ -1124,9 +1124,9 @@ This section describes the metadata format for the providers, variants
 and properties of a package and its wheels. The format is used in three
 locations, with slight variations:
 
-- in the source tree, inside the ``pyproject.toml`` file
-- in the built wheel, as a ``*.dist-info/variant.json`` file
-- on the package index, as a ``{name}-{version}-variants.json`` file.
+1. in the source tree, inside the ``pyproject.toml`` file
+2. in the built wheel, as a ``*.dist-info/variant.json`` file
+3. on the package index, as a ``{name}-{version}-variants.json`` file.
 
 All three variants metadata files share a common JSON-compatible
 structure:
@@ -1789,7 +1789,7 @@ significant. It is defined using the following protocol:
             """List of values, possibly ordered from most preferred to least"""
             raise NotImplementedError
 
-A “variant feature config” must provide three properties or attributes:
+A “variant feature config” must provide the following properties or attributes:
 
 - ``name`` specifying the feature name, as a string.
 
