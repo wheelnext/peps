@@ -21,21 +21,20 @@ Post-History:
 Abstract
 ========
 
-The Python wheel packaging format uses `platform compatibility
-tags <https://packaging.python.org/en/latest/specifications/platform-compatibility-tags/>`__
-to specify wheel’s supported environments based on Python version, ABI,
-and platform (operating system, architecture, core system libraries).
-These tags are not able to express features of modern hardware. This is
+The Python wheel packaging format uses
+:doc:`packaging:specifications/platform-compatibility-tags` to specify
+wheel’s supported environments based on Python version, ABI, and
+platform (operating system, architecture, core system libraries).  These
+tags are not able to express features of modern hardware. This is
 particularly challenging for the scientific computing, artificial
 intelligence (AI), machine learning (ML), and high-performance computing
 communities, where packages are often built with specific hardware
 accelerations (e.g., NVIDIA CUDA, AMD ROCm), specialized CPU
 instructions (e.g., AVX512_BF16), or other system dependencies.
 
-This PEP proposes “Wheel Variants,” an extension to the `binary
-distribution format
-specification <https://packaging.python.org/en/latest/specifications/binary-distribution-format/>`__.
-This extension introduces a mechanism for package maintainers to declare
+This PEP proposes “Wheel Variants,” an extension to the
+:doc:`packaging:specifications/binary-distribution-format`.  This
+extension introduces a mechanism for package maintainers to declare
 multiple build variants for the same package version, while allowing
 installers to automatically select the most appropriate variant based on
 system hardware and software capabilities and characteristics. More
@@ -520,10 +519,10 @@ Conda - conda-forge
 
 `Conda <https://docs.conda.io>`__ is a binary-only package ecosystem
 that uses aggregated metadata indexes for resolution rather than
-filename parsing. Unlike the `Simple Repository
-API <https://packaging.python.org/en/latest/specifications/simple-repository-api/#simple-repository-api>`__,
-conda’s resolution relies on `repodata indexes per
-platform <https://docs.conda.io/projects/conda-build/en/stable/concepts/generating-index.html>`__
+filename parsing. Unlike the
+:doc:`packaging:specifications/simple-repository-api`, conda’s
+resolution relies on `repodata indexes per platform
+<https://docs.conda.io/projects/conda-build/en/stable/concepts/generating-index.html>`__
 containing full metadata, making filenames purely identifiers with no
 parsing requirements.
 
@@ -896,14 +895,12 @@ The optional ``abi_dependency`` extension can be used to build multiple
 Specification
 =============
 
-This PEP proposes a set of backward-compatible extensions to the `binary
-distribution
-format <https://packaging.python.org/en/latest/specifications/binary-distribution-format/>`__
-specification, and the packaging ecosystem version while maintaining
-complete backward compatibility with existing package managers and
-tools. The design was made with the intent to protect non-variant-aware
-tools from failure when a new type of wheel appears that they don’t know
-how to manage.
+This PEP proposes a set of backward-compatible extensions to the
+:ref:`packaging:binary-distribution-format` specification, and the
+packaging ecosystem version while maintaining complete backward
+compatibility with existing package managers and tools. The design was
+made with the intent to protect non-variant-aware tools from failure
+when a new type of wheel appears that they don’t know how to manage.
 
 
 Wheel variant glossary
@@ -1179,6 +1176,8 @@ their presence. The tools must ignore unknown keys in the dictionaries
 to permit future backwards compatible updates to the PEP. However, users
 should not introduce custom keys to avoid potential future conflicts.
 
+.. TODO: how to actually include it in generated files?
+
 `A JSON Schema is included in the Appendix of this PEP.  <pep-0815/variant_schema.json>`__
 
 
@@ -1213,10 +1212,9 @@ A provider information dictionary may contain the following keys:
 
 - ``plugin-api: str``: The API endpoint for the plugin. If it is
   specified, it must be an object reference as explained in the `API
-  endpoint <#api-endpoint>`__ section. If it is missing, the package
-  name from the first dependency specifier in ``requires`` is used,
-  after replacing all ``-`` characters with ``_`` in the normalized
-  package name.
+  endpoint`_ section. If it is missing, the package name from the first
+  dependency specifier in ``requires`` is used, after replacing all
+  ``-`` characters with ``_`` in the normalized package name.
 
 - ``requires: list[str]``: A list of zero or more package dependency
   specifiers, that are used to install the provider plugin. If the
@@ -1249,8 +1247,7 @@ Default priorities
 ''''''''''''''''''
 
 The ``default-priorities`` dictionary controls the ordering of variants.
-The exact algorithm is described in the `Variant
-ordering <#variant-ordering>`__ section.
+The exact algorithm is described in the `Variant ordering`_ section.
 
 It has a single required key:
 
@@ -1325,11 +1322,10 @@ values.
 ''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 The ``pyproject.toml`` file is the standard project configuration file
-as defined in `pyproject.toml
-specification <https://packaging.python.org/en/latest/specifications/pyproject-toml/#pyproject-toml-spec>`__.
-The variant metadata must be rooted at a top-level table named
-``variant``. It must not specify the ``variants`` dictionary. It is used
-by build backends to build variant wheels.
+as defined in :doc:`packaging:specifications/pyproject-toml`. The
+variant metadata must be rooted at a top-level table named ``variant``.
+It must not specify the ``variants`` dictionary. It is used by build
+backends to build variant wheels.
 
 Example Structure:
 
@@ -1454,10 +1450,9 @@ there must exist a corresponding ``{name}-{version}-variants.json``
 file, hosted and served by the package index. The ``{name}`` and
 ``{version}`` placeholders correspond to the package name and version,
 normalized according to the same rules as wheel files, as found in the
-`Binary Distribution Format
-specification <https://packaging.python.org/en/latest/specifications/binary-distribution-format/#escaping-and-unicode>`__.
-The link to this file must be present on all index pages where the
-variant wheels are linked.
+:ref:`packaging:wheel-file-name-spec` of Binary Distribution Format
+specification.  The link to this file must be present on all index pages
+where the variant wheels are linked.
 
 This file uses the same structure as ``variant.json`` described above,
 except that the variants object must list all variants available on the
@@ -1735,8 +1730,8 @@ API endpoint
 ''''''''''''
 
 The location of the plugin code is called an “API endpoint”, and it is
-expressed using the object reference notation following the `entry point
-specification <https://packaging.python.org/en/latest/specifications/entry-points/>`__:
+expressed using the object reference notation following the
+:doc:`packaging:specifications/entry-points`.
 
 .. code::
 
@@ -1880,7 +1875,7 @@ The plugin interface must provide the following functions:
   particular system, along with their values that are supported. The
   variant feature and value lists must be ordered from the most
   preferred to the least preferred, as they affect `variant
-  ordering <#variant-ordering>`__.
+  ordering`_.
 
 The value returned by ``get_supported_configs()``\ must be a subset of
 the feature names and values returned by ``get_all_configs()`` (modulo
@@ -2051,11 +2046,10 @@ property.
 
 Within this namespace, zero or more properties can be used to express
 compatible dependency versions. For each property, the feature name must
-be the `normalized
-name <https://packaging.python.org/en/latest/specifications/name-normalization/#name-normalization>`__
-of the dependency, whereas the value must be a valid release segment of
-a public version identifier, as defined by the `version specifier
-specification <https://packaging.python.org/en/latest/specifications/version-specifiers/#version-specifiers>`__.
+be the :ref:`normalized name <packaging:name-normalization>` of the
+dependency, whereas the value must be a valid release segment of
+a public version identifier, as defined by the
+:doc:`packaging:specifications/version-specifiers` specification.
 It must contain up to three version components, that are matched against
 the installed version same as the ``=={value}.*`` specifier. Notably,
 trailing zeroes match versions with fewer components (e.g. ``2.0``
@@ -2199,8 +2193,8 @@ opt-in. A few options are suggested for improving the user experience
 without introducing the RCE risk, notably vendoring or locking plugins
 at the installer level, therefore ensuring that they are audited on the
 same level as the installer itself. More details are provided in the
-`Overview <#overview>`__ section. Static file input can be used to skip
-running plugins on installation altogether.
+`Overview`_ section. Static file input can be used to skip running
+plugins on installation altogether.
 
 
 Reference implementation
