@@ -111,7 +111,7 @@ maintainers, the ability to optimize a package for a specific
 architecture can lead to significant performance improvement (and often
 also reduce power requirements, etc.).
 
-.. figure:: ../assets/wheel_variants/avx512_gromacs_benchmark.png
+.. figure:: pep-0815/avx512_gromacs_benchmark.png
    :alt: GROMACS AVX512 Benchmark
 
    GROMACS AVX512 Benchmark
@@ -208,7 +208,7 @@ necessary - workarounds. Such as this manual selector provided by the
 PyTorch team. This complexity represents a fundamental scalability issue
 with the current tag system.
 
-.. figure:: ../assets/wheel_variants/pytorch_variant_selector.png
+.. figure:: pep-0815/pytorch_variant_selector.png
    :alt: PyTorch Wheel Selector
 
    PyTorch Wheel Selector
@@ -1161,8 +1161,7 @@ their presence. The tools must ignore unknown keys in the dictionaries
 to permit future backwards compatible updates to the PEP. However, users
 should not introduce custom keys to avoid potential future conflicts.
 
-`A JSON Schema is included in the Appendix of this PEP. TODO: Move to
-appendix <../assets/wheel_variants/variant_schema.json>`__
+`A JSON Schema is included in the Appendix of this PEP.  <pep-0815/variant_schema.json>`__
 
 
 Provider information
