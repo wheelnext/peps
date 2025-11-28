@@ -53,12 +53,14 @@ compatibility. This approach allows seamless package resolution without
 requiring intrusive changes to installers, ensures backward
 compatibility, and minimizes the burden on package maintainers.
 
+
 Definitions
 ===========
 
 The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”,
 “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and “OPTIONAL” in this
 document are to be interpreted as described in :rfc:`2119`.
+
 
 Motivation
 ==========
@@ -131,6 +133,7 @@ optimized wheels based on platform characteristics, which will help
 Python’s usage expand across diverse computing environments, from cloud
 computing to embedded systems and AI accelerators.
 
+
 User stories
 ------------
 
@@ -155,6 +158,7 @@ User stories
 - SciPy wants to provide packages built against different BLAS
   libraries, like OpenBLAS and Accelerate on macOS. This is something
   they indirectly do today
+
 
 The limitations of platform compatibility tags
 ----------------------------------------------
@@ -218,6 +222,7 @@ similar hurdles. The core issue is that wheel tags, while successful,
 are not extensible enough to handle the combinatorial complexity of
 build options.
 
+
 Current workarounds and their limitations
 -----------------------------------------
 
@@ -235,8 +240,9 @@ The Wheel Variants proposal aims to solve this problem at a fundamental
 level within the packaging ecosystem, providing a standardized,
 automated, and user-friendly solution.
 
+
 “Separate package indexes” as variants
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+''''''''''''''''''''''''''''''''''''''
 
 Projects like `PyTorch <https://pytorch.org/get-started/locally/>`__,
 `RAPIDS <https://docs.rapids.ai/install/#selector>`__ and other packages
@@ -270,8 +276,9 @@ installation instructions rather than covering permanent settings. This
 can lead to users being unable to cleanly upgrade the packages, or the
 upgraded packages being reverted to the default variant on upgrades.
 
+
 “Package name” as variants
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+''''''''''''''''''''''''''
 
 Some packages use different names for variants (e.g., ```xgboost`` -
 NVIDIA CUDA accelerated,
@@ -323,8 +330,9 @@ those new package names.
    cupy-rocm-4-4 cupy-rocm-4-5 cupy-rocm-5-0 cupy-rocm-5-1 cupy-rocm-5-2 cupy-rocm-5-3 cupy-rocm-5-4 cupy-rocm-5-5
    cupy-rocm-5-6 cupy-rocm-5-7 cupy-rocm-5-8 cupy-rocm-5-9 cupy-rocm-6-0 cupy-rocm-6-1 cupy-rocm-6-2 cupy-rocm-6-3
 
+
 “Extra-Dependency” as variants
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+''''''''''''''''''''''''''''''
 
 `JAX <https://docs.jax.dev/en/latest/installation.html>`__ uses a
 plugin-based approach. The central ``jax`` package provides a number of
@@ -357,8 +365,9 @@ incompatibility within the package metadata.
    Provides-Extra: k8s
    Provides-Extra: xprof
 
+
 Bundled universal packages - monolithic builds
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+''''''''''''''''''''''''''''''''''''''''''''''
 
 Including all possible variants in a single wheel is another option, but
 this leads to excessively large artifacts, wasting bandwidth and slower
@@ -366,8 +375,9 @@ installation times for users who only need one specific variant. In some
 cases, such artifacts cannot be hosted on PyPI because they exceed its
 size limits.
 
+
 Wheel variant selection via source distribution
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+'''''''''''''''''''''''''''''''''''''''''''''''
 
 `Flash-attention <https://github.com/Dao-AILab/flash-attention>`__ does
 not publish wheels on PyPI at all, but instead publishes a customized
@@ -384,8 +394,9 @@ ecosystem.
 **Induced Security Risk:** similarly to regular source builds, this
 model requires running arbitrary code at install time.
 
+
 Ecosystem fragmentation
-~~~~~~~~~~~~~~~~~~~~~~~
+'''''''''''''''''''''''
 
 The lack of standardized variant support has led to ecosystem
 fragmentation:
@@ -400,6 +411,7 @@ systems struggle to handle non-standard installation requirements.
 installation guides and users must read them. If they don’t know or
 don’t take the time to read it - almost certainly their install will be
 dysfunctional.
+
 
 Impact on scientific computing and AI/ML workflows
 --------------------------------------------------
@@ -421,8 +433,9 @@ AI/ML applications where performance optimization is critical.
 
    — *Michael Hudgins, Jax Developer Infrastructure Lead*
 
+
 Heterogeneous computing environments
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+''''''''''''''''''''''''''''''''''''
 
 Research institutions and cloud providers often manage heterogeneous
 computing clusters with different architectures (CPU, Hardware
@@ -431,14 +444,16 @@ environment-specific installation procedures, making reproducible
 deployment difficult. This situation also contributes to making
 “scientific papers” difficult to reproduce.
 
+
 Artificial intelligence, machine learning, and deep learning
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 The recent advances in modern AI workflows increasingly rely on GPU
 acceleration, but the current packaging system makes deployment complex
 and adds a significant burden on open source developers of the entire
 tool stack (from build backends to installers, not forgetting the
 package maintainers).
+
 
 Motivation summary
 ------------------
@@ -464,6 +479,7 @@ increase maintenance burden, and fragment the ecosystem.
 - Provides a future-proof and flexible system that can evolve with the
   ecosystem and future use cases.
 
+
 Out-of-scope features
 ---------------------
 
@@ -478,6 +494,7 @@ to tools to evolve. A non-exhaustive list:
   mechanism. For backwards compatibility, build backends have to default
   to non-variant builds
 
+
 Prior art
 ---------
 
@@ -486,8 +503,9 @@ ecosystems have come up with various answers to that very problem. This
 section will focus on highlighting the strengths and weaknesses of the
 different approaches taken by various communities.
 
+
 Conda - conda-forge
-~~~~~~~~~~~~~~~~~~~
+'''''''''''''''''''
 
 `Conda <https://docs.conda.io>`__ is a binary-only package ecosystem
 that uses aggregated metadata indexes for resolution rather than
@@ -545,8 +563,9 @@ libraries, and CUDA driver version. Detection logic is tool-specific
 (`rattler <https://github.com/conda/rattler/tree/main/crates/rattler_virtual_packages/src>`__,
 `mamba <https://github.com/mamba-org/mamba/blob/main/libmamba/src/core/virtual_packages.cpp>`__).
 
+
 Spack / Archspec
-~~~~~~~~~~~~~~~~
+''''''''''''''''
 
 `archspec <https://github.com/archspec/archspec>`__ is a library for
 detecting, labeling, and reasoning about CPU microarchitecture variants,
@@ -580,8 +599,9 @@ microarchitecture (e.g., ``x86_64``/\`\ ``armv8.1a``/``haswell``);
 runtime initialization uses ``archspec`` to select best compatible build
 when no exact match exists.
 
+
 Gentoo Linux
-~~~~~~~~~~~~
+''''''''''''
 
 `Gentoo Linux <https://www.gentoo.org>`__ is a source-first distribution
 with support for extensive package customization. This is primarily
@@ -612,6 +632,7 @@ possible is desirable. When more fine-grained control is desired, slots
 are used in conjunction with USE flags. For example,
 ``llvm_slot_${major}`` flags are used to select a LLVM major version to
 build against.
+
 
 Rationale
 =========
@@ -655,6 +676,7 @@ This behavior was confirmed for a number of existing tools:
 `poetry <https://github.com/python-poetry/poetry/blob/1c04c65149776ae4993fa508bef53373f45c66eb/src/poetry/utils/wheel.py#L23-L27>`__,
 `uv <https://github.com/astral-sh/uv/blob/f6a9b55eb73be4f1fb9831362a192cdd8312ab96/crates/uv-distribution-filename/src/wheel.rs#L182-L299>`__.
 
+
 Variant properties system
 -------------------------
 
@@ -682,6 +704,7 @@ inspired by Trove Classifiers in :pep:`301`:
 ::
 
    {namespace} :: {feature_name} :: {feature_value}
+
 
 Null variant
 ------------
@@ -720,6 +743,7 @@ priority the null variant. If none is published, fallback on the
 non-variant wheel instead. The non-variant wheel is also used if variant
 support is explicitly disabled by an installer flag.
 
+
 Plugin stability and versioning
 -------------------------------
 
@@ -748,11 +772,12 @@ versions numbers, and possibly fall back to installing the external
 plugin when the package in question is incompatible with the installer’s
 implementation.
 
+
 Example use cases
 -----------------
 
 PyTorch CPU/GPU variants
-~~~~~~~~~~~~~~~~~~~~~~~~
+''''''''''''''''''''''''
 
 As of October 2025,
 `PyTorch <https://pytorch.org/get-started/locally/>`__ publishes builds
@@ -773,8 +798,9 @@ back to the CPU-only variant. In the corner case when both CUDA and ROCm
 are available and supported, PyTorch package maintainers indicate which
 one takes preference by default.
 
+
 Optimized CPU variants
-~~~~~~~~~~~~~~~~~~~~~~
+''''''''''''''''''''''
 
 Wheel variants can be used to provide variants requiring specific CPU
 extensions, beyond what platform tags currently provide. They can be
@@ -798,8 +824,9 @@ necessary to cover all available instruction sets from the start, nor to
 update the installers whenever the instruction set coverage needs to be
 improved.
 
+
 BLAS / LAPACK variants
-~~~~~~~~~~~~~~~~~~~~~~
+''''''''''''''''''''''
 
 Packages such as `NumPy <https://numpy.org/>`__ and
 `SciPy <https://scipy.org/>`__ can be built using different BLAS /
@@ -816,8 +843,9 @@ that provides a predefined set of BLAS / LAPACK library names can be
 used. When the package is installed, normally the default variant is
 used, but the user can explicitly select another one.
 
+
 Debug package variants
-~~~~~~~~~~~~~~~~~~~~~~
+''''''''''''''''''''''
 
 A package may wish to provide a special debug-enabled builds for
 debugging or CI purposes, in addition to the regular release build. For
@@ -828,8 +856,9 @@ default, users normally install the non-variant wheel providing the
 release build. However, they can easily obtain the debug build by
 enabling the optional provider or selecting the variant explicitly.
 
+
 Package ABI matching
-~~~~~~~~~~~~~~~~~~~~
+''''''''''''''''''''
 
 Packages such as `vLLM <https://docs.vllm.ai/en/latest/index.html>`__
 need to be pinned to the PyTorch version they were built against to
@@ -852,6 +881,7 @@ The optional ``abi_dependency`` extension can be used to build multiple
 - ``vllm-0.11.0-...-torch27.wheel`` with
   ``abi_dependency :: torch :: 2.7``
 
+
 Specification
 =============
 
@@ -863,6 +893,7 @@ complete backward compatibility with existing package managers and
 tools. The design was made with the intent to protect non-variant-aware
 tools from failure when a new type of wheel appears that they don’t know
 how to manage.
+
 
 Wheel variant glossary
 ----------------------
@@ -906,6 +937,7 @@ This section focuses specifically on the vocabulary used by the proposed
   supported properties which is then embedded in the wheel metadata.
   Such a list can either be embedded in ``pyproject.toml`` or provided
   by a plugin queried at build time.
+
 
 Overview
 --------
@@ -958,6 +990,7 @@ supported by default. Tools may provide an opt-out to only use
 non-variant wheels. For scenarios requiring more control, providers can
 be marked as optional and must be explicitly enabled by the user.
 
+
 Overview of changes
 -------------------
 
@@ -987,6 +1020,7 @@ The Wheel Variant PEP introduces four key components:
 
 4. **Environment Markers**: New environment markers to declare
    dependencies that are applicable to a subset of variants only.
+
 
 Extended wheel filename
 -----------------------
@@ -1025,6 +1059,7 @@ Examples:
   ``numpy-2.3.2-cp313-cp313t-musllinux_1_2_x86_64.whl``
 - Wheel with variant label:
   ``numpy-2.3.2-cp313-cp313t-musllinux_1_2_x86_64-x86_64_v3.whl``
+
 
 Variant properties
 ------------------
@@ -1074,6 +1109,7 @@ Examples:
     additionally, at least one of the following must be supported
    nvidia :: sm_arch :: 120_real
    nvidia :: sm_arch :: 110_real
+
 
 Variant metadata
 ----------------
@@ -1128,8 +1164,9 @@ should not introduce custom keys to avoid potential future conflicts.
 `A JSON Schema is included in the Appendix of this PEP. TODO: Move to
 appendix <../assets/wheel_variants/variant_schema.json>`__
 
+
 Provider information
-~~~~~~~~~~~~~~~~~~~~
+''''''''''''''''''''
 
 ``providers`` is a dictionary, the keys are namespaces, the values are
 dictionaries with provider information. It specifies how to install and
@@ -1190,8 +1227,9 @@ All the fields are optional, except that:
    2. Otherwise, ``static-properties`` must be specified in
       ``pyproject.toml``.
 
+
 Default priorities
-~~~~~~~~~~~~~~~~~~
+''''''''''''''''''
 
 The ``default-priorities`` dictionary controls the ordering of variants.
 The exact algorithm is described in the `Variant
@@ -1222,8 +1260,9 @@ It may have the following optional keys:
   the list are considered of lower priority than these present, and
   their relative priority is defined by the plugin output.
 
+
 Static properties
-~~~~~~~~~~~~~~~~~
+'''''''''''''''''
 
 The ``static-properties`` dictionary specifies the supported properties
 for AoT providers. It is a nested dictionary with namespaces as first
@@ -1252,8 +1291,9 @@ preferred, same as the lists returned by ``get_supported_configs()``
 plugin API call. The ``default-priorities.property`` dict can be used to
 override the property ordering.
 
+
 Variants
-~~~~~~~~
+''''''''
 
 The ``variants`` dictionary is used in ``variant.json`` to indicate the
 variant that the wheel was built for, and in ``*-variants.json`` to
@@ -1263,8 +1303,9 @@ variant labels, the second level keys are namespaces, the third level
 are feature names, and the third level values are lists of feature
 values.
 
+
 ``pyproject.toml``: variant project-level data table
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 The ``pyproject.toml`` file is the standard project configuration file
 as defined in `pyproject.toml
@@ -1312,8 +1353,9 @@ Example Structure:
     into variant.json
    install-time = false
 
+
 ``*.dist-info/variant.json``: the packaged variant metadata file
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 The ``variant.json`` file must be present in the ``*.dist-info/``
 directory of a built variant wheel. It is serialized into JSON, with the
@@ -1386,8 +1428,9 @@ pyproject.toml file for x86-64-v3 would look like:
       }
    }
 
+
 ``{name}-{version}-variants.json``: the index level variant metadata file
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 For every package version that includes at least one variant wheel,
 there must exist a corresponding ``{name}-{version}-variants.json``
@@ -1446,6 +1489,7 @@ like:
          }
      }
    }
+
 
 Variant ordering
 ----------------
@@ -1585,6 +1629,7 @@ pseudocode:
     (see VariantWheel.__lt__())
    wheels.sort()
 
+
 Integration with ``pylock.toml``
 --------------------------------
 
@@ -1627,11 +1672,12 @@ The following section is added to the ``pylock.toml`` specification:
 If there is a ``[packages.variants-json]`` section, the installer should
 resolve variants to select the best wheel file.
 
+
 Provider plugin API
 -------------------
 
 High level design
-~~~~~~~~~~~~~~~~~
+'''''''''''''''''
 
 Every provider plugin must operate within a single namespace. This
 namespace is used as a unique key for all plugin-related operations. All
@@ -1667,8 +1713,9 @@ return a specific value after being accessed via
 implemented either as modules, or classes with class methods or static
 methods. The specifics are provided in the subsequent sections.
 
+
 API endpoint
-~~~~~~~~~~~~
+''''''''''''
 
 The location of the plugin code is called an “API endpoint”, and it is
 expressed using the object reference notation following the `entry point
@@ -1703,8 +1750,9 @@ b. as the value of an installed entry point in the ``variant_plugins``
    optional but recommended, as it permits variant-related utilities to
    discover variant plugins installed to the user’s environment.
 
+
 Variant feature config class
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+''''''''''''''''''''''''''''
 
 The variant feature config class is used as a return value in plugin API
 functions. It defines a single variant feature, along with a list of
@@ -1751,8 +1799,9 @@ A “variant feature config” must provide three properties or attributes:
 
 All features are interpreted as being within the plugin’s namespace.
 
+
 Plugin interface
-~~~~~~~~~~~~~~~~
+''''''''''''''''
 
 The plugin interface must follow the following protocol:
 
@@ -1820,8 +1869,9 @@ The value returned by ``get_supported_configs()``\ must be a subset of
 the feature names and values returned by ``get_all_configs()`` (modulo
 ordering).
 
+
 Example implementation
-~~~~~~~~~~~~~~~~~~~~~~
+''''''''''''''''''''''
 
 .. code:: python
 
@@ -1900,8 +1950,9 @@ Example implementation
                ),
            ]
 
+
 Future extensions
-~~~~~~~~~~~~~~~~~
+'''''''''''''''''
 
 The future versions of this specification, as well as third-party
 extensions may introduce additional properties and methods on the plugin
@@ -1911,6 +1962,7 @@ For best compatibility, all private attributes should be prefixed with
 an underscore (``_``) character to avoid incidental conflicts with
 future extensions.
 
+
 Build backends
 --------------
 
@@ -1918,6 +1970,7 @@ As a build backend can’t determine whether the frontend supports variant
 wheels or not, PEP 517 and PEP 660 hooks must build non-variant wheels
 by default. Build backends may provide ways to request variant builds.
 This specification does not define any specific configuration.
+
 
 Variant environment markers
 ---------------------------
@@ -1961,6 +2014,7 @@ Variant marker expressions must be evaluated against the variant
 properties stored in the wheel being installed, not against the current
 output of the provider plugins. If a non-variant wheel was selected or
 built, all variant markers evaluate to ``False``.
+
 
 ABI Dependency Variant Namespace (Optional)
 -------------------------------------------
@@ -2013,6 +2067,7 @@ e.g.:
 
 This means the wheel is compatible with both PyTorch 2.8.0 and 2.9.0.
 
+
 How to teach this
 =================
 
@@ -2046,6 +2101,7 @@ For the transition period, during which some package managers do and
 some do not support variant wheels, users need to be aware that certain
 features may only be available with certain tools.
 
+
 Python package maintainers
 --------------------------
 
@@ -2072,6 +2128,7 @@ cases.
 For the transition period, package maintainers need to be aware that
 they should still publish non-variant wheels for backwards
 compatibility.
+
 
 Backwards compatibility
 =======================
@@ -2109,6 +2166,7 @@ possible to use variant wheels on an index that does not specifically
 support variant metadata. However, the index must permit distributing
 wheels that use the extended filename syntax and the JSON file.
 
+
 Security implications
 =====================
 
@@ -2127,6 +2185,7 @@ same level as the installer itself. More details are provided in the
 `Overview <#overview>`__ section. Static file input can be used to skip
 running plugins on installation altogether.
 
+
 Reference implementation
 ========================
 
@@ -2144,6 +2203,7 @@ includes example implementations of provider plugins, as well as
 modified versions of build backends featuring variant wheel building
 support and modified versions of some Python packages demonstrating
 variant wheel uses.
+
 
 Rejected ideas
 ==============
@@ -2175,6 +2235,7 @@ having the necessary knowledge and hardware. They can be updated as
 frequently as necessary, independently of package managers. The decision
 to use a particular provider falls entirely on the maintainer of package
 needing it.
+
 
 Resolving variants to separate packages
 ---------------------------------------
