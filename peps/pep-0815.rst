@@ -900,42 +900,49 @@ Wheel variant glossary
 This section focuses specifically on the vocabulary used by the proposed
 “Wheel Variant” standard:
 
-- **Variant Wheels**: Wheels that share the same distribution name,
-  version, build number, and platform compatibility tags, but are
-  distinctly identified by an arbitrary set of variant properties.
+Variant Wheels
+    Wheels that share the same distribution name, version, build number,
+    and platform compatibility tags, but are distinctly identified by an
+    arbitrary set of variant properties.
 
-- **Variant Namespace**: An identifier used to group related features
-  provided by a single provider (e.g., ``nvidia``, ``x86_64``, ``arm``,
-  etc.).
+Variant Namespace
+    An identifier used to group related features provided by a single
+    provider (e.g., ``nvidia``, ``x86_64``, ``arm``, etc.).
 
-- **Variant Feature**: A specific characteristic (key) within a
-  namespace (e.g., ``version``, ``avx512_bf16``, etc.) that can have one
-  or more values.
+Variant Feature
+    A specific characteristic (key) within a namespace (e.g.,
+    ``version``, ``avx512_bf16``, etc.) that can have one or more
+    values.
 
-- **Variant Property**: A 3-tuple
-  (``namespace :: feature-name :: feature-value``) describing a single
-  specific feature and its value. If a feature has multiple values, each
-  is represented by a separate property.
+Variant Property
+    A 3-tuple (``namespace :: feature-name :: feature-value``)
+    describing a single specific feature and its value. If a feature has
+    multiple values, each is represented by a separate property.
 
-- **Variant Label**: A string added to the wheel filename to uniquely
-  identify variants. A string up to 16 characters.
+Variant Label
+    A string added to the wheel filename to uniquely identify variants.
+    A string up to 16 characters.
 
-- **Null Variant**: A special variant with zero variant properties and
-  the reserved label ``null``. Always considered supported but has the
-  lowest priority among wheel variants, while being preferably chosen
-  over non-variant wheels.
+Null Variant
+    A special variant with zero variant properties and the reserved
+    label ``null``. Always considered supported but has the lowest
+    priority among wheel variants, while being preferably chosen over
+    non-variant wheels.
 
-- **Variant Provider**: A provider of supported and valid variant
-  properties for a specific namespace, usually in the form of a Python
-  package that implements system detection.
+Variant Provider
+    A provider of supported and valid variant properties for a specific
+    namespace, usually in the form of a Python package that implements
+    system detection.
 
-- **Install-time Provider**: A provider implemented as a plugin that can
-  be queried during wheel installation.
+Install-time Provider
+    A provider implemented as a plugin that can be queried during wheel
+    installation.
 
-- **Ahead-of-Time Provider**: A provider that features a static list of
-  supported properties which is then embedded in the wheel metadata.
-  Such a list can either be embedded in ``pyproject.toml`` or provided
-  by a plugin queried at build time.
+Ahead-of-Time Provider
+    A provider that features a static list of supported properties which
+    is then embedded in the wheel metadata.  Such a list can either be
+    embedded in ``pyproject.toml`` or provided by a plugin queried at
+    build time.
 
 
 Overview
