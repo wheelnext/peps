@@ -296,9 +296,8 @@ upgrade ordering.
 
 Additional limitation of this approach is that publishing a new release
 synchronously across multiple package names is not currently possible.
-:pep:`694` proposes adding such a
-mechanism for multiple wheels within a single package, but extending it
-to multiple packages is not a goal.
+:pep:`694` proposes adding such a mechanism for multiple wheels within a
+single package, but extending it to multiple packages is not a goal.
 
 **Induced Security Risk:** proliferation of suffixed variant packages
 leads users to expect these suffixes in other packages, making name
