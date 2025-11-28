@@ -112,7 +112,14 @@ architecture can lead to significant performance improvement (and often
 also reduce power requirements, etc.).
 
 .. figure:: pep-0815/avx512_gromacs_benchmark.png
-    :alt: GROMACS AVX512 Benchmark
+    :alt: A bar graph comparing GROMACS performance (in ns/day) with
+          various targets. The first two bars are labeled "yum (2018.8)"
+          and "generic (SSE2)", reach about 1.0 ns/day and are both
+          marked as "SSE2". The next bar is labeled "ivybridge" ("AVX")
+          and reaches almost 1.5 ns/day.  Two following bars are labeled
+          "haswell" and "broadwell" (both "AVX2") and exceed 1.5 ns/day
+          slightly.  The last two bars are labeled "skylake_avx512" and
+          "cascadelake" (both "AVX512") and reach almost 2.0 ns/day.
 
     GROMACS AVX512 Benchmark
 
@@ -208,7 +215,13 @@ PyTorch team. This complexity represents a fundamental scalability issue
 with the current tag system.
 
 .. figure:: pep-0815/pytorch_variant_selector.png
-    :alt: PyTorch Wheel Selector
+    :alt: A grid-based selector for PyTorch versions. Individual rows
+          provide the choice of PyTorch Build (stable or nightly),
+          operating system (Linux, Mac, Windows), package (Pip,
+          LibTorch, Source), language (Python, C++ / Java), and Compute
+          Platform (CUDA 12.6, CUDA 12.8, CUDA 13.0, ROCM 6.4, CPU).
+          Below these rows, the pip install command for the selected
+          variant is provided, utilizing the --index-url parameter.
 
     PyTorch Wheel Selector
 
