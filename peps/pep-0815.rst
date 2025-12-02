@@ -289,14 +289,16 @@ upgraded packages being reverted to the default variant on subsequent upgrades.
 
 
 “Package names” as variants
-''''''''''''''''''''''''''
+'''''''''''''''''''''''''''
 
-Some packages use different names for variants (e.g., ```xgboost`` -
+Some packages use different names for variants (e.g., `xgboost -
 NVIDIA CUDA accelerated,
-`xgboost-cpu <https://xgboost.readthedocs.io/en/stable/install.html>`__).
-However, this creates dependency management challenges when multiple
-packages require the same underlying library with different acceleration
-support.
+xgboost-cpu <https://xgboost.readthedocs.io/en/stable/install.html>`__).
+However, then maintainers of other software cannot cleanly express
+a dependency on any of the available variants; it needs to either depend
+on a specific variant, provide multiple alternative dependency sets
+using extras, or even publish their own software using multiple packages
+with matching variants.
 
 Commonly, these packages install overlapping files. Since Python
 packaging does not support expressing that two packages are mutually
@@ -389,7 +391,7 @@ size limits.
 Wheel variant selection via source distribution
 '''''''''''''''''''''''''''''''''''''''''''''''
 
-`FlashAttention<https://github.com/Dao-AILab/flash-attention>`__ does
+`FlashAttention <https://github.com/Dao-AILab/flash-attention>`__ does
 not publish wheels on PyPI at all, but instead publishes a customized
 source distribution that performs platform detection, downloads the
 appropriate wheel from upstream server, and then provides it to the
