@@ -23,11 +23,11 @@ Abstract
 
 The Python wheel packaging format uses
 :doc:`packaging:specifications/platform-compatibility-tags` to specify
-wheel’s supported environments based on Python version, ABI, and
+a given wheel’s supported environments based on Python version, ABI, and
 platform (operating system, architecture, core system libraries).  These
-tags are not able to express features of modern hardware. This is
+tags are unable to express features of modern hardware. This is
 particularly challenging for the scientific computing, artificial
-intelligence (AI), machine learning (ML), and high-performance computing
+intelligence (AI), machine learning (ML), and high-performance computing (HPC)
 communities, where packages are often built with specific hardware
 accelerations (e.g., NVIDIA CUDA, AMD ROCm), specialized CPU
 instructions (e.g., AVX512_BF16), or other system dependencies.
@@ -43,11 +43,11 @@ specifically, it proposes:
 - An evolution of the wheel format called **Wheel Variant** that allows
   wheels to be distinguished by hardware or software attributes.
 
-- A **variant provider plugin** interface allowing to dynamically detect
+- A **variant provider plugin** interface that allows installers to dynamically detect
   platform attributes and select the most suitable wheel.
 
 The goal is to simplify the user experience to a familiar
-``pip install <package>``, while ensuring optimal performance and
+``[uv] pip install <package>``, while ensuring optimal performance and
 compatibility. This approach allows seamless package resolution without
 requiring intrusive changes to installers, ensures backward
 compatibility, and minimizes the burden on package maintainers.
@@ -66,9 +66,9 @@ Motivation
 
 The Python packaging ecosystem has evolved to support increasingly
 diverse computing environments. The current software ecosystem often
-relies on platform specific features to pick which binaries are
-compatible with a particular computer. Unfortunately the current wheel
-format cannot adequately express the features of modern hardware. This
+relies on platform-specific features to determine which binaries are
+compatible with a particular machine. Unfortunately the current wheel
+format cannot adequately express the diversity of features of present in modern hardware. This
 limitation forces package authors into suboptimal distribution
 strategies and creates friction for users attempting to install
 performance-critical packages.
@@ -78,9 +78,9 @@ platform requirements are suboptimal (explored below in greater
 details). Some methods include maintaining separate package indexes for
 different hardware configurations, bundling all potential variants into
 a single “mega-wheel” / “monolithic wheel” or using separate package
-names (``mypackage-gpu``, ``mypackage-cpu``). Each of these approaches
+names (``mypackage-gpu``, ``mypackage-cpu``, etc.). Each of these approaches
 has significant drawbacks, such as excessive binary size, dependency
-confusion, and inefficient dependency resolution, complex documentation,
+confusion, inefficient dependency resolution, complex documentation,
 etc.
 
 According to the `2024 Python Developers
@@ -162,7 +162,7 @@ User stories
 
 - SciPy wants to provide packages built against different BLAS
   libraries, like OpenBLAS and Accelerate on macOS. This is something
-  they indirectly do today
+  they indirectly do today.
 
 
 The limitations of platform compatibility tags
@@ -276,19 +276,19 @@ separate package indexes with custom URLs.
   variants with different levels of CPU optimizations)
 
 **Induced Security Risk:** This approach has unfortunately led to supply
-chain attacks - More details on `PyTorch
+chain attacks - more details on `PyTorch
 Blog <https://pytorch.org/blog/compromised-nightly-dependency/>`__. It’s
-a non-trivial problem to address which has forced the PyTorch to create
-a complete mirror of all their dependencies. Which is one of the core
+a non-trivial problem to address which has forced the PyTorch team to create
+a complete mirror of all their dependencies, and is one of the core
 motivations behind :pep:`766`.
 
 The complexity of configuration often leads to projects providing ad-hoc
 installation instructions rather than covering permanent settings. This
 can lead to users being unable to cleanly upgrade the packages, or the
-upgraded packages being reverted to the default variant on upgrades.
+upgraded packages being reverted to the default variant on subsequent upgrades.
 
 
-“Package name” as variants
+“Package names” as variants
 ''''''''''''''''''''''''''
 
 Some packages use different names for variants (e.g., ```xgboost`` -
@@ -306,7 +306,7 @@ installed first. This could lead to unpredictable behavior, including
 the possibility of incidentally switching between variants depending on
 upgrade ordering.
 
-Additional limitation of this approach is that publishing a new release
+An additional limitation of this approach is that publishing a new release
 synchronously across multiple package names is not currently possible.
 :pep:`694` proposes adding such a mechanism for multiple wheels within a
 single package, but extending it to multiple packages is not a goal.
@@ -348,7 +348,7 @@ those new package names.
 plugin-based approach. The central ``jax`` package provides a number of
 extras that can be used to install additional plugins,
 e.g. ``jax[cuda12]`` or ``jax[tpu]``. This is far from ideal as
-``pip install jax`` (with no extra) would provide a broken install for
+``pip install jax`` (with no extra) leads to a broken installation for
 everybody and consequently dependency chains, a fundamental expected
 behavior in the Python ecosystem is dysfunctional.
 
@@ -389,7 +389,7 @@ size limits.
 Wheel variant selection via source distribution
 '''''''''''''''''''''''''''''''''''''''''''''''
 
-`Flash-attention <https://github.com/Dao-AILab/flash-attention>`__ does
+`FlashAttention<https://github.com/Dao-AILab/flash-attention>`__ does
 not publish wheels on PyPI at all, but instead publishes a customized
 source distribution that performs platform detection, downloads the
 appropriate wheel from upstream server, and then provides it to the
@@ -419,8 +419,7 @@ systems struggle to handle non-standard installation requirements.
 
 **Documentation Burden**: Maintainers must create and maintain complex
 installation guides and users must read them. If they don’t know or
-don’t take the time to read it - almost certainly their install will be
-dysfunctional.
+don’t take the time to read it, their install will likely be dysfunctional.
 
 
 Impact on scientific computing and AI/ML workflows
@@ -476,16 +475,14 @@ increase maintenance burden, and fragment the ecosystem.
 
 **Wheel Variants provide a standardized solution that:**
 
-- Enables automatic hardware-appropriate package selection
-- Maintains full backward compatibility with existing tools (by
-  guaranteeing to not break non-variant aware installers, tools, and
-  indexes)
+- Enables automatic hardware-appropriate package selection.
+- Maintains full backward compatibility with existing tools (i.e., non-variant aware installers, tools, and
+  indexes remain unaffected).
 - Simplifies package maintenance by offering a unified and flexible
   solution to the challenge of managing multiple platform-specific
   package builds and distributions.
-- Provides a seamless and predictable experience for users, that
-  requires little to no user inputs.
-- Supports the full spectrum of modern computing hardware
+- Provides a seamless and predictable experience for users, with little-to-no user input required.
+- Supports the full spectrum of modern computing hardware.
 - Provides a future-proof and flexible system that can evolve with the
   ecosystem and future use cases.
 
@@ -1204,10 +1201,10 @@ A provider information dictionary may contain the following keys:
   instead.
 
 - ``optional: bool``: Whether the provider is optional, as a boolean
-  value. Defaults to ``false``. If it is true, the provider is
+  value. Defaults to ``false``. If it is ``true``, the provider is
   considered optional and should not be used unless the user opts in to
   it, effectively rendering the variants using its properties
-  incompatible. If it is false or missing, the provider is considered
+  incompatible. If it is ``false`` or missing, the provider is considered
   obligatory.
 
 - ``plugin-api: str``: The API endpoint for the plugin. If it is
