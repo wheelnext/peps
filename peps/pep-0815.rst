@@ -404,7 +404,10 @@ separately, and does not provide for uniform experience across the
 ecosystem.
 
 **Induced Security Risk:** similarly to regular source builds, this
-model requires running arbitrary code at install time.
+model requires running arbitrary code at install time. The wheels
+are downloaded entirely outside package manager's control, extending
+the attack surface to two wheel fetching implementations and preventing
+proper provenance tracking.
 
 
 Ecosystem fragmentation
