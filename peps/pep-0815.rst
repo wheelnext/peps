@@ -926,8 +926,7 @@ Variant Property
     multiple values, each is represented by a separate property.
 
 Variant Label
-    A string added to the wheel filename to uniquely identify variants.
-    A string up to 16 characters.
+    A string (up to 16 characters) added to the wheel filename to uniquely identify variants.
 
 Null Variant
     A special variant with zero variant properties and the reserved
