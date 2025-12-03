@@ -443,7 +443,7 @@ AI/ML applications where performance optimization is critical.
     where ``pip install jax`` automatically selects packages matching the
     user’s hardware, unless explicitly overridden.
 
-    WheelNext is a clear step in the right direction in this regard.
+    Wheel variants are a clear step in the right direction in this regard.
 
     — Michael Hudgins, Jax Developer Infrastructure Lead
 
