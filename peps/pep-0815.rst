@@ -161,8 +161,9 @@ User stories
   using different graphics backends.
 
 - SciPy wants to provide packages built against different BLAS
-  libraries, like OpenBLAS and Accelerate on macOS. This is something
-  they indirectly do today.
+  libraries. It already ships wheels linked against different BLAS
+  libraries on macOS, however they are not selectable by the user
+  but keyed on different OS versions.
 
 
 The limitations of platform compatibility tags
