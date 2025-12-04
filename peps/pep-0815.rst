@@ -959,7 +959,7 @@ Overview
 --------
 
 Wheel variants introduce a more fine-grained specification of built
-wheel characteristics beyond what wheel tags provide. Individual wheels
+wheel characteristics beyond what existing wheel tags provide. Individual wheels
 are characterized by sets of variant properties that are organized into
 a hierarchical structure of namespaces, features and feature values.
 When evaluating wheels to install, the installer must determine whether
@@ -974,12 +974,12 @@ kinds of variant providers: install-time providers and ahead-of-time
 while installing wheels to determine the set of supported properties and
 their preference order. For AoT providers, this data is static and
 embedded in the wheel; it can be either provided directly by the
-developer or queried at wheel build time from an AoT plugin. Both kinds
-of plugins are usually implemented as third-party Python packages
-providing the API specified in this document.
+wheel maintainer or queried at wheel build time from an AoT plugin. Both kinds
+of plugins are usually implemented as Python packages external
+to the resolver which implement the APIs specified in this document.
 
 Package managers must not install or run any untrusted package for
-variant resolution without the explicit user opt-in. Provider packages
+variant resolution without explicit user opt-in. Provider packages
 should take measures to guard against supply chain attacks, for example
 by vendoring all dependencies. Pinning dependencies is discouraged to
 comply with PEP 517 build process, as provider plugins may be needed at
@@ -1007,7 +1007,7 @@ non-variant wheels. For scenarios requiring more control, providers can
 be marked as optional and must be explicitly enabled by the user.
 
 
-Overview of changes
+Summary of changes
 -------------------
 
 The Wheel Variant PEP introduces four key components:
@@ -1049,7 +1049,7 @@ This PEP changes the wheel filename template originally defined by
     {distribution}-{version}(-{build tag})?-{python tag}-{abi tag}-{platform tag}(-{variant label})?.whl
 
 Wheels using extensions introduced by this PEP must feature the variant
-label component. It must adhere to the following rules:
+label component. The label must adhere to the following rules:
 
 - Lower case only (to prevent issues with case-sensitive
   vs. case-insensitive filesystems)
@@ -1171,7 +1171,7 @@ structure:
             +- {feature}  : list[str]  = []
 
 The top-level object is a dictionary rooted at a specific point in the
-containing file. Its invidual keys are sub-dictionaries that are
+containing file. Its individual keys are sub-dictionaries that are
 described in the subsequent sections, along with the requirements for
 their presence. The tools must ignore unknown keys in the dictionaries
 to permit future backwards compatible updates to the PEP. However, users
@@ -1227,7 +1227,7 @@ A provider information dictionary may contain the following keys:
   specified, the first dependency present after filtering must always
   evaluate to the same API endpoint.
 
-All the fields are optional, except that:
+All the fields are optional, with the following exceptions:
 
 1. If ``install-time`` is true, the dictionary describes an install-time
    provider and the ``requires`` key must be present and specify at
@@ -1451,7 +1451,7 @@ there must exist a corresponding ``{name}-{version}-variants.json``
 file, hosted and served by the package index. The ``{name}`` and
 ``{version}`` placeholders correspond to the package name and version,
 normalized according to the same rules as wheel files, as found in the
-:ref:`packaging:wheel-file-name-spec` of Binary Distribution Format
+:ref:`packaging:wheel-file-name-spec` of the Binary Distribution Format
 specification.  The link to this file must be present on all index pages
 where the variant wheels are linked.
 
