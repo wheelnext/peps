@@ -505,7 +505,7 @@ The lead maintainer of XGBoost enumerates a number of problems XGBoost
 has that he expects will be addressed by wheel variants:
 
     * Large download size, due to the use of "fat binaries" for multiple
-      SMs.  Currently, XGBoost builds for 11 different SMs.
+      SMs. Currently, XGBoost builds for 11 different SMs.
 
     * The need for a separate packaging name for CPU-only package.
       Currently we ship a separate package named ``xgboost-cpu``,
