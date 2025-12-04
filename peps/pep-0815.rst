@@ -1067,7 +1067,10 @@ variant and must use an empty set of variant properties.
 
 Installers that do not implement this specification must ignore wheels
 with variant label when installing from an index, and fall back to a
-wheel without such label if it is available.
+wheel without such label if it is available. If no such wheel is
+available, the installer should output an appropriate diagnostic,
+in particular warning if it results in selecting an earlier package
+version or a clear error if no package version can be installed.
 
 Examples:
 
