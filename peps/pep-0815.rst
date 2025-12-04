@@ -1104,7 +1104,7 @@ The feature value must consist only of ``0-9``, ``a-z``, ``_`` and ``.``
 ASCII Characters (``^[a-z0-9_.]+$``). It must correspond to a valid
 value defined by the respective variant provider for the feature.
 
-If a feature is marked as “multi-value” by the provider, a single
+If a feature is marked as “multi-value” by the provider plugin, a single
 variant wheel may define multiple properties sharing the same namespace
 and feature name. Otherwise, only a single value can correspond to a
 single namespace and feature name within a variant wheel.
