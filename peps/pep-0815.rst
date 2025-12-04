@@ -68,14 +68,16 @@ The Python packaging ecosystem has evolved to support increasingly
 diverse computing environments. The current software ecosystem often
 relies on platform-specific features to determine which binaries are
 compatible with a particular machine. Unfortunately the current wheel
-format cannot adequately express the diversity of features of present in modern hardware. This
-limitation forces package authors into suboptimal distribution
-strategies and creates friction for users attempting to install
-performance-critical packages.
+format cannot adequately express the diversity of features of present
+in modern hardware. For example, some packages need to be built for
+specific CUDA or ROCm versions, and that information cannot currently
+be included in the wheel tag. This limitation forces package authors
+into suboptimal distribution strategies and creates friction for users
+attempting to install performance-critical packages.
 
 Existing approaches to handling Python packages with more complex
 platform requirements are suboptimal (explored below in greater
-details). Some methods include maintaining separate package indexes for
+detail). Some methods include maintaining separate package indexes for
 different hardware configurations, bundling all potential variants into
 a single “mega-wheel” / “monolithic wheel” or using separate package
 names (``mypackage-gpu``, ``mypackage-cpu``, etc.). Each of these approaches
