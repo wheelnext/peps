@@ -1043,10 +1043,10 @@ wheel characteristics beyond what existing wheel tags provide. Individual wheels
 are characterized by sets of variant properties that are organized into
 a hierarchical structure of namespaces, features and feature values.
 When evaluating wheels to install, the installer must determine whether
-variant properties are compatible with the system in addition to
-determining the tag compatibility. To choose the most suitable wheel to
-install, the installer must order wheels according to the priorities of
-their variant properties first, and their tags second.
+variant properties are compatible with the system, and use them to order
+the wheels in the order of preference. This is done in addition to
+determining the compatibility and ordering through tags. The ordering
+by variant properties takes precedence over ordering by tags.
 
 Every variant namespace is governed by a variant provider. There are two
 kinds of variant providers: install-time providers and ahead-of-time
