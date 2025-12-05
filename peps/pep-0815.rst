@@ -1536,8 +1536,8 @@ file, hosted and served by the package index. The ``{name}`` and
 normalized according to the same rules as wheel files, as found in the
 :ref:`packaging:wheel-file-name-spec` of the Binary Distribution Format
 specification. The link to this file must be present on all index pages
-where the variant wheels are linked. It is presented in the same format
-as source distributions and wheels in the index, including an (optional)
+where the variant wheels are linked. It is presented in the same simple repository format
+as source distribution and wheel links in the index, including an (optional)
 hash.
 
 This file uses the same structure as ``variant.json`` described above,
