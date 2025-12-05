@@ -234,7 +234,7 @@ Separate package indexes as variants
 Projects like `PyTorch <https://pytorch.org/get-started/locally/>`__,
 `RAPIDS <https://docs.rapids.ai/install/#selector>`__ and other packages
 currently distribute packages that approximate “variants” through
-separate package indexes with custom URLs. We show the problem at the
+separate package indexes with custom URLs. We will use the
 example of PyTorch, while the problem, the workarounds and the impact for
 users also apply to other packages.
 
