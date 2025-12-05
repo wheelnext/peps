@@ -149,7 +149,7 @@ User stories
   their GPU architecture.
 
 - A user wants to install a version of mpi4py that has certain features
-  enabled (e.g. specific MPI implementations for their hardware).
+  enabled (e.g. specific MPI implementations for their hardware).
 
 - A library maintainer wants to build their library for wasm32-wasi with
   and without pthreads support.
@@ -273,7 +273,7 @@ separate package indexes with custom URLs.
 - Potential security issues when combining multiple indexes
 - Managing and potentially hosting all project dependencies when using a
   single index which can significantly increase storage and CDN cost
-- Separate index for every combination of compatible features (e.g. GPU
+- Separate index for every combination of compatible features (e.g. GPU
   variants with different levels of CPU optimizations)
 
 **Induced Security Risk:** This approach has unfortunately led to supply
@@ -350,7 +350,7 @@ those new package names.
 `JAX <https://docs.jax.dev/en/latest/installation.html>`__ uses a
 plugin-based approach. The central ``jax`` package provides a number of
 extras that can be used to install additional plugins,
-e.g. ``jax[cuda12]`` or ``jax[tpu]``. This is far from ideal as
+e.g. ``jax[cuda12]`` or ``jax[tpu]``. This is far from ideal as
 ``pip install jax`` (with no extra) leads to a broken installation for
 everybody and consequently dependency chains, a fundamental expected
 behavior in the Python ecosystem is dysfunctional.
@@ -699,7 +699,7 @@ achieved via `USE
 flags <https://devmanual.gentoo.org/general-concepts/use-flags/index.html>`__:
 boolean flags exposed by individual packages and permitting fine-tuning
 the enabled features, optional dependencies and some build parameters
-(e.g. ``jpegxl``, ``cpu_flags_x86_avx2``). Flags can be toggled
+(e.g. ``jpegxl``, ``cpu_flags_x86_avx2``). Flags can be toggled
 individually, and separate binary packages can be built for different
 sets of flags. The package manager can either pick a binary package with
 matching configuration or build from source.
@@ -707,7 +707,7 @@ matching configuration or build from source.
 API and ABI matching is primarily done through use of
 `slotting <https://devmanual.gentoo.org/general-concepts/slotting/index.html>`__.
 Slots are generally used to provide multiple versions or variants of
-given package that can be installed alongside (e.g. different major GTK+
+given package that can be installed alongside (e.g. different major GTK+
 or LLVM versions, or GTK+3 and GTK4 builds of WebKitGTK), whereas
 subslots are merely used to group versions within a slot, usually
 corresponding to the library SOVERSION. Packages can then declare
@@ -782,9 +782,9 @@ same name. The character set for values is more relaxed, to permit
 values resembling versions.
 
 Variant features can be declared as allowing multiple values. If that is
-the case, these values are matched as a logical disjunction, i.e. only a
+the case, these values are matched as a logical disjunction, i.e. only a
 single value needs to be supported. Features are treated conjunctively,
-i.e. all of them need to be supported. This provides some flexibility in
+i.e. all of them need to be supported. This provides some flexibility in
 designating variant compatibility while avoiding having to implement a
 complete boolean logic.
 
@@ -811,7 +811,7 @@ could publish the following wheels:
   without suitable hardware.
 
 - A GPU+CPU regular wheel for systems without wheel variant support
-  (i.e. the “mega-wheel” approach)
+  (i.e. the “mega-wheel” approach)
 
 The null variant uses a reserved ``null`` label to make it clearly
 distinguishable from regular variants.
@@ -823,7 +823,7 @@ variants are not supported and therefore GPU support cannot be
 determined.
 
 Not being compatible with any of the available variants gives the
-installer more information about the system (e.g. not having specialized
+installer more information about the system (e.g. not having specialized
 hardware) than systems which do not support wheel variants.
 Consequently, it makes sense that package maintainers may wish to
 propose a different “fallback” to their users whether their system is
@@ -1130,7 +1130,7 @@ Wheels using extensions introduced by this PEP must feature the variant
 label component. The label must adhere to the following rules:
 
 - Lower case only (to prevent issues with case-sensitive
-  vs. case-insensitive filesystems)
+  vs. case-insensitive filesystems)
 - Between 1-16 characters
 - Using only ``0-9``, ``a-z``, ``.`` or ``_`` ASCII characters
 
@@ -1364,13 +1364,13 @@ feature values as second level values.
 
 In ``pyproject.toml`` file, the namespaces present in this dictionary in
 ``pyproject.toml`` file must correspond to all AoT providers without a
-plugin (i.e. with ``install-time`` of ``false`` and no or empty
+plugin (i.e. with ``install-time`` of ``false`` and no or empty
 ``requires``). When building a wheel, the build backend must query the
-AoT provider plugins (i.e. these with ``install-time`` being false and
+AoT provider plugins (i.e. these with ``install-time`` being false and
 non-empty ``requires``) to obtain supported properties and embed them
 into the dictionary. Therefore, the dictionary in ``variant.json`` and
 ``*-variants.json`` must contain namespaces for all AoT providers
-(i.e. all providers with ``install-time`` being false).
+(i.e. all providers with ``install-time`` being false).
 
 Since TOML and JSON dictionaries are unsorted, so are the features in
 the ``static-properties`` dictionary. If more than one feature is
@@ -2131,7 +2131,7 @@ a public version identifier, as defined by the
 :doc:`packaging:specifications/version-specifiers` specification.
 It must contain up to three version components, that are matched against
 the installed version same as the ``=={value}.*`` specifier. Notably,
-trailing zeroes match versions with fewer components (e.g. ``2.0``
+trailing zeroes match versions with fewer components (e.g. ``2.0``
 matches release ``2`` but not ``2.1``). This also implies that the
 property values have different semantics than PEP 440 versions, in
 particular ``2``, ``2.0`` and ``2.0.0`` represent different ranges.
