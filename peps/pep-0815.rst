@@ -1006,12 +1006,13 @@ privileges.
 A similar issue already exists in the packaging ecosystem when packages
 are installed from source distributions, whereas build backends
 and other build dependencies are installed and executed. However,
-various projects operating purely on wheels, as well as users using
-the ``--only-binary`` option have been relying on the assumption that
-no code external to the system will be executed while resolving
-dependencies, installing a wheel or otherwise processing it. To uphold
-this assumption, the proposal explicitly requires that provider plugin
-packages are never installed without explicit user consent.
+various tools operating purely on wheels, as well as users using
+tool-specific options to disable use of source distributions,
+have been relying on the assumption that no code external to the system
+will be executed while resolving dependencies, installing a wheel or
+otherwise processing it. To uphold this assumption, the proposal
+explicitly requires that provider plugin packages are never installed
+without explicit user consent.
 
 The `Overview`_ section of the specification provides further
 suggestions that aim to improve both security and the user experience.
