@@ -1022,8 +1022,8 @@ external to the tool altogether, or pinned to specific versions,
 providing the same level of code auditing as the tools themselves.
 This will lead to the majority of packages focusing on these specific
 plugins. External plugins requiring explicit opt-in should be rare,
-and therefore pose limited risk to users who could otherwise start
-blanket-allowing all plugins with no prior research.
+minimizing the workflow disruption and reducing the risk that users 
+blanket-allow all plugins.
 
 Furthermore, the specification permits using static configuration as
 input to skip running plugins altogether.
