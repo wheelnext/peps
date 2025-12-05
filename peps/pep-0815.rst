@@ -977,20 +977,50 @@ The optional ``abi_dependency`` extension can be used to build multiple
 Security implications
 =====================
 
-The proposal introduces a variant properties system that could introduce
-a risk of remote code execution through installing and executing
-third-party Python packages. Such a risk existed already when installing
-from source distributions, but the binary package specification does not
-provide for any third-party code being executed when installing a wheel,
-and the users have been relying on the ``--no-binary`` option to
-guarantee that. For this reason, the proposal explicitly requires that
-untrusted providers are never installed or used without explicit user
-opt-in. A few options are suggested for improving the user experience
-without introducing the RCE risk, notably vendoring or locking plugins
-at the installer level, therefore ensuring that they are audited on the
-same level as the installer itself. More details are provided in the
-`Overview`_ section. Static file input can be used to skip running
-plugins on installation altogether.
+The proposal introduces a plugin system for querying the system
+capabilities in order to determine variant wheel capability. The system
+permits specifying additional Python packages providing the plugins
+in the package index metadata. Installers and other tools that need
+to determine whether a particular wheel is installable, or select
+the most preferred variant among multiple variant wheels, may need
+to install these packages and execute the code within them while
+resolving dependencies or processing wheels.
+
+This elevates the supply-chain attack potential by introducing two new
+points for malicious actors to inject arbitrary code payload:
+
+1. Publishing a version of a variant provider plugin or one of its
+   dependencies with malicious code.
+
+2. Introducing a malicious variant provider plugin in an existing
+   package metadata.
+
+While such attacks are already possible at the package dependency level,
+it needs to be emphasized that in some scenarios the affected tools are
+executed with elevated privileges, e.g. when installing packages for
+multi-user systems, while the installed packages are only used with
+regular user privileges afterwards. Therefore, variant provider plugins
+could introduce a Remote Code Execution vulnerability with elevated
+privileges.
+
+A similar issue already exists in the packaging ecosystem when packages
+are installed from source distributions, whereas build backends
+and other build dependencies are installed and executed. However,
+various projects operating purely on wheels, as well as users using
+the ``--only-binary`` option have been relying on the assumption that
+no code external to the system will be executed while resolving
+dependencies, installing a wheel or otherwise processing it. To uphold
+this assumption, the proposal explicitly requires that provider plugin
+packages are never installed without explicit user consent.
+
+The `Overview`_ section of the specification provides further
+suggestions that aim to improve both security and the user experience.
+Notably, the specification suggests vendoring or locking popular
+provider plugin versions at the installer level. This permits the wheels
+using them to be processed either without executing code external
+to the tools at all, or the code to be audited on the same level
+as the tools themselves. Furthermore, the specification permits using
+static configuration as input to skip running plugins altogether.
 
 
 Specification
