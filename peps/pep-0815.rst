@@ -396,15 +396,15 @@ Wheel variant selection via source distribution
 not publish wheels on PyPI at all, but instead publishes a customized
 source distribution that performs platform detection, downloads the
 appropriate wheel from upstream server, and then provides it to the
-installer. Such an approach can provide a good end-user experience by
-selecting the most optimal variant automatically. However, it prevents
-``--only-binary`` installs from working and requires downloading source
-distribution and running its build phase. In this case, it also requires
-running with ``--no-build-isolation``. It requires hosting wheels
-separately, and does not provide for uniform experience across the
-ecosystem.
+installer. This approach can select the optimal variant automatically,
+but it prevents wheel-only installs from working, requires a slow and
+error-prone source distribution build and breaks common caching assumptions
+based on the wheel filename. It also requires a specially prepared build
+environment that contains the torch package the wheel will be installed with,
+which means building without build isolation. On the project side, it requires
+hosting wheels separately.
 
-**Induced Security Risk:** similarly to regular source builds, this
+**Induced Security Risk:** Similar to regular source builds, this
 model requires running arbitrary code at install time. The wheels
 are downloaded entirely outside package manager's control, extending
 the attack surface to two wheel fetching implementations and preventing
