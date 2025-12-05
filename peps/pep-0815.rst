@@ -214,20 +214,6 @@ necessary - workarounds. Such as this manual selector provided by the
 PyTorch team. This complexity represents a fundamental scalability issue
 with the current tag system.
 
-.. figure:: pep-0815/pytorch_variant_selector.png
-    :alt: A grid-based selector for PyTorch versions. Individual rows
-          provide the choice of PyTorch Build (stable or nightly),
-          operating system (Linux, Mac, Windows), package (Pip,
-          LibTorch, Source), language (Python, C++ / Java), and Compute
-          Platform (CUDA 12.6, CUDA 12.8, CUDA 13.0, ROCM 6.4, CPU).
-          Below these rows, the pip install command for the selected
-          variant is provided, utilizing the --index-url parameter.
-
-    PyTorch Wheel Selector
-
-**Source:** https://pytorch.org/get-started/locally/ (screen capture
-date: 2025/08/22)
-
 This problem is not unique to PyTorch. Projects like JAX, NumPy, SciPy,
 Scikit-Learn and many others in the scientific Python ecosystem face
 similar hurdles. The core issue is that wheel tags, while successful,
@@ -242,42 +228,51 @@ Package maintainers have developed various strategies to work around
 aforementioned limitations. However, each approach has significant
 drawbacks.
 
-These workarounds place a significant burden on both end-users and
-package maintainers. Users must understand their hardware and software
-environment in detail to select the correct installation command.
-Maintainers must manage complex build matrices and provide extensive
-documentation on how to install their packages correctly.
-
-The Wheel Variants proposal aims to solve this problem at a fundamental
-level within the packaging ecosystem, providing a standardized,
-automated, and user-friendly solution.
-
-
-“Separate package indexes” as variants
-''''''''''''''''''''''''''''''''''''''
+Separate package indexes as variants
+''''''''''''''''''''''''''''''''''''
 
 Projects like `PyTorch <https://pytorch.org/get-started/locally/>`__,
 `RAPIDS <https://docs.rapids.ai/install/#selector>`__ and other packages
 currently distribute packages that approximate “variants” through
-separate package indexes with custom URLs.
+separate package indexes with custom URLs. We show the problem at the
+example of PyTorch, while the problem, the workarounds and the impact for
+users also apply to other packages.
+
+.. figure:: pep-0815/pytorch_variant_selector.png
+    :alt: A grid-based selector for PyTorch versions. Individual rows
+          provide the choice of PyTorch Build (stable or nightly),
+          operating system (Linux, Mac, Windows), package (Pip,
+          LibTorch, Source), language (Python, C++ / Java), and Compute
+          Platform (CUDA 12.6, CUDA 12.8, CUDA 13.0, ROCM 6.4, CPU).
+          Below these rows, the pip install command for the selected
+          variant is provided, utilizing the --index-url parameter.
+
+    The PyTorch install selector (https://pytorch.org/get-started/locally/,
+    captured 22-Aug-2025)
+
+PyTorch uses a combination of index URLs per accelerator type and local
+version segments as accelerator tag (such as ``+cu130``, ``+rocm6.4`` or
+``+cpu``) . Users need to first determine the correct index URL for their
+system, and add an index specifically for PyTorch.
 
 .. code:: bash
 
-    pip install torch --index-url="https://download.pytorch.org/whl/cu129"
+    pip install torch --index-url https://download.pytorch.org/whl/cu129
 
-**This approach requires:**
+Tools need to implement special handling for the way PyTorch uses local
+version segments. PyTorch breaks the pattern that packages are usually
+installed with through these requirements. Problems with installing Pytorch
+are a very common point of user confusion. To quantify this, in uv's issue
+tracker 552/8136, or 6.8%, of issues contain the term "torch".
 
-- Manual selection of artifacts based on hardware and software factors
-- Complex installation instructions
-- Separate infrastructure maintenance
-- Potential security issues when combining multiple indexes
-- Managing and potentially hosting all project dependencies when using a
-  single index which can significantly increase storage and CDN cost
-- Separate index for every combination of compatible features (e.g. GPU
-  variants with different levels of CPU optimizations)
+Wheel variants remove this special casing and make GPU and TPU packages work
+just as well as regular packages with native code. They also reduce the burden
+on the maintainers to run separate infrastructure and to find and use
+non-standard features such as local version segments on an index for platform
+selection.
 
 **Induced Security Risk:** This approach has unfortunately led to supply
-chain attacks - more details on `PyTorch
+chain attacks - more details on the `PyTorch
 Blog <https://pytorch.org/blog/compromised-nightly-dependency/>`__. It’s
 a non-trivial problem to address which has forced the PyTorch team to create
 a complete mirror of all their dependencies, and is one of the core
@@ -289,8 +284,8 @@ can lead to users being unable to cleanly upgrade the packages, or the
 upgraded packages being reverted to the default variant on subsequent upgrades.
 
 
-“Package names” as variants
-'''''''''''''''''''''''''''
+Package names as variants
+'''''''''''''''''''''''''
 
 Some packages use different names for variants (e.g., `xgboost -
 NVIDIA CUDA accelerated,
@@ -344,8 +339,8 @@ those new package names.
     cupy-rocm-5-6 cupy-rocm-5-7 cupy-rocm-5-8 cupy-rocm-5-9 cupy-rocm-6-0 cupy-rocm-6-1 cupy-rocm-6-2 cupy-rocm-6-3
 
 
-“Extra-Dependency” as variants
-''''''''''''''''''''''''''''''
+Extra-Dependency as variants
+''''''''''''''''''''''''''''
 
 `JAX <https://docs.jax.dev/en/latest/installation.html>`__ uses a
 plugin-based approach. The central ``jax`` package provides a number of
