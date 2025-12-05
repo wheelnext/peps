@@ -269,8 +269,7 @@ tracker](https://github.com/astral-sh/uv/issues/) contain the term "torch".
 Wheel variants remove this special casing and make GPU and TPU packages work
 just as well as regular packages with native code. They also reduce the burden
 on the maintainers to run separate infrastructure and to find and use
-non-standard features such as local version segments on an index for platform
-selection.
+non-standard features such as local version segments present on an index.
 
 **Induced Security Risk:** This approach has unfortunately led to supply
 chain attacks - more details on the `PyTorch
