@@ -262,8 +262,9 @@ system, and add an index specifically for PyTorch.
 Tools need to implement special handling for the way PyTorch uses local
 version segments. PyTorch breaks the pattern that packages are usually
 installed with through these requirements. Problems with installing Pytorch
-are a very common point of user confusion. To quantify this, in uv's issue
-tracker 552/8136, or 6.8%, of issues contain the term "torch".
+are a very common point of user confusion. To quantify this, on 2025-12-05
+the 552 out of 8136, or 6.8%, of issues on the [uv's issue
+tracker](https://github.com/astral-sh/uv/issues/) contain the term "torch".
 
 Wheel variants remove this special casing and make GPU and TPU packages work
 just as well as regular packages with native code. They also reduce the burden
