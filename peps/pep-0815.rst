@@ -397,7 +397,7 @@ not publish wheels on PyPI at all, but instead publishes a customized
 source distribution that performs platform detection, downloads the
 appropriate wheel from upstream server, and then provides it to the
 installer. This approach can select the optimal variant automatically,
-but it prevents wheel-only installs from working, requires a slow and
+but it prevents binary-only installs from working, requires a slow and
 error-prone source distribution build and breaks common caching assumptions
 based on the wheel filename. It also requires a specially prepared build
 environment that contains the torch package the wheel will be installed with,
