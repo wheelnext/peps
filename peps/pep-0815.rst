@@ -687,7 +687,7 @@ microarchitecture-aware binary caching. The `European Environment for
 Scientific Software Installations
 (EESSI) <https://onlinelibrary.wiley.com/doi/full/10.1002/spe.3075>`__
 distributes optimized builds in separate subdirectories per
-microarchitecture (e.g., ``x86_64``/\`\ ``armv8.1a``/``haswell``);
+microarchitecture (e.g., ``x86_64``, ``armv8.1a``, ``haswell``);
 runtime initialization uses ``archspec`` to select best compatible build
 when no exact match exists.
 
@@ -1958,7 +1958,7 @@ The plugin interface must provide the following functions:
   preferred to the least preferred, as they affect `variant
   ordering`_.
 
-The value returned by ``get_supported_configs()``\ must be a subset of
+The value returned by ``get_supported_configs()`` must be a subset of
 the feature names and values returned by ``get_all_configs()`` (modulo
 ordering).
 
