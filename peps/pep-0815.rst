@@ -853,7 +853,7 @@ The specification covers two related use cases for package variants:
 
 The first class of variants requires querying provider plugins to
 determine package compatibility, and therefore involves the potential
-risks highlighted in `security implications`_ section. The proposed
+risks highlighted in the `security implications`_ section. The proposed
 mitigations incur a cost on installer implementations, making it
 desirable to avoid plugin use in the second class where it is not
 strictly necessary.
