@@ -1016,12 +1016,17 @@ without explicit user consent.
 
 The `Overview`_ section of the specification provides further
 suggestions that aim to improve both security and the user experience.
-Notably, the specification suggests vendoring or locking popular
-provider plugin versions at the installer level. This permits the wheels
-using them to be processed either without executing code external
-to the tools at all, or the code to be audited on the same level
-as the tools themselves. Furthermore, the specification permits using
-static configuration as input to skip running plugins altogether.
+It is expected that a limited subset of popular provider plugins will
+be either vendored by the installer, eliminating the use of packages
+external to the tool altogether, or pinned to specific versions,
+providing the same level of code auditing as the tools themselves.
+This will lead to the majority of packages focusing on these specific
+plugins. External plugins requiring explicit opt-in should be rare,
+and therefore pose limited risk to users who could otherwise start
+blanket-allowing all plugins with no prior research.
+
+Furthermore, the specification permits using static configuration as
+input to skip running plugins altogether.
 
 
 Specification
