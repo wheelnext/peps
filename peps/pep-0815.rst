@@ -836,6 +836,53 @@ non-variant wheel instead. The non-variant wheel is also used if variant
 support is explicitly disabled by an installer flag.
 
 
+Install-time and Ahead-of-Time providers
+----------------------------------------
+
+The specification covers two related use cases for package variants:
+
+1. Variants that need to query the user system to determine their
+   compatibility with it. For example, these are the variants utilizing
+   GPUs or requiring CPU instruction sets beyond what platform tags
+   provide.
+
+2. Variants that can always be installed, and therefore only provide
+   a choice between different installation options. This could
+   include software built against different BLAS / LAPACK providers
+   or debug builds of packages.
+
+The first class of variants requires querying provider plugins to
+determine package compatibility, and therefore involves the potential
+risks highlighted in `security implications`_ section. The proposed
+mitigations incur a cost on installer implementations, making it
+desirable to avoid plugin use in the second class where it is not
+strictly necessary.
+
+To account for this, the specification proposes two classes of
+providers:
+
+a. Install-time providers that require executing code to determine
+   the wheel compatibility, and therefore satisfy the variants needing
+   that.
+
+b. Ahead-of-Time (AoT) providers that entirely rely on static metadata
+   for the purpose of wheel selection, and that can be used for the
+   other class of variants to avoid the additional problems posed
+   by install-time providers.
+
+For user convenience and better consistency across different packages,
+AoT providers can also feature plugin packages, but they are only used
+at build time (where executing code from additional packages is already
+a risk) to verify the variant properties specified by the maintainer
+and automatically generate the static metadata.
+
+Both kinds of provider plugins expose the same API. However, an AoT
+provider must always consider all valid variant properties supported,
+and it must always return the same ordered list of supported properties
+irrespective of the user system. All AoT providers can be technically
+used as install-time providers, but not the other way around.
+
+
 Plugin stability and versioning
 -------------------------------
 
