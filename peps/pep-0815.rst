@@ -385,9 +385,9 @@ installation methods, creating confusion and reducing discoverability.
 **Development Tool Complications**: Installation tools, IDEs, and CI/CD
 systems struggle to handle non-standard installation requirements.
 
-**Documentation Burden**: Maintainers must create and maintain complex
-installation guides and users must read them. If they don’t know or
-don’t take the time to read it, their install will likely be dysfunctional.
+**Error-proneness**: The established workarounds are often error-prone,
+and in the past they have lead to issues such as downloading incorrect
+artifacts.
 
 
 Impact on scientific computing and AI/ML workflows
