@@ -169,9 +169,9 @@ with their GPU hardware or drivers.
 provides no indication whether it contains CPUs optimized instructions
 ranging from basic x86-64 to modern processors with AVX512, SHA-NI, and
 other specialized instructions. Packages cannot indicate whether they
-require or benefit from specific CPU features. In turns having to rely
-on the lowest common denominator forces to leave performance on the
-table.
+require specific CPU features. This forces maintainers to either use
+inconvenient runtime dispatching, or rely on the lowest common
+denominator, leaving performance improvements on the table.
 
 **Runtime Dependencies:** Scientific computing packages often depend on
 specific BLAS implementations (OpenBLAS vs Intel MKL), MPI providers
