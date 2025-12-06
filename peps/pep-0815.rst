@@ -461,6 +461,21 @@ and adds a significant burden on open source developers of the entire
 tool stack (from build backends to installers, not forgetting the
 package maintainers).
 
+    PyTorch’s extensive wheel support was always state of the art and
+    provided hardware accelerator support from day zero via our `package
+    selector <https://pytorch.org/get-started/locally/>`__. We believe
+    this was always a superpower of PyTorch to get things working out of
+    the box for our users. Unfortunately, the infrastructure supporting
+    these is very complex, hard to maintain and inefficient (for us, our
+    users and package repositories).
+
+    With the number of hardware we support growing rapidly again, we are
+    very supportive of the wheel variants efforts that will allow us to
+    get PyTorch install instructions to be what our users have been
+    expecting since PyTorch was first released: ``pip install torch``
+
+    — The PyTorch Core Maintainers
+
 The lead maintainer of XGBoost enumerates a number of problems XGBoost
 has that he expects will be addressed by wheel variants:
 
