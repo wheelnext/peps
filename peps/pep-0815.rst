@@ -195,10 +195,6 @@ the correct wheel at install time.
 Current workarounds and their limitations
 -----------------------------------------
 
-Package maintainers have developed various strategies to work around
-aforementioned limitations. However, each approach has significant
-drawbacks.
-
 Separate package indexes as variants
 ''''''''''''''''''''''''''''''''''''
 
