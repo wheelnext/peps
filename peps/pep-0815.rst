@@ -169,15 +169,15 @@ tags:
 1. **Python tag:** `The Python tag indicates the implementation and
    version required by a
    distribution <https://packaging.python.org/en/latest/specifications/platform-compatibility-tags/#python-tag>`__
-   (e.g., ``cp313``)
+   (e.g., ``cp313``, ``py313``, ``py3``)
 2. **ABI tag:** `The ABI tag indicates which Python ABI is required by
    any included extension
    modules <https://packaging.python.org/en/latest/specifications/platform-compatibility-tags/#abi-tag>`__
-   (e.g., ``cp313``, ``none``)
+   (e.g., ``cp313``, ``abi3``, ``none``)
 3. **Platform tag**: `Operating system and architecture - In its simplest
    form:
    sysconfig.get_platform() <https://packaging.python.org/en/latest/specifications/platform-compatibility-tags/#platform-tag>`__
-   (e.g., ``linux_x86_64``)
+   (e.g., ``manylinux_2_34_x86_64``, ``macosx_14_0_arm64``, ``any``)
 
 While these tags effectively handle traditional compatibility
 dimensions, they cannot express modern requirements:
