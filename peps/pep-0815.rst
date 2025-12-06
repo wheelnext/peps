@@ -1536,7 +1536,7 @@ pyproject.toml file for x86-64-v3 would look like:
 .. code:: json5
 
     {
-      // TODO: replace this with appendix URL for the PEP
+      // The schema URL will be replaced with the final URL on packaging.python.org
       "$schema": "https://variants-schema.wheelnext.dev/v0.0.3.json",
       "default-priorities": {
          "feature": {
@@ -1616,7 +1616,7 @@ like:
 .. code:: json5
 
     {
-      // TODO: replace this with appendix URL for the PEP
+      // The schema URL will be replaced with the final URL on packaging.python.org
       "$schema": "https://variants-schema.wheelnext.dev/v0.0.3.json",
       "default-priorities": {
          // identical to above
