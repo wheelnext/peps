@@ -135,11 +135,6 @@ also reduce power requirements, etc.).
     — `archspec: A library for detecting, labeling, and reasoning about
     microarchitectures <https://tgamblin.github.io/pubs/archspec-canopie-hpc-2020.pdf>`__
 
-This PEP proposes a systematic and scalable approach to selecting
-optimized wheels based on platform characteristics, which will help
-Python’s usage expand across diverse computing environments, from cloud
-computing to embedded systems and AI accelerators.
-
 
 User stories
 ------------
