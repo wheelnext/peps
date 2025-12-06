@@ -90,8 +90,8 @@ Survey <https://lp.jetbrains.com/python-developers-survey-2024/#purposes-for-usi
 a significant portion of respondents over the last years have been
 successively using Python for scientific computing purposes, covering
 such areas as Data analysis (steadily over 40% respondents), Machine
-learning (grown to 40% in 2024), Data engineering (around 30%), and
-more. Many of these use cases are directly impacted by suboptimal
+learning (grown to 40% in 2024) and Data engineering (around 30%).
+Many of these use cases are directly impacted by suboptimal
 packaging.
 
 This issue is often crossing the boundaries of scientific computing - as
