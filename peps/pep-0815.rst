@@ -106,11 +106,9 @@ the maintenance burden for package authors. The ``x86_64`` compiler
 flags further emphasizes the urgent need for a more expressive and
 efficient solution in the Python packaging ecosystem.
 
-As illustrated by
-`archspec <https://github.com/archspec/archspec>`__’s authors and
-maintainers, the ability to optimize a package for a specific
-architecture can lead to significant performance improvement (and often
-also reduce power requirements, etc.).
+As illustrated by `archspec <https://github.com/archspec/archspec>`__,
+the ability to optimize a package for a specific architecture can lead to
+significant performance improvement.
 
 .. figure:: pep-0815/avx512_gromacs_benchmark.png
     :alt: A bar graph comparing GROMACS performance (in ns/day) with
@@ -176,7 +174,7 @@ denominator, leaving performance improvements on the table.
 **Runtime Dependencies:** Scientific computing packages often depend on
 specific BLAS implementations (OpenBLAS vs Intel MKL), MPI providers
 (OpenMPI vs MPICH), or other system libraries that affect both
-functionality and performance. The current Wheel format is not able to
+functionality and performance. The current wheel format is not able to
 encode that dependency.
 
 This lack of flexibility has led many projects to find sub-optimal - yet
