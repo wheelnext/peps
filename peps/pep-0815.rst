@@ -136,30 +136,6 @@ also reduce power requirements, etc.).
     microarchitectures <https://tgamblin.github.io/pubs/archspec-canopie-hpc-2020.pdf>`__
 
 
-User stories
-------------
-
-- A user wants to install a version of NumPy that is specialized for
-  their CPU architecture.
-
-- A user wants to install a version of PyTorch that is specialized for
-  their GPU architecture.
-
-- A user wants to install a version of mpi4py that has certain features
-  enabled (e.g. specific MPI implementations for their hardware).
-
-- A library maintainer wants to build their library for wasm32-wasi with
-  and without pthreads support.
-
-- A library maintainer wants to build their library for an Emscripten
-  platform for Pyodide with extensions for graphics compiled in.
-
-- SciPy wants to provide packages built against different BLAS
-  libraries. It already ships wheels linked against different BLAS
-  libraries on macOS, however they are not selectable by the user
-  but keyed on different OS versions.
-
-
 The limitations of platform compatibility tags
 ----------------------------------------------
 
