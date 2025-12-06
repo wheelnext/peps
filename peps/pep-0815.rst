@@ -68,14 +68,16 @@ The Python packaging ecosystem has evolved to support increasingly
 diverse computing environments. The current software ecosystem often
 relies on platform-specific features to determine which binaries are
 compatible with a particular machine. Unfortunately the current wheel
-format cannot adequately express the diversity of features of present in modern hardware. This
-limitation forces package authors into suboptimal distribution
-strategies and creates friction for users attempting to install
-performance-critical packages.
+format cannot adequately express the diversity of features of present
+in modern hardware. For example, some packages need to be built for
+specific CUDA or ROCm versions, and that information cannot currently
+be included in the wheel tag. This limitation forces package authors
+into suboptimal distribution strategies and creates friction for users
+attempting to install performance-critical packages.
 
 Existing approaches to handling Python packages with more complex
 platform requirements are suboptimal (explored below in greater
-details). Some methods include maintaining separate package indexes for
+detail). Some methods include maintaining separate package indexes for
 different hardware configurations, bundling all potential variants into
 a single “mega-wheel” / “monolithic wheel” or using separate package
 names (``mypackage-gpu``, ``mypackage-cpu``, etc.). Each of these approaches
@@ -149,7 +151,7 @@ User stories
   their GPU architecture.
 
 - A user wants to install a version of mpi4py that has certain features
-  enabled (e.g. specific MPI implementations for their hardware).
+  enabled (e.g. specific MPI implementations for their hardware).
 
 - A library maintainer wants to build their library for wasm32-wasi with
   and without pthreads support.
@@ -345,7 +347,7 @@ Extra-Dependency as variants
 `JAX <https://docs.jax.dev/en/latest/installation.html>`__ uses a
 plugin-based approach. The central ``jax`` package provides a number of
 extras that can be used to install additional plugins,
-e.g. ``jax[cuda12]`` or ``jax[tpu]``. This is far from ideal as
+e.g. ``jax[cuda12]`` or ``jax[tpu]``. This is far from ideal as
 ``pip install jax`` (with no extra) leads to a broken installation for
 everybody and consequently dependency chains, a fundamental expected
 behavior in the Python ecosystem is dysfunctional.
@@ -391,15 +393,15 @@ Wheel variant selection via source distribution
 not publish wheels on PyPI at all, but instead publishes a customized
 source distribution that performs platform detection, downloads the
 appropriate wheel from upstream server, and then provides it to the
-installer. Such an approach can provide a good end-user experience by
-selecting the most optimal variant automatically. However, it prevents
-``--only-binary`` installs from working and requires downloading source
-distribution and running its build phase. In this case, it also requires
-running with ``--no-build-isolation``. It requires hosting wheels
-separately, and does not provide for uniform experience across the
-ecosystem.
+installer. This approach can select the optimal variant automatically,
+but it prevents binary-only installs from working, requires a slow and
+error-prone source distribution build and breaks common caching assumptions
+based on the wheel filename. It also requires a specially prepared build
+environment that contains the torch package the wheel will be installed with,
+which means building without build isolation. On the project side, it requires
+hosting wheels separately.
 
-**Induced Security Risk:** similarly to regular source builds, this
+**Induced Security Risk:** Similar to regular source builds, this
 model requires running arbitrary code at install time. The wheels
 are downloaded entirely outside package manager's control, extending
 the attack surface to two wheel fetching implementations and preventing
@@ -680,7 +682,7 @@ microarchitecture-aware binary caching. The `European Environment for
 Scientific Software Installations
 (EESSI) <https://onlinelibrary.wiley.com/doi/full/10.1002/spe.3075>`__
 distributes optimized builds in separate subdirectories per
-microarchitecture (e.g., ``x86_64``/\`\ ``armv8.1a``/``haswell``);
+microarchitecture (e.g., ``x86_64``, ``armv8.1a``, ``haswell``);
 runtime initialization uses ``archspec`` to select best compatible build
 when no exact match exists.
 
@@ -694,7 +696,7 @@ achieved via `USE
 flags <https://devmanual.gentoo.org/general-concepts/use-flags/index.html>`__:
 boolean flags exposed by individual packages and permitting fine-tuning
 the enabled features, optional dependencies and some build parameters
-(e.g. ``jpegxl``, ``cpu_flags_x86_avx2``). Flags can be toggled
+(e.g. ``jpegxl``, ``cpu_flags_x86_avx2``). Flags can be toggled
 individually, and separate binary packages can be built for different
 sets of flags. The package manager can either pick a binary package with
 matching configuration or build from source.
@@ -702,7 +704,7 @@ matching configuration or build from source.
 API and ABI matching is primarily done through use of
 `slotting <https://devmanual.gentoo.org/general-concepts/slotting/index.html>`__.
 Slots are generally used to provide multiple versions or variants of
-given package that can be installed alongside (e.g. different major GTK+
+given package that can be installed alongside (e.g. different major GTK+
 or LLVM versions, or GTK+3 and GTK4 builds of WebKitGTK), whereas
 subslots are merely used to group versions within a slot, usually
 corresponding to the library SOVERSION. Packages can then declare
@@ -777,9 +779,9 @@ same name. The character set for values is more relaxed, to permit
 values resembling versions.
 
 Variant features can be declared as allowing multiple values. If that is
-the case, these values are matched as a logical disjunction, i.e. only a
+the case, these values are matched as a logical disjunction, i.e. only a
 single value needs to be supported. Features are treated conjunctively,
-i.e. all of them need to be supported. This provides some flexibility in
+i.e. all of them need to be supported. This provides some flexibility in
 designating variant compatibility while avoiding having to implement a
 complete boolean logic.
 
@@ -806,7 +808,7 @@ could publish the following wheels:
   without suitable hardware.
 
 - A GPU+CPU regular wheel for systems without wheel variant support
-  (i.e. the “mega-wheel” approach)
+  (i.e. the “mega-wheel” approach)
 
 The null variant uses a reserved ``null`` label to make it clearly
 distinguishable from regular variants.
@@ -818,7 +820,7 @@ variants are not supported and therefore GPU support cannot be
 determined.
 
 Not being compatible with any of the available variants gives the
-installer more information about the system (e.g. not having specialized
+installer more information about the system (e.g. not having specialized
 hardware) than systems which do not support wheel variants.
 Consequently, it makes sense that package maintainers may wish to
 propose a different “fallback” to their users whether their system is
@@ -827,6 +829,53 @@ one is published, a wheel variant enabled installer must select in
 priority the null variant. If none is published, fallback on the
 non-variant wheel instead. The non-variant wheel is also used if variant
 support is explicitly disabled by an installer flag.
+
+
+Install-time and Ahead-of-Time providers
+----------------------------------------
+
+The specification covers two related use cases for package variants:
+
+1. Variants that need to query the user system to determine their
+   compatibility with it. For example, these are the variants utilizing
+   GPUs or requiring CPU instruction sets beyond what platform tags
+   provide.
+
+2. Variants that can always be installed, and therefore only provide
+   a choice between different installation options. This could
+   include software built against different BLAS / LAPACK providers
+   or debug builds of packages.
+
+The first class of variants requires querying provider plugins to
+determine package compatibility, and therefore involves the potential
+risks highlighted in the `security implications`_ section. The proposed
+mitigations incur a cost on installer implementations, making it
+desirable to avoid plugin use in the second class where it is not
+strictly necessary.
+
+To account for this, the specification proposes two classes of
+providers:
+
+a. Install-time providers that require executing code to determine
+   the wheel compatibility, and therefore satisfy the variants needing
+   that.
+
+b. Ahead-of-Time (AoT) providers that entirely rely on static metadata
+   for the purpose of wheel selection, and that can be used for the
+   other class of variants to avoid the additional problems posed
+   by install-time providers.
+
+For user convenience and better consistency across different packages,
+AoT providers can also feature plugin packages, but they are only used
+at build time (where executing code from additional packages is already
+a risk) to verify the variant properties specified by the maintainer
+and automatically generate the static metadata.
+
+Both kinds of provider plugins expose the same API. However, an AoT
+provider must always consider all valid variant properties supported,
+and it must always return the same ordered list of supported properties
+irrespective of the user system. All AoT providers can be technically
+used as install-time providers, but not the other way around.
 
 
 Plugin stability and versioning
@@ -967,6 +1016,61 @@ The optional ``abi_dependency`` extension can be used to build multiple
   ``abi_dependency :: torch :: 2.7``
 
 
+Security implications
+=====================
+
+The proposal introduces a plugin system for querying the system
+capabilities in order to determine variant wheel capability. The system
+permits specifying additional Python packages providing the plugins
+in the package index metadata. Installers and other tools that need
+to determine whether a particular wheel is installable, or select
+the most preferred variant among multiple variant wheels, may need
+to install these packages and execute the code within them while
+resolving dependencies or processing wheels.
+
+This elevates the supply-chain attack potential by introducing two new
+points for malicious actors to inject arbitrary code payload:
+
+1. Publishing a version of a variant provider plugin or one of its
+   dependencies with malicious code.
+
+2. Introducing a malicious variant provider plugin in an existing
+   package metadata.
+
+While such attacks are already possible at the package dependency level,
+it needs to be emphasized that in some scenarios the affected tools are
+executed with elevated privileges, e.g. when installing packages for
+multi-user systems, while the installed packages are only used with
+regular user privileges afterwards. Therefore, variant provider plugins
+could introduce a Remote Code Execution vulnerability with elevated
+privileges.
+
+A similar issue already exists in the packaging ecosystem when packages
+are installed from source distributions, whereas build backends
+and other build dependencies are installed and executed. However,
+various tools operating purely on wheels, as well as users using
+tool-specific options to disable use of source distributions,
+have been relying on the assumption that no code external to the system
+will be executed while resolving dependencies, installing a wheel or
+otherwise processing it. To uphold this assumption, the proposal
+explicitly requires that provider plugin packages are never installed
+without explicit user consent.
+
+The `Overview`_ section of the specification provides further
+suggestions that aim to improve both security and the user experience.
+It is expected that a limited subset of popular provider plugins will
+be either vendored by the installer, eliminating the use of packages
+external to the tool altogether, or pinned to specific versions,
+providing the same level of code auditing as the tools themselves.
+This will lead to the majority of packages focusing on these specific
+plugins. External plugins requiring explicit opt-in should be rare,
+minimizing the workflow disruption and reducing the risk that users
+blanket-allow all plugins.
+
+Furthermore, the specification permits using static configuration as
+input to skip running plugins altogether.
+
+
 Specification
 =============
 
@@ -1036,10 +1140,10 @@ wheel characteristics beyond what existing wheel tags provide. Individual wheels
 are characterized by sets of variant properties that are organized into
 a hierarchical structure of namespaces, features and feature values.
 When evaluating wheels to install, the installer must determine whether
-variant properties are compatible with the system in addition to
-determining the tag compatibility. To choose the most suitable wheel to
-install, the installer must order wheels according to the priorities of
-their variant properties first, and their tags second.
+variant properties are compatible with the system, and order selected wheels
+based on the priority of the compatible variant properties. This is done in
+addition to determining the compatibility and ordering through tags. The
+ordering by variant properties takes precedence over ordering by tags.
 
 Every variant namespace is governed by a variant provider. There are two
 kinds of variant providers: install-time providers and ahead-of-time
@@ -1125,7 +1229,7 @@ Wheels using extensions introduced by this PEP must feature the variant
 label component. The label must adhere to the following rules:
 
 - Lower case only (to prevent issues with case-sensitive
-  vs. case-insensitive filesystems)
+  vs. case-insensitive filesystems)
 - Between 1-16 characters
 - Using only ``0-9``, ``a-z``, ``.`` or ``_`` ASCII characters
 
@@ -1140,7 +1244,10 @@ variant and must use an empty set of variant properties.
 
 Installers that do not implement this specification must ignore wheels
 with variant label when installing from an index, and fall back to a
-wheel without such label if it is available.
+wheel without such label if it is available. If no such wheel is
+available, the installer should output an appropriate diagnostic,
+in particular warning if it results in selecting an earlier package
+version or a clear error if no package version can be installed.
 
 Examples:
 
@@ -1359,13 +1466,13 @@ feature values as second level values.
 
 In ``pyproject.toml`` file, the namespaces present in this dictionary in
 ``pyproject.toml`` file must correspond to all AoT providers without a
-plugin (i.e. with ``install-time`` of ``false`` and no or empty
+plugin (i.e. with ``install-time`` of ``false`` and no or empty
 ``requires``). When building a wheel, the build backend must query the
-AoT provider plugins (i.e. these with ``install-time`` being false and
+AoT provider plugins (i.e. these with ``install-time`` being false and
 non-empty ``requires``) to obtain supported properties and embed them
 into the dictionary. Therefore, the dictionary in ``variant.json`` and
 ``*-variants.json`` must contain namespaces for all AoT providers
-(i.e. all providers with ``install-time`` being false).
+(i.e. all providers with ``install-time`` being false).
 
 Since TOML and JSON dictionaries are unsorted, so are the features in
 the ``static-properties`` dictionary. If more than one feature is
@@ -1951,7 +2058,7 @@ The plugin interface must provide the following functions:
   preferred to the least preferred, as they affect `variant
   ordering`_.
 
-The value returned by ``get_supported_configs()``\ must be a subset of
+The value returned by ``get_supported_configs()`` must be a subset of
 the feature names and values returned by ``get_all_configs()`` (modulo
 ordering).
 
@@ -2126,7 +2233,7 @@ a public version identifier, as defined by the
 :doc:`packaging:specifications/version-specifiers` specification.
 It must contain up to three version components, that are matched against
 the installed version same as the ``=={value}.*`` specifier. Notably,
-trailing zeroes match versions with fewer components (e.g. ``2.0``
+trailing zeroes match versions with fewer components (e.g. ``2.0``
 matches release ``2`` but not ``2.1``). This also implies that the
 property values have different semantics than PEP 440 versions, in
 particular ``2``, ``2.0`` and ``2.0.0`` represent different ranges.
@@ -2250,25 +2357,6 @@ By using a separate ``*-variants.json`` file for shared metadata, it is
 possible to use variant wheels on an index that does not specifically
 support variant metadata. However, the index must permit distributing
 wheels that use the extended filename syntax and the JSON file.
-
-
-Security implications
-=====================
-
-The proposal introduces a variant properties system that could introduce
-a risk of remote code execution through installing and executing
-third-party Python packages. Such a risk existed already when installing
-from source distributions, but the binary package specification does not
-provide for any third-party code being executed when installing a wheel,
-and the users have been relying on the ``--no-binary`` option to
-guarantee that. For this reason, the proposal explicitly requires that
-untrusted providers are never installed or used without explicit user
-opt-in. A few options are suggested for improving the user experience
-without introducing the RCE risk, notably vendoring or locking plugins
-at the installer level, therefore ensuring that they are audited on the
-same level as the installer itself. More details are provided in the
-`Overview`_ section. Static file input can be used to skip running
-plugins on installation altogether.
 
 
 Reference implementation
