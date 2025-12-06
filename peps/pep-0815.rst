@@ -154,9 +154,6 @@ User stories
 - A library maintainer wants to build their library for an Emscripten
   platform for Pyodide with extensions for graphics compiled in.
 
-- A library maintainer wants to provide packages of their game library
-  using different graphics backends.
-
 - SciPy wants to provide packages built against different BLAS
   libraries. It already ships wheels linked against different BLAS
   libraries on macOS, however they are not selectable by the user
