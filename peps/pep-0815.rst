@@ -186,9 +186,10 @@ with the current tag system.
 
 This problem is not unique to PyTorch. Projects like JAX, NumPy, SciPy,
 Scikit-Learn and many others in the scientific Python ecosystem face
-similar hurdles. The core issue is that wheel tags, while successful,
-are not extensible enough to handle the combinatorial complexity of
-build options.
+similar hurdles. The core issue is that wheel tags are not extensible
+enough to handle the combinatorial complexity of build options. Wheel
+variants can capture GPU compatibility in wheel metadata and select
+the correct wheel at install time.
 
 
 Current workarounds and their limitations
