@@ -89,17 +89,13 @@ learning (grown to 40% in 2024) and Data engineering (around 30%).
 Many of these use cases are directly impacted by suboptimal
 packaging.
 
-This issue is often crossing the boundaries of scientific computing - as
-highlighted in the following issue: `manylinux_2_34 x86-64 builds
-produce binaries that are not compatible with all x86-64
-CPUs <https://github.com/pypa/manylinux/issues/1725>`__, where
-``manylinux_2_34_x86_64`` now implicitly requires ``x86_64-v2`` with no
-support for other x86 version. This lack of support results in
-complexity in managing platform-specific dependencies and compatibility.
-That complexity affects the installation process for users and increases
-the maintenance burden for package authors. The ``x86_64`` compiler
-flags further emphasizes the urgent need for a more expressive and
-efficient solution in the Python packaging ecosystem.
+This issue is often crossing the boundaries of scientific computing.
+Wheels currently cannot express more specific CPU requirements, forcing
+the maintainers to build and ship only for the oldest CPU they wish to
+support. Newer CPU features are sometimes utilized through runtime CPU
+detection and dispatching, but for example they cannot benefit from
+performance improvements related to auto-vectorization for x86-64-v4
+CPUs.
 
 As illustrated by `archspec <https://github.com/archspec/archspec>`__,
 the ability to optimize a package for a specific architecture can lead to
