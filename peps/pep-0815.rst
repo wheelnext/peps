@@ -23,21 +23,19 @@ Abstract
 
 The Python wheel packaging format uses
 :doc:`packaging:specifications/platform-compatibility-tags` to specify
-a given wheel’s supported environments based on Python version, ABI, and
-platform (operating system, architecture, core system libraries).  These
-tags are unable to express features of modern hardware. This is
-particularly challenging for the scientific computing, artificial
-intelligence (AI), machine learning (ML), and high-performance computing (HPC)
-communities, where packages are often built with specific hardware
-accelerations (e.g., NVIDIA CUDA, AMD ROCm), specialized CPU
-instructions (e.g., AVX512_BF16), or other system dependencies.
+a given wheel’s supported environments. These tags are unable to express
+features of modern hardware configuration, such as the availability of
+GPU acceleration, or to provide custom package variants, such as builds
+against different dependency ABIs. This is particularly challenging for
+the scientific computing, artificial intelligence (AI), machine learning
+(ML), and high-performance computing (HPC) communities.
 
 This PEP proposes “Wheel Variants,” an extension to the
 :doc:`packaging:specifications/binary-distribution-format`.  This
 extension introduces a mechanism for package maintainers to declare
 multiple build variants for the same package version, while allowing
 installers to automatically select the most appropriate variant based on
-system hardware and software capabilities and characteristics. More
+system hardware and software capabilities, and characteristics. More
 specifically, it proposes:
 
 - An evolution of the wheel format called **Wheel Variant** that allows
@@ -46,11 +44,8 @@ specifically, it proposes:
 - A **variant provider plugin** interface that allows installers to dynamically detect
   platform attributes and select the most suitable wheel.
 
-The goal is to simplify the user experience to a familiar
-``[uv] pip install <package>``, while ensuring optimal performance and
-compatibility. This approach allows seamless package resolution without
-requiring intrusive changes to installers, ensures backward
-compatibility, and minimizes the burden on package maintainers.
+The goal is for a familiar ``[uv] pip install <package>`` to provide
+the best user experience.
 
 
 Definitions
