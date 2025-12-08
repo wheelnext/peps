@@ -102,19 +102,19 @@ As illustrated by `archspec <https://github.com/archspec/archspec>`__,
 the ability to optimize a package for a specific architecture can lead to
 significant performance improvement.
 
-.. figure:: pep-0815/avx512_gromacs_benchmark.png
-    :alt: A bar graph comparing GROMACS performance (in ns/day) with
-          various targets. The first two bars are labeled "yum (2018.8)"
-          and "generic (SSE2)", reach about 1.0 ns/day and are both
-          marked as "SSE2". The next bar is labeled "ivybridge" ("AVX")
-          and reaches almost 1.5 ns/day.  Two following bars are labeled
-          "haswell" and "broadwell" (both "AVX2") and exceed 1.5 ns/day
-          slightly.  The last two bars are labeled "skylake_avx512" and
-          "cascadelake" (both "AVX512") and reach almost 2.0 ns/day.
+    .. figure:: pep-0815/avx512_gromacs_benchmark.png
+        :alt: A bar graph comparing GROMACS performance (in ns/day) with
+              various targets. The first two bars are labeled "yum (2018.8)"
+              and "generic (SSE2)", reach about 1.0 ns/day and are both
+              marked as "SSE2". The next bar is labeled "ivybridge" ("AVX")
+              and reaches almost 1.5 ns/day.  Two following bars are labeled
+              "haswell" and "broadwell" (both "AVX2") and exceed 1.5 ns/day
+              slightly.  The last two bars are labeled "skylake_avx512" and
+              "cascadelake" (both "AVX512") and reach almost 2.0 ns/day.
 
-    GROMACS AVX512 Benchmark
-
-..
+        Performance of GROMACS 2020.1 built for different generations of
+        CPUs.  Vertical axis shows performance expressed in ns/day, a
+        GROMACS-specific measure of simulation speed (higher is better).
 
     “Compiling `GROMACS <https://www.gromacs.org/>`__ for architectures
     that can exploit the AVX-512 instructions supported by the Intel
