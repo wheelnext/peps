@@ -169,12 +169,12 @@ functionality and performance. The current wheel format is not able to
 encode that dependency.
 
 This lack of flexibility has led many projects to find sub-optimal - yet
-necessary - workarounds. Such as this manual selector provided by the
-PyTorch team. This complexity represents a fundamental scalability issue
-with the current tag system.
+necessary - workarounds, such as the manual installation command selector
+provided by the PyTorch team. This complexity represents a fundamental
+scalability issue with the current tag system.
 
 This problem is not unique to PyTorch. Projects like JAX, NumPy, SciPy,
-Scikit-Learn and many others in the scientific Python ecosystem face
+scikit-learn and many others in the scientific Python ecosystem face
 similar hurdles. The core issue is that wheel tags are not extensible
 enough to handle the combinatorial complexity of build options. Wheel
 variants can capture GPU compatibility in wheel metadata and select
@@ -395,7 +395,7 @@ AI/ML applications where performance optimization is critical:
 
     Wheel variants are a clear step in the right direction in this regard.
 
-    — Michael Hudgins, Jax Developer Infrastructure Lead
+    — Michael Hudgins, JAX Developer Infrastructure Lead
 
 They affect everyone from package authors to end users of all skill
 levels, including students, scientists and engineers:
@@ -542,13 +542,13 @@ Out-of-scope features
 This PEP tries to present the minimal scope required and leaves aspects
 to tools to evolve. A non-exhaustive list:
 
-- The format of the static variants file, and how to include them in a
-  pylock.toml
-- The list of variant providers that are vendored or re-implemented, as
-  well as opt-in mechanisms
+- The format of a static file to select variants deterministically or include
+  variants in a ``pylock.toml`` file,
+- The list of variant providers that are vendored or re-implemented by installers,
+- The specific opt-in mechanisms and UX for allowing an installer to run
+  non-vendored variant providers,
 - How to instruct build backends to emit variants through the PEP 517
-  mechanism. For backwards compatibility, build backends have to default
-  to non-variant builds
+  mechanism.
 
 
 Prior art
@@ -625,7 +625,7 @@ Spack / Archspec
 
 `archspec <https://github.com/archspec/archspec>`__ is a library for
 detecting, labeling, and reasoning about CPU microarchitecture variants,
-developed from the `Spack <https://spack.io/>`__ package manager.
+developed for the `Spack <https://spack.io/>`__ package manager.
 
 **Variant Model:** CPU Microarchitectures (e.g., ``haswell``,
 ``skylake``, ``zen2``, ``armv8.1a``) form a `Directed Acyclic Graph
@@ -811,16 +811,15 @@ The specification covers two related use cases for package variants:
    provide.
 
 2. Variants that can always be installed, and therefore only provide
-   a choice between different installation options. This could
-   include software built against different BLAS / LAPACK providers
-   or debug builds of packages.
+   a choice between different installation options. For example, software built
+   against different BLAS / LAPACK providers or debug builds of packages.
 
 The first class of variants requires querying provider plugins to
 determine package compatibility, and therefore involves the potential
 risks highlighted in the `security implications`_ section. The proposed
 mitigations incur a cost on installer implementations, making it
-desirable to avoid plugin use in the second class where it is not
-strictly necessary.
+desirable to avoid plugin use at install time for the second class of variants,
+where that is not strictly necessary.
 
 To account for this, the specification proposes two classes of
 providers:
