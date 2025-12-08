@@ -140,18 +140,18 @@ The limitations of platform compatibility tags
 The current wheel format encodes compatibility through three platform
 tags:
 
-1. **Python tag:** `The Python tag indicates the implementation and
-   version required by a
-   distribution <https://packaging.python.org/en/latest/specifications/platform-compatibility-tags/#python-tag>`__
-   (e.g., ``cp313``, ``py313``, ``py3``)
-2. **ABI tag:** `The ABI tag indicates which Python ABI is required by
-   any included extension
-   modules <https://packaging.python.org/en/latest/specifications/platform-compatibility-tags/#abi-tag>`__
-   (e.g., ``cp313``, ``abi3``, ``none``)
-3. **Platform tag**: `Operating system and architecture - In its simplest
-   form:
-   sysconfig.get_platform() <https://packaging.python.org/en/latest/specifications/platform-compatibility-tags/#platform-tag>`__
-   (e.g., ``manylinux_2_34_x86_64``, ``macosx_14_0_arm64``, ``any``)
+1. **Python tag**: encoding the minimum Python version and optionally
+   restricting Python distributions (e.g., ``py3`` for any Python 3,
+   ``py313`` for Python 3.13 or newer, ``cp313`` for specifically
+   CPython, 3.13 or newer).
+2. **ABI tag**: encoding the Python ABI required by any extension
+   modules (e.g., ``none`` for no requirement, ``abi3`` for the CPython
+   stable ABI, ``cp313`` for extensions requiring CPython 3.13 ABI).
+3. **Platform tag**: currently encoding the operating system,
+   architecture and core system libraries (e.g., ``any`` for any
+   platform, ``manylinux_2_34_x86_64`` for x86-64 Linux system with
+   glibc 2.34 or newer, ``macosx_14_0_arm64`` for arm64 macOS 14.0
+   or newer system.
 
 While these tags effectively handle traditional compatibility
 dimensions, they cannot express modern requirements:
