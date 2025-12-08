@@ -2412,3 +2412,18 @@ resolution. It is unclear how to account for such variants while
 performing universal solution. The one-to-one mapping between
 dependencies and installed packages would be lost, as a ``torch``
 dependency could effectively be satisfied by ``torch-cu129``.
+
+
+Acknowledgements
+================
+
+This work would not have been possible without the contributions and
+feedbacks of many people in the Python packaging community. In 
+particular, we would like to credit the following individuals for their
+help in shaping this PEP (in alphabetical order):
+
+Alban Desmaison, Andy Terrel, Bradley Dice, Chris Gottbrath, 
+Dmitry Rogozhkin, Emma Smith, Geoffrey Thomas, Henry Schreiner, 
+Jeff Daily, Jeremy Tanner, Jithun Nair, Keith Kraus, Leo Fang, 
+Mike McCarty, Nikita Shulga, Paul Ganssle, Philip Hyunsu Cho, 
+Robert Maynard, Vyas Ramasubramani, and Zanie Blue.
