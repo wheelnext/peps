@@ -1044,12 +1044,11 @@ input to skip running plugins altogether.
 Specification
 =============
 
-This PEP proposes a set of backward-compatible extensions to the
-:ref:`packaging:binary-distribution-format` specification, and the
-packaging ecosystem version while maintaining complete backward
-compatibility with existing package managers and tools. The design was
-made with the intent to protect non-variant-aware tools from failure
-when a new type of wheel appears that they don’t know how to manage.
+This PEP proposes a set of extensions to the
+:ref:`packaging:binary-distribution-format` specification that enable
+building additional variants of wheels that can be installed by
+variant-aware tools while being ignored by programs that do not
+implement this specification.
 
 
 Wheel variant glossary
