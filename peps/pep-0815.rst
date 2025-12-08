@@ -64,21 +64,22 @@ diverse computing environments. The current software ecosystem often
 relies on platform-specific features to determine which binaries are
 compatible with a particular machine. Unfortunately the current wheel
 format cannot adequately express the diversity of features of present
-in modern hardware. For example, some packages need to be built for
-specific CUDA or ROCm versions, and that information cannot currently
-be included in the wheel tag. This limitation forces package authors
-into suboptimal distribution strategies and creates friction for users
-attempting to install performance-critical packages.
+in modern hardware.
 
-Existing approaches to handling Python packages with more complex
-platform requirements are suboptimal (explored below in greater
-detail). Some methods include maintaining separate package indexes for
-different hardware configurations, bundling all potential variants into
-a single “mega-wheel” / “monolithic wheel” or using separate package
-names (``mypackage-gpu``, ``mypackage-cpu``, etc.). Each of these approaches
-has significant drawbacks, such as excessive binary size, dependency
-confusion, inefficient dependency resolution, complex documentation,
-etc.
+For example, packages such as `PyTorch <https://pytorch.org/>`__ need to
+be built for specific CUDA or ROCm versions, and that information cannot
+currently be included in the wheel tag. Having to build multiple wheels
+targeting very different hardware configurations forces maintainers into
+various distribution strategies that are suboptimal and create friction
+for users and authors of other software that wish to depend on the
+package in question.
+
+A few existing approaches are explored in the subsequent subsections.
+These include maintaining separate package indexes for different
+hardware configurations, bundling all potential variants into a single
+wheel of considerable size, or using separate package names
+(``mypackage-gpu``, ``mypackage-cpu``, etc.). Each of these approaches
+has significant drawbacks.
 
 According to the `2024 Python Developers
 Survey <https://lp.jetbrains.com/python-developers-survey-2024/#purposes-for-using-python>`__,
