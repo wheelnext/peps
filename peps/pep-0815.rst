@@ -1203,7 +1203,7 @@ Extended wheel filename
 This PEP changes the wheel filename template originally defined by
 :pep:`427` to:
 
-.. code::
+.. code:: text
 
     {distribution}-{version}(-{build tag})?-{python tag}-{abi tag}-{platform tag}(-{variant label})?.whl
 
@@ -1877,8 +1877,8 @@ associated with the project they represent, and avoid namespaces that
 refer to other projects or generic terms that could lead to naming
 conflicts in the future.
 
-In different variants of the same package version, the same provider
-plugin must always be used for a given namespace. Attempting to load
+All variants published on a single index for a specific package version
+must use the same provider for a given namespace. Attempting to load
 more than one plugin for the same namespace in the same release version
 must result in a fatal error. While multiple plugins for the same
 namespace may exist across different packages or release versions (such
@@ -1891,10 +1891,21 @@ particular, packages published to PyPI must not rely on plugins that
 need to be installed from other indexes.
 
 Plugins are implemented as Python packages. They need to expose two
-kinds of Python objects at a specified API endpoint: attributes that
-return a specific value after being accessed via
-``{API endpoint}.{attribute name}``, and callables that are called via
-``{API endpoint}.{callable name}({arguments}...)``. These can be
+kinds of Python objects at a specified API endpoint:
+
+a. attributes that return a specific value after being accessed via:
+
+   .. code:: text
+
+       {API endpoint}.{attribute name}
+
+b. callables that are called via:
+
+   .. code:: text
+
+       {API endpoint}.{callable name}({arguments}...)
+
+These can be
 implemented either as modules, or classes with class methods or static
 methods. The specifics are provided in the subsequent sections.
 
@@ -1904,9 +1915,9 @@ API endpoint
 
 The location of the plugin code is called an “API endpoint”, and it is
 expressed using the object reference notation following the
-:doc:`packaging:specifications/entry-points`.
+:doc:`packaging:specifications/entry-points`:
 
-.. code::
+.. code:: text
 
     {import_path}(:{object_path})?
 
@@ -1915,7 +1926,6 @@ pseudocode:
 
 .. code:: python
 
-    import inspect
     import {import_path}
 
     if "{object_path}":
@@ -1971,14 +1981,14 @@ significant. It is defined using the following protocol:
 
 A “variant feature config” must provide the following properties or attributes:
 
-- ``name`` specifying the feature name, as a string.
+- ``name: str`` specifying the feature name.
 
-- ``multi_value`` specifying whether the feature is allowed to have
+- ``multi_value: bool`` specifying whether the feature is allowed to have
   multiple corresponding values within a single variant wheel. If it is
   ``False``, then it is an error to specify multiple values for the
   feature.
 
-- ``values`` specifying feature values, as a list of strings. In
+- ``values: list[str]`` specifying feature values. In
   contexts where the order is significant, the values must be ordered
   from the most preferred to the least preferred.
 
@@ -2070,7 +2080,7 @@ Example implementation
         multi_value: bool
 
 
-    internal -- provided for illustrative purpose
+    # internal -- provided for illustrative purpose
     _MAX_VERSION = 4
     _ALL_GPUS = ["narf", "poit", "zort"]
 
@@ -2152,7 +2162,7 @@ Build backends
 --------------
 
 As a build backend can’t determine whether the frontend supports variant
-wheels or not, PEP 517 and PEP 660 hooks must build non-variant wheels
+wheels or not, :pep:`517` and :pep:`660` hooks must build non-variant wheels
 by default. Build backends may provide ways to request variant builds.
 This specification does not define any specific configuration.
 
@@ -2180,16 +2190,23 @@ or ``not in`` operator, e.g.:
 
 .. code::
 
+    # satisfied by any "foo :: * :: *" property
     dep1; "foo" in variant_namespaces
+    # satisfied by any "foo :: bar :: *" property
     dep2; "foo :: bar" in variant_features
+    # satisfied only by "foo :: bar :: baz" property
     dep3; "foo :: bar :: baz" in variant_properties
 
 The ``variant_label`` marker is a plain string:
 
 .. code::
 
+    # satisfied by the variant "foobar"
     dep4; variant_label == "foobar"
+    # satisfied by any wheel other other than the null variant
+    # (including the non-variant wheel)
     dep5; variant_label != "null"
+    # satisfied by the non-variant wheel
     dep6; variant_label == ""
 
 Implementations must ignore differences in whitespace while matching the
