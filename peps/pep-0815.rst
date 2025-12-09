@@ -220,7 +220,7 @@ Tools need to implement special handling for the way PyTorch uses local
 version segments. These requirements break the pattern that packages
 are usually installed with. Problems with installing PyTorch
 are a very common point of user confusion. To quantify this, on
-2025-12-05 the 552 out of 8136, or 6.8%, of issues on the `uv's issue
+2025-12-05, 552 out of 8136, or 6.8%, of issues on the `uv's issue
 tracker <https://github.com/astral-sh/uv/issues/>`__ contained the term
 "torch".
 
@@ -254,8 +254,8 @@ package names to approximate variants:
     pip install xgboost      # NVIDIA GPU variant
     pip install xgboost-cpu  # CPU-only variant
 
-However, in that case maintainers of other software cannot cleanly
-express a dependency on any of the available variants. They need to
+Maintainers of other software cannot express that they depend on either
+of the available variants being selected. They need to
 either depend on a specific variant, provide multiple alternative
 dependency sets using extras, or even publish their own software using
 multiple package names matching upstream variants.
@@ -279,7 +279,7 @@ squatting much easier. For example, one could create a malicious
 ``numpy-cuda`` package that users will be lead to believe it’s a CUDA
 variant of NumPy.
 
-For diverse reasons, `CuPy <https://cupy.dev/>`__ had to build
+`CuPy <https://cupy.dev/>`__ had to build
 a total of 52 different packages - all with different names - which
 clearly highlights the limit of such an approach. End users need to
 carefully read the CuPy installation documentation to figure out
@@ -780,7 +780,7 @@ Null variant
 The concept of a null variant makes it possible to distinguish a
 fallback wheel variant from a regular wheel published for backwards
 compatibility. For example, a package that features optional GPU support
-could publish the following wheels:
+could publish the following wheels during the transition period:
 
 - One or more wheel variants built for specific hardware, that will be
   installed on systems with an installer supporting variants and
