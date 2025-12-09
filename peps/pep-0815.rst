@@ -2277,7 +2277,7 @@ Python package users
 
 The primary source of information for Python package users should be
 installer documentation, supplemented by helpful informational messages
-from command-line interface and tutorials. Users without special needs
+from command-line interface, and tutorials. Users without special needs
 should not require any special variant awareness. Advanced users would
 specifically need documentation on (provided the installer in question
 implements these features):
@@ -2321,7 +2321,7 @@ documentation needs to indicate:
 
 The maintainers will also need to peruse provider plugin documentation.
 They should also be aware which provider plugins are considered trusted
-by commonly used installers, and know the implications of used untrusted
+by commonly used installers, and know the implications of using untrusted
 plugins. These materials may also be supplemented by generic documents
 explaining publishing variant wheels, along with specific example use
 cases.
@@ -2399,16 +2399,16 @@ the available properties and their discovery methods as part of the
 specification, much like how wheel tags are implemented currently.
 However, the existing wheel tag logic already imposes a significant
 complexity on packaging tools that need to maintain the logic for
-generating supported tags, partially amortized by data available in the
-Python interpreter itself.
+generating supported tags, partially amortized by the data provided by
+the Python interpreter itself.
 
-Every new axis will be imposing even more effort on package manager
-maintainers, who will have to maintain an algorithm to determine
-property compatibility. This algorithm can be quite complex, possibly
+Every new axis would be imposing even more effort on package manager
+maintainers, who would have to maintain an algorithm to determine the
+property compatibility. This algorithm could become quite complex, possibly
 needing to account for different platforms, hardware versions and
-requiring more frequent updates than platform tags. This will also
+requiring more frequent updates than the one for platform tags. This would also
 significantly increase the barrier towards adding new axes and therefore
-the risk of incompatibility between different installers, as every new
+the risk of lack of feature parity between different installers, as every new
 axis will be imposing additional maintenance cost.
 
 For comparison, the plugin design essentially democratizes the variant
@@ -2416,7 +2416,9 @@ properties. Provider plugins can be maintained independently by people
 having the necessary knowledge and hardware. They can be updated as
 frequently as necessary, independently of package managers. The decision
 to use a particular provider falls entirely on the maintainer of package
-needing it.
+needing it, though they need to take into consideration that using
+plugins that are not vetted by the common installers will inconvenience
+their users.
 
 
 Resolving variants to separate packages
@@ -2447,7 +2449,7 @@ Furthermore, it requires significant changes to the dependency resolver
 and package metadata formats. In particular, the dependency resolver
 would need to query all “resolver” packages before performing
 resolution. It is unclear how to account for such variants while
-performing universal solution. The one-to-one mapping between
+performing universal resolution. The one-to-one mapping between
 dependencies and installed packages would be lost, as a ``torch``
 dependency could effectively be satisfied by ``torch-cu129``.
 
@@ -2456,7 +2458,7 @@ Acknowledgements
 ================
 
 This work would not have been possible without the contributions and
-feedbacks of many people in the Python packaging community. In
+feedback of many people in the Python packaging community. In
 particular, we would like to credit the following individuals for their
 help in shaping this PEP (in alphabetical order):
 
