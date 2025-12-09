@@ -24,7 +24,7 @@ Abstract
 The Python wheel packaging format uses
 :doc:`packaging:specifications/platform-compatibility-tags` to specify
 a given wheel’s supported environments. These tags are unable to express
-features of modern hardware configuration, such as the availability of
+the features of modern hardware configurations, such as the availability of
 GPU acceleration, or to provide custom package variants, such as builds
 against different dependency ABIs. This is particularly challenging for
 the scientific computing, artificial intelligence (AI), machine learning
@@ -35,8 +35,8 @@ This PEP proposes “Wheel Variants,” an extension to the
 extension introduces a mechanism for package maintainers to declare
 multiple build variants for the same package version, while allowing
 installers to automatically select the most appropriate variant based on
-system hardware and software capabilities, and characteristics. More
-specifically, it proposes:
+system hardware and software characteristics. More specifically, it
+proposes:
 
 - An evolution of the wheel format called **Wheel Variant** that allows
   wheels to be distinguished by hardware or software attributes.
@@ -63,15 +63,15 @@ The Python packaging ecosystem has evolved to support increasingly
 diverse computing environments. The current software ecosystem often
 relies on platform-specific features to determine which binaries are
 compatible with a particular machine. Unfortunately the current wheel
-format cannot adequately express the diversity of features of present
+format cannot adequately express the diversity of features present
 in modern hardware.
 
 For example, packages such as `PyTorch <https://pytorch.org/>`__ need to
 be built for specific CUDA or ROCm versions, and that information cannot
 currently be included in the wheel tag. Having to build multiple wheels
 targeting very different hardware configurations forces maintainers into
-various distribution strategies that are suboptimal and create friction
-for users and authors of other software that wish to depend on the
+various distribution strategies that are suboptimal, and create friction
+for users and authors of other software who wish to depend on the
 package in question.
 
 A few existing approaches are explored in the subsequent subsections.
@@ -92,9 +92,9 @@ packaging.
 
 This issue is often crossing the boundaries of scientific computing.
 Wheels currently cannot express more specific CPU requirements, forcing
-the maintainers to build and ship only for the oldest CPU they wish to
-support. Newer CPU features are sometimes utilized through runtime CPU
-detection and dispatching, but for example they cannot benefit from
+the maintainers to build and ship only for the oldest CPU baseline they wish to
+support. Newer CPU features are sometimes utilized through runtime
+dispatching, but for example this does not let software benefit from the
 performance improvements related to auto-vectorization for x86-64-v4
 CPUs.
 
@@ -150,16 +150,16 @@ dimensions, they cannot express modern requirements:
 
 **GPU Accelerated Frameworks:** A wheel filename like
 ``torch-2.9.0-cp313-cp313-manylinux_2_28_x86_64.whl`` provides no
-indication whether it contains NVIDIA CUDA support, AMD ROCm support,
-Intel XPU support, or is CPU-only. Users cannot determine compatibility
+indication whether it provides the support for NVIDIA CUDA, AMD ROCm,
+Intel XPU, or is CPU-only. Users cannot determine compatibility
 with their GPU hardware or drivers.
 
 **CPU Instruction Sets:** A wheel filename like
 ``numpy-2.3.2-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl``
-provides no indication whether it contains CPUs optimized instructions
-ranging from basic x86-64 to modern processors with AVX512, SHA-NI, and
-other specialized instructions. Packages cannot indicate whether they
-require specific CPU features. This forces maintainers to either use
+provides no indication whether it uses optimized instructions
+for modern processors with AVX512, SHA-NI, and other specialized
+instruction sets. Packages cannot indicate whether they
+require specific CPU baseline. This forces maintainers to either use
 inconvenient runtime dispatching, or rely on the lowest common
 denominator, leaving performance improvements on the table.
 
@@ -188,8 +188,8 @@ Current workarounds and their limitations
 Separate package indexes as variants
 ''''''''''''''''''''''''''''''''''''
 
-Projects like `PyTorch <https://pytorch.org/get-started/locally/>`__,
-`RAPIDS <https://docs.rapids.ai/install/#selector>`__ and other packages
+Projects like `PyTorch <https://pytorch.org/get-started/locally/>`__
+and `RAPIDS <https://docs.rapids.ai/install/#selector>`__
 currently distribute packages that approximate “variants” through
 separate package indexes with custom URLs. We will use the
 example of PyTorch, while the problem, the workarounds and the impact for
@@ -217,11 +217,12 @@ system, and add an index specifically for PyTorch.
     pip install torch --index-url https://download.pytorch.org/whl/cu129
 
 Tools need to implement special handling for the way PyTorch uses local
-version segments. PyTorch breaks the pattern that packages are usually
-installed with through these requirements. Problems with installing Pytorch
-are a very common point of user confusion. To quantify this, on 2025-12-05
-the 552 out of 8136, or 6.8%, of issues on the [uv's issue
-tracker](https://github.com/astral-sh/uv/issues/) contain the term "torch".
+version segments. These requirements break the pattern that packages
+are usually installed with. Problems with installing PyTorch
+are a very common point of user confusion. To quantify this, on
+2025-12-05 the 552 out of 8136, or 6.8%, of issues on the `uv's issue
+tracker <https://github.com/astral-sh/uv/issues/>`__ contain the term
+"torch".
 
 Wheel variants remove this special casing and make GPU and TPU packages work
 just as well as regular packages with native code. They also reduce the burden
@@ -244,14 +245,20 @@ upgraded packages being reverted to the default variant on subsequent upgrades.
 Package names as variants
 '''''''''''''''''''''''''
 
-Some packages use different names for variants (e.g., `xgboost -
-NVIDIA CUDA accelerated,
-xgboost-cpu <https://xgboost.readthedocs.io/en/stable/install.html>`__).
-However, then maintainers of other software cannot cleanly express
-a dependency on any of the available variants; it needs to either depend
-on a specific variant, provide multiple alternative dependency sets
-using extras, or even publish their own software using multiple packages
-with matching variants.
+Packages such as `XGBoost
+<https://xgboost.readthedocs.io/en/stable/install.html>`__ use different
+package names to approximate variants:
+
+.. code:: bash
+
+    pip install xgboost      # NVIDIA GPU variant
+    pip install xgboost-cpu  # CPU-only variant
+
+However, in that case maintainers of other software cannot cleanly
+express a dependency on any of the available variants. They need to
+either depend on a specific variant, provide multiple alternative
+dependency sets using extras, or even publish their own software using
+multiple package names matching upstream variants.
 
 Commonly, these packages install overlapping files. Since Python
 packaging does not support expressing that two packages are mutually
@@ -259,7 +266,7 @@ exclusive, installers can install both of them to the same environment,
 with the package installed second overwriting files from the one
 installed first. This could lead to unpredictable behavior, including
 the possibility of incidentally switching between variants depending on
-upgrade ordering.
+the way package upgrades are ordered.
 
 An additional limitation of this approach is that publishing a new release
 synchronously across multiple package names is not currently possible.
@@ -272,19 +279,14 @@ squatting much easier. For example, one could create a malicious
 ``numpy-cuda`` package that users will be lead to believe it’s a CUDA
 variant of NumPy.
 
-.. code:: bash
-
-    pip install xgboost      # NVIDIA GPU variant
-    pip install xgboost-cpu  # CPU-only variant
-
-`cupy <https://github.com/cupy/cupy>`__ for diverse reasons had to build
+For diverse reasons, `CuPy <https://cupy.dev/>`__ had to build
 a total of 52 different packages - all with different names - which
 clearly highlights the limit of such an approach. End users need to
-carefully read the ``CuPy`` installation documentation to figure out
-which package they need. And for maintainers it’s labor-intensive to
-continuously have to create new PyPI packages, ask for limit increases,
-and keep their wheel build infrastructure and documentation in sync with
-those new package names.
+carefully read the CuPy installation documentation to figure out
+which package they need. Continuously having to create new PyPI
+packages, request increasing limits and keep the build infrastructure
+and documentation in sync, requires significant effort from software
+maintainers.
 
 .. code:: text
 
@@ -303,17 +305,17 @@ Extra-Dependency as variants
 plugin-based approach. The central ``jax`` package provides a number of
 extras that can be used to install additional plugins,
 e.g. ``jax[cuda12]`` or ``jax[tpu]``. This is far from ideal as
-``pip install jax`` (with no extra) leads to a broken installation for
-everybody and consequently dependency chains, a fundamental expected
-behavior in the Python ecosystem is dysfunctional.
+``pip install jax`` (with no extra) leads to a nonfunctional
+installation, and consequently dependency chains, a fundamental expected
+behavior in the Python ecosystem, are dysfunctional.
 
 JAX includes 12 extra selectors to cover all use cases - many of which
-overlap and could be misleading to users if they don’t read in detail
-the documentation.
+overlap and could be misleading to users if they don’t read the
+documentation in detail.
 
 It should be noted that most of these “extras” are technically mutually
 exclusive, though it is currently impossible to correctly express this
-incompatibility within the package metadata.
+within the package metadata.
 
 .. code:: email
 
@@ -335,7 +337,7 @@ Bundled universal packages - monolithic builds
 ''''''''''''''''''''''''''''''''''''''''''''''
 
 Including all possible variants in a single wheel is another option, but
-this leads to excessively large artifacts, wasting bandwidth and slower
+this leads to excessively large artifacts, wasting bandwidth and leading to slower
 installation times for users who only need one specific variant. In some
 cases, such artifacts cannot be hosted on PyPI because they exceed its
 size limits.
@@ -347,20 +349,21 @@ Wheel variant selection via source distribution
 `FlashAttention <https://github.com/Dao-AILab/flash-attention>`__ does
 not publish wheels on PyPI at all, but instead publishes a customized
 source distribution that performs platform detection, downloads the
-appropriate wheel from upstream server, and then provides it to the
+appropriate wheel from an upstream server, and then provides it to the
 installer. This approach can select the optimal variant automatically,
 but it prevents binary-only installs from working, requires a slow and
-error-prone source distribution build and breaks common caching assumptions
-based on the wheel filename. It also requires a specially prepared build
-environment that contains the torch package the wheel will be installed with,
-which means building without build isolation. On the project side, it requires
-hosting wheels separately.
+error-prone build via a source distribution, and breaks common caching
+assumptions tied to the wheel filename. It also requires a specially
+prepared build environment that contains the ``torch`` package matching
+the version that the software will run against, which requires building
+without build isolation. On the project side, it requires hosting wheels
+separately.
 
 **Induced Security Risk:** Similar to regular source builds, this
 model requires running arbitrary code at install time. The wheels
 are downloaded entirely outside package manager's control, extending
-the attack surface to two wheel fetching implementations and preventing
-proper provenance tracking.
+the attack surface to two separate wheel download implementations and
+preventing proper provenance tracking.
 
 
 Ecosystem fragmentation
@@ -600,8 +603,8 @@ only one package with a given name can exist at one time. Mutex
 metapackages are sets of packages with the same name, but different
 build string. Packages depend on specific mutex builds (e.g.,
 ``blas=*=openblas`` vs ``blas=*=mkl``) to avoid problems with related
-packages using different dependency libraries, such as numpy using
-openblas and scipy using mkl.
+packages using different dependency libraries, such as NumPy using
+OpenBLAS and SciPy using MKL.
 
 **Example software variants**:
 `BLAS <https://conda-forge.org/docs/maintainer/knowledge_base/#blas>`__,
@@ -641,7 +644,7 @@ descending from skylake, as each has unique AVX-512 extensions.
 **Implementation:** A language-agnostic JSON database stores
 microarchitecture metadata (features, compatibility relationships,
 compiler-specific optimization flags). Language bindings provide
-detection (queries /proc/cpuinfo, matches to microarchitecture with
+detection (queries ``/proc/cpuinfo``, matches to microarchitecture with
 largest compatible feature subset) and compatibility comparison
 operators.
 
@@ -666,7 +669,8 @@ achieved via `USE
 flags <https://devmanual.gentoo.org/general-concepts/use-flags/index.html>`__:
 boolean flags exposed by individual packages and permitting fine-tuning
 the enabled features, optional dependencies and some build parameters
-(e.g. ``jpegxl``, ``cpu_flags_x86_avx2``). Flags can be toggled
+(e.g. ``jpegxl`` for JPEG XL image format support,
+``cpu_flags_x86_avx2`` for AVX2 instruction set use). Flags can be toggled
 individually, and separate binary packages can be built for different
 sets of flags. The package manager can either pick a binary package with
 matching configuration or build from source.
@@ -676,18 +680,19 @@ API and ABI matching is primarily done through use of
 Slots are generally used to provide multiple versions or variants of
 given package that can be installed alongside (e.g. different major GTK+
 or LLVM versions, or GTK+3 and GTK4 builds of WebKitGTK), whereas
-subslots are merely used to group versions within a slot, usually
-corresponding to the library SOVERSION. Packages can then declare
+subslots are used to group versions within a slot, usually
+corresponding to the library ABI version. Packages can then declare
 dependencies bound to the slot and subslot used at build time. Again,
-separate binary packages can be built bound to different dependency
-slots, and when installing a dependency version falling into a different
-slot or subslot, the package manager may either choose a binary packages
-bound to that slot or rebuild from source.
+separate binary packages can be built against different dependency
+slots. When installing a dependency version falling into a different
+slot or subslot, the package manager may either replace the package
+needing that dependency with a binary packages built against the new
+slot, or rebuild it from source.
 
 Normally, the use of slots assumes that upgrading to the newest version
 possible is desirable. When more fine-grained control is desired, slots
 are used in conjunction with USE flags. For example,
-``llvm_slot_${major}`` flags are used to select a LLVM major version to
+``llvm_slot_{major}`` flags are used to select a LLVM major version to
 build against.
 
 
@@ -2418,12 +2423,12 @@ Acknowledgements
 ================
 
 This work would not have been possible without the contributions and
-feedbacks of many people in the Python packaging community. In 
+feedbacks of many people in the Python packaging community. In
 particular, we would like to credit the following individuals for their
 help in shaping this PEP (in alphabetical order):
 
-Alban Desmaison, Andy Terrel, Bradley Dice, Chris Gottbrath, 
-Dmitry Rogozhkin, Emma Smith, Geoffrey Thomas, Henry Schreiner, 
-Jeff Daily, Jeremy Tanner, Jithun Nair, Keith Kraus, Leo Fang, 
-Mike McCarty, Nikita Shulga, Paul Ganssle, Philip Hyunsu Cho, 
+Alban Desmaison, Andy Terrel, Bradley Dice, Chris Gottbrath,
+Dmitry Rogozhkin, Emma Smith, Geoffrey Thomas, Henry Schreiner,
+Jeff Daily, Jeremy Tanner, Jithun Nair, Keith Kraus, Leo Fang,
+Mike McCarty, Nikita Shulga, Paul Ganssle, Philip Hyunsu Cho,
 Robert Maynard, Vyas Ramasubramani, and Zanie Blue.
