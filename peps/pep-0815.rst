@@ -264,7 +264,7 @@ Commonly, these packages install overlapping files. Since Python
 packaging does not support expressing that two packages are mutually
 exclusive, installers can install both of them to the same environment,
 with the package installed second overwriting files from the one
-installed first. This could leads to runtime errors, and
+installed first. This leads to runtime errors, and
 the possibility of incidentally switching between variants depending on
 the way package upgrades are ordered.
 
