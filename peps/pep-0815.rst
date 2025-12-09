@@ -782,34 +782,31 @@ fallback wheel variant from a regular wheel published for backwards
 compatibility. For example, a package that features optional GPU support
 could publish the following wheels:
 
-- One or more wheel variants built for specific hardware for wheel
-  variant enabled systems with suitable hardware.
+- One or more wheel variants built for specific hardware, that will be
+  installed on systems with an installer supporting variants and
+  suitable hardware.
 
-- A CPU-only null variant for systems with wheel variant support but
-  without suitable hardware.
+- A CPU-only null variant, that will be installed on systems with an
+  installer supporting variants, but without hardware suitable for any
+  other variants.
 
-- A GPU+CPU regular wheel for systems without wheel variant support
-  (i.e. the “mega-wheel” approach)
+- A GPU+CPU regular wheel, that will be installed on systems without an
+  installer supporting variants.
 
-The null variant uses a reserved ``null`` label to make it clearly
-distinguishable from regular variants.
-
-In particular, this makes it possible to publish a smaller null variant
+Notably, this makes it possible to publish a smaller null variant
 for systems that do not feature suitable hardware, with a fallback
 regular wheel with support for CPU and all GPUs for systems where
 variants are not supported and therefore GPU support cannot be
 determined.
 
-Not being compatible with any of the available variants gives the
-installer more information about the system (e.g. not having specialized
-hardware) than systems which do not support wheel variants.
-Consequently, it makes sense that package maintainers may wish to
-propose a different “fallback” to their users whether their system is
-Wheel Variant enabled or not. Publishing a null variant is optional. If
-one is published, a wheel variant enabled installer must select in
-priority the null variant. If none is published, fallback on the
-non-variant wheel instead. The non-variant wheel is also used if variant
-support is explicitly disabled by an installer flag.
+Publishing a null variant is optional. If one is published, a wheel
+variant-enabled installer will prefer it over the non-variant wheel. If
+it is not, it will fall back to the non-variant wheel instead. The
+non-variant wheel is also used if variant support is explicitly disabled
+by an installer flag.
+
+The null variant uses a reserved ``null`` label to make it clearly
+distinguishable from regular variants.
 
 
 Install-time and Ahead-of-Time providers
