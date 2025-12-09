@@ -1120,6 +1120,8 @@ variant properties are compatible with the system, and order selected wheels
 based on the priority of the compatible variant properties. This is done in
 addition to determining the compatibility and ordering through tags. The
 ordering by variant properties takes precedence over ordering by tags.
+Null variants (variants with no variant properties) are preferred over
+non-variant wheels with the same tags.
 
 Every variant namespace is governed by a variant provider. There are two
 kinds of variant providers: install-time providers and ahead-of-time
