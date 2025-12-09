@@ -820,7 +820,7 @@ The specification covers two related use cases for package variants:
    provide.
 
 2. Variants that can always be installed, and therefore only provide
-   choice between different installation options. For example, software built
+   a choice between different installation options. For example, software built
    against different BLAS / LAPACK providers or debug builds of packages.
 
 The first class of variants requires querying provider plugins to
