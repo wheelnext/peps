@@ -24,7 +24,7 @@ Abstract
 The Python wheel packaging format uses
 :doc:`packaging:specifications/platform-compatibility-tags` to specify
 a given wheel’s supported environments. These tags are unable to express
-the features of modern hardware configurations, such as the availability of
+features of modern hardware configurations, such as the availability of
 GPU acceleration, or to provide custom package variants, such as builds
 against different dependency ABIs. This is particularly challenging for
 the scientific computing, artificial intelligence (AI), machine learning
@@ -150,7 +150,7 @@ dimensions, they cannot express modern requirements:
 
 **GPU Accelerated Frameworks:** A wheel filename like
 ``torch-2.9.0-cp313-cp313-manylinux_2_28_x86_64.whl`` provides no
-indication whether it provides the support for NVIDIA CUDA, AMD ROCm,
+indication whether it supports NVIDIA CUDA, AMD ROCm,
 Intel XPU, or is CPU-only. Users cannot determine compatibility
 with their GPU hardware or drivers.
 
@@ -188,7 +188,7 @@ Current workarounds and their limitations
 Separate package indexes as variants
 ''''''''''''''''''''''''''''''''''''
 
-Projects like `PyTorch <https://pytorch.org/get-started/locally/>`__
+Projects such as `PyTorch <https://pytorch.org/get-started/locally/>`__
 and `RAPIDS <https://docs.rapids.ai/install/#selector>`__
 currently distribute packages that approximate “variants” through
 separate package indexes with custom URLs. We will use the
@@ -221,7 +221,7 @@ version segments. These requirements break the pattern that packages
 are usually installed with. Problems with installing PyTorch
 are a very common point of user confusion. To quantify this, on
 2025-12-05 the 552 out of 8136, or 6.8%, of issues on the `uv's issue
-tracker <https://github.com/astral-sh/uv/issues/>`__ contain the term
+tracker <https://github.com/astral-sh/uv/issues/>`__ contained the term
 "torch".
 
 Wheel variants remove this special casing and make GPU and TPU packages work
@@ -264,7 +264,7 @@ Commonly, these packages install overlapping files. Since Python
 packaging does not support expressing that two packages are mutually
 exclusive, installers can install both of them to the same environment,
 with the package installed second overwriting files from the one
-installed first. This could lead to unpredictable behavior, including
+installed first. This could leads to runtime errors, and
 the possibility of incidentally switching between variants depending on
 the way package upgrades are ordered.
 
