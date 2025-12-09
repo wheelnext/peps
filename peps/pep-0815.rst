@@ -820,7 +820,7 @@ The specification covers two related use cases for package variants:
    provide.
 
 2. Variants that can always be installed, and therefore only provide
-   a choice between different installation options. For example, software built
+   choice between different installation options. For example, software built
    against different BLAS / LAPACK providers or debug builds of packages.
 
 The first class of variants requires querying provider plugins to
@@ -828,7 +828,7 @@ determine package compatibility, and therefore involves the potential
 risks highlighted in the `security implications`_ section. The proposed
 mitigations incur a cost on installer implementations, making it
 desirable to avoid plugin use at install time for the second class of variants,
-where that is not strictly necessary.
+where it is not strictly necessary.
 
 To account for this, the specification proposes two classes of
 providers:
@@ -858,10 +858,10 @@ used as install-time providers, but not the other way around.
 Plugin stability and versioning
 -------------------------------
 
-Given that provider plugins may be necessary to install old variant
-wheels, it is important that provider plugin behavior remain stable
-within their lifetime. Ideally, no properties previously supported
-should ever be removed.
+Given that calling provider plugins may be necessary while installing
+variant wheels published in the past, it is important that provider
+plugin behavior remain stable within their lifetime. Ideally, no
+properties previously supported should ever be removed.
 
 If a breaking change needs to be performed, it is recommended to either
 introduce a new provider package for that, or add a new plugin API
@@ -877,8 +877,8 @@ caps on dependencies, as otherwise old wheels will start using
 incompatible plugin versions. This is already a problem with Python
 build backends used today.
 
-When vendoring or reimplementing plugins, installers need to follow the
-current API. In particular, they should recognize the relevant provider
+When vendoring or reimplementing plugins, installers need to follow
+their current behavior. In particular, they should recognize the relevant provider
 versions numbers, and possibly fall back to installing the external
 plugin when the package in question is incompatible with the installer’s
 implementation.
@@ -896,8 +896,8 @@ a total of seven variants for every release: a CPU-only variant, three
 CUDA variants with different minimal CUDA runtime versions and supported
 GPUs, two ROCm variants and a Linux XPU variant.
 
-This setup could be improved using two GPU plugins that query the
-installed runtime version and installed GPUs to filter out the wheels
+This setup could be improved using three GPU/XPU plugins that query the
+installed runtime version and installed GPUs/XPUs to filter out the wheels
 for which the runtime is unavailable, it is too old or the user’s GPU is
 not supported, and order the remaining variants by the runtime version.
 The CPU-only version is published as a null variant that is always
@@ -905,9 +905,9 @@ supported.
 
 If a GPU runtime is available and supported, the installer automatically
 chooses the wheel for the newest runtime supported. Otherwise, it falls
-back to the CPU-only variant. In the corner case when both CUDA and ROCm
-are available and supported, PyTorch package maintainers indicate which
-one takes preference by default.
+back to the CPU-only variant. In the corner case when multiple
+accelerators are available and supported, PyTorch package maintainers
+indicate which one takes preference by default.
 
 
 Optimized CPU variants
@@ -917,13 +917,14 @@ Wheel variants can be used to provide variants requiring specific CPU
 extensions, beyond what platform tags currently provide. They can be
 particularly helpful when runtime dispatching is impractical, when the
 package relies on prebuilt components that use instructions above the
-baseline or when availability of instruction sets implies library ABI
-changes.
+baseline, when availability of instruction sets implies library ABI
+changes, or simply to benefit from compiler optimizations such as
+auto-vectorization applied across the code base.
 
 For example, an x86-64 CPU plugin can detect the capabilities for the
 installed CPU, mapping them onto the appropriate x86-64 architecture
 level and a set of extended instruction sets. Variant wheels indicate
-which level and/or instruction sets are required, filter out variants
+which level and/or instruction sets are required. The installer filters out variants
 that do not meet the requirements and select the best optimized variant.
 A non-variant wheel can be used to represent the architecture baseline,
 if supported.
@@ -942,10 +943,11 @@ BLAS / LAPACK variants
 Packages such as `NumPy <https://numpy.org/>`__ and
 `SciPy <https://scipy.org/>`__ can be built using different BLAS /
 LAPACK libraries. Users may wish to choose a specific library for
-improved performance on a particular hardware or license considerations.
-Furthermore, different libraries may use different OpenMP
-implementations, whereas using a consistent implementation across the
-stack can avoid performance degradation by spawning too many threads.
+improved performance on a particular hardware, or based on license
+considerations.  Furthermore, different libraries may use different
+OpenMP implementations, whereas using a consistent implementation across
+the stack can avoid degrading performance through spawning too many
+threads.
 
 BLAS / LAPACK variants do not require a plugin at install time, since
 all variants built for a particular platform are compatible with it.
@@ -978,7 +980,7 @@ results in unnecessarily strict pins in package versions, making it
 impossible to find a satisfactory resolution for an environment
 involving multiple packages requiring different versions of PyTorch, or
 resorting to source builds. Variant wheels can be used to publish
-variants of vLLM built against different PyTorch version, therefore
+variants of vLLM built against different PyTorch versions, therefore
 enabling upstream to easily provide support for multiple versions
 simultaneously.
 
