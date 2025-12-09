@@ -1131,12 +1131,12 @@ kinds of variant providers: install-time providers and ahead-of-time
 while installing wheels to determine the set of supported properties and
 their preference order. For AoT providers, this data is static and
 embedded in the wheel; it can be either provided directly by the
-wheel maintainer or queried at wheel build time from an AoT plugin. Both kinds
-of plugins are usually implemented as Python packages external
-to the resolver which implement the APIs specified in this document.
+wheel maintainer or queried at wheel build time from an AoT plugin. Both
+kinds of plugins are usually implemented as Python packages which
+implement the API specified in this document.
 
 Installers, as well as other tools that need to verify variant wheel
-compatibility and are run in security-sensitive contexts, must not
+compatibility and are run in security-sensitive context, must not
 install or run code from any untrusted package for variant resolution
 without explicit user opt-in. Provider packages should take measures to
 guard against supply chain attacks, for example by vendoring all
@@ -1160,9 +1160,10 @@ command-line interface options. It is important that the user is
 informed of the risk before giving such an approval.
 
 For a consistent experience between tools, variant wheels should be
-supported by default. Tools may provide an opt-out to only use
+supported by default. Tools may provide an option to only use
 non-variant wheels. For scenarios requiring more control, providers can
-be marked as optional and must be explicitly enabled by the user.
+be marked as optional and then must be explicitly enabled by the user
+for the wheels to become available for installation.
 
 
 Summary of changes
@@ -1268,7 +1269,7 @@ value defined by the respective variant provider for the feature.
 If a feature is marked as “multi-value” by the provider plugin, a single
 variant wheel may define multiple properties sharing the same namespace
 and feature name. Otherwise, only a single value can correspond to a
-single namespace and feature name within a variant wheel.
+single pair of namespace and feature name within a variant wheel.
 
 For a variant wheel to be considered compatible with the system, all of
 the features defined within it must be determined to be compatible. For
@@ -1329,7 +1330,7 @@ structure:
     +- variants
       +- {variant_label}
          +- {namespace}
-            +- {feature}  : list[str]  = []
+            +- {feature}   : list[str]  = []
 
 The top-level object is a dictionary rooted at a specific point in the
 containing file. Its individual keys are sub-dictionaries that are
@@ -1350,8 +1351,8 @@ Provider information
 dictionaries with provider information. It specifies how to install and
 use variant providers. A provider information dictionary must be
 declared in ``pyproject.toml`` for every variant namespace supported by
-the package. It must be copied to ``variant.json`` as-is, including data
-for providers that are not used in the particular wheel.
+the package. It must be copied to ``variant.json`` as-is, including
+the data for providers that are not used in the particular wheel.
 
 A provider information dictionary may contain the following keys:
 
@@ -1365,11 +1366,11 @@ A provider information dictionary may contain the following keys:
   Defaults to ``true``. ``false`` means that it is an AoT provider
   instead.
 
-- ``optional: bool``: Whether the provider is optional, as a boolean
-  value. Defaults to ``false``. If it is ``true``, the provider is
+- ``optional: bool``: Whether the provider is optional. Defaults
+  to ``false``. If it is ``true``, the provider is
   considered optional and should not be used unless the user opts in to
   it, effectively rendering the variants using its properties
-  incompatible. If it is ``false`` or missing, the provider is considered
+  incompatible. If it is ``false``, the provider is considered
   obligatory.
 
 - ``plugin-api: str``: The API endpoint for the plugin. If it is
@@ -1398,7 +1399,7 @@ All the fields are optional, with the following exceptions:
    ``requires`` key is optional. In that case:
 
    a. If ``requires`` is provided and non-empty, the provider dictionary
-      must reference an AOT provider plugin that will be queried at
+      must reference an AoT provider plugin that will be queried at
       build time to fill ``static-properties``.
 
    b. Otherwise, ``static-properties`` must be specified in
@@ -1445,15 +1446,15 @@ for AoT providers. It is a nested dictionary with namespaces as first
 level keys, feature name as second level keys and ordered lists of
 feature values as second level values.
 
-In ``pyproject.toml`` file, the namespaces present in this dictionary in
-``pyproject.toml`` file must correspond to all AoT providers without a
+In ``pyproject.toml`` file, the namespaces present in this dictionary
+must correspond to all AoT providers without a
 plugin (i.e. with ``install-time`` of ``false`` and no or empty
 ``requires``). When building a wheel, the build backend must query the
-AoT provider plugins (i.e. these with ``install-time`` being false and
+AoT provider plugins (i.e. these with ``install-time`` being ``false`` and
 non-empty ``requires``) to obtain supported properties and embed them
 into the dictionary. Therefore, the dictionary in ``variant.json`` and
 ``*-variants.json`` must contain namespaces for all AoT providers
-(i.e. all providers with ``install-time`` being false).
+(i.e. all providers with ``install-time`` being ``false``).
 
 Since TOML and JSON dictionaries are unsorted, so are the features in
 the ``static-properties`` dictionary. If more than one feature is
@@ -1571,8 +1572,8 @@ pyproject.toml file for x86-64-v3 would look like:
             "enable-if": "platform_machine == 'aarch64' or 'arm' in platform_machine",
             "plugin-api": "provider_variant_aarch64.plugin:AArch64Plugin",
             "requires": [
-               "provider-variant-aarch64 >=0.0.1; python_version >= '3.9'",
-               "legacy-provider-variant-aarch64 >=0.0.1; python_version < '3.9'"
+               "provider-variant-aarch64 >=0.0.1; python_version >= '3.12'",
+               "legacy-provider-variant-aarch64 >=0.0.1; python_version < '3.12'"
             ]
          },
          "blas_lapack": {
@@ -1723,10 +1724,15 @@ to the following algorithm:
    properties is sorted earlier.
 
 After this process, the variant wheels are sorted from the most
-preferred to the least preferred.
+preferred to the least preferred. The null variant naturally sorts after
+all the other variants, and the non-variant wheel must be sorted after
+the null variant. Multiple wheels with the same variant set (and
+multiple non-variant wheels) must then be ordered according to their
+platform compatibility tags.
 
-Alternatively, the sort algorithm could be described using the following
-pseudocode:
+Alternatively, the sort algorithm for variant wheels could be described
+using the following pseudocode. For simplicity, this code does not
+account for non-variant wheels or tags.
 
 .. code:: python
 
@@ -1809,7 +1815,8 @@ pseudocode:
 Integration with ``pylock.toml``
 --------------------------------
 
-The following section is added to the ``pylock.toml`` specification:
+The following section is added to the
+:doc:`packaging:specifications/pylock-toml`:
 
 .. code:: rst
 
@@ -1844,6 +1851,8 @@ The following section is added to the ``pylock.toml`` specification:
 
     ``packages.variants-json.hashes``
     '''''''''''''''''''''''''''''''''
+
+    See :ref:`pylock-packages-archive-hashes`.
 
 If there is a ``[packages.variants-json]`` section, the installer should
 resolve variants to select the best wheel file.
