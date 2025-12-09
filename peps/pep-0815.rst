@@ -1,6 +1,6 @@
 PEP: 815
 Title: Wheel Variants - extending platform awareness
-Author: Jonathan DEKHTIAR <jonathan@dekhtiar.com>,
+Author: Jonathan Dekhtiar <jonathan@dekhtiar.com>,
         Michał Górny <mgorny@quansight.com>,
         Konstantin Schütze <konstin@mailbox.org>,
         Ralf Gommers <ralf.gommers@gmail.com>,
@@ -9,7 +9,8 @@ Author: Jonathan DEKHTIAR <jonathan@dekhtiar.com>,
         Michael Sarahan <msarahan@gmail.com>,
         Eli Uriegas <eliuriegas@meta.com>,
         Barry Warsaw <barry@python.org>,
-        Donald Stufft <donald@stufft.io>
+        Donald Stufft <donald@stufft.io>,
+        Andy R. Terrel <andy.terrel@gmail.com>
 Discussions-To: Pending
 Status: Draft
 Type: Standards Track
