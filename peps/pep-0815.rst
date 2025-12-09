@@ -742,9 +742,13 @@ This behavior was confirmed for a number of existing tools:
 Variant properties system
 -------------------------
 
-Variant properties follow a key-value design, where namespace and
-feature name constitute the key. Namespaces are used to group features
-defined by a single provider, and avoid conflicts should multiple
+Variant properties serve the purpose of expressing the characteristics
+of the variant. Unlike platform compatibility tags, they are stored
+in the variant metadata and therefore do not affect the wheel filename
+length. They follow a hierarchical key-value design, with the key
+further broken into a namespace and a feature name.
+Namespaces are used to group features
+defined by a single provider, and to avoid conflicts should multiple
 providers define a feature with the same name. This permits independent
 governance and evolution of every namespace.
 
@@ -753,10 +757,12 @@ Uppercase characters are disallowed to avoid different spellings of the
 same name. The character set for values is more relaxed, to permit
 values resembling versions.
 
-Variant features can be declared as allowing multiple values. If that is
+Variant features can be declared as allowing multiple values to be
+present within a single variant wheel. If that is
 the case, these values are matched as a logical disjunction, i.e. only a
-single value needs to be supported. Features are treated conjunctively,
-i.e. all of them need to be supported. This provides some flexibility in
+single value needs to be compatible with the system for the wheel to be
+considered supported. On the other hand, features are treated conjunctively,
+i.e. all of them need to be compatible. This provides some flexibility in
 designating variant compatibility while avoiding having to implement a
 complete boolean logic.
 
