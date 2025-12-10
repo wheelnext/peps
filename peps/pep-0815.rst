@@ -25,7 +25,7 @@ Abstract
 The Python wheel packaging format uses
 :doc:`packaging:specifications/platform-compatibility-tags` to specify
 a given wheel’s supported environments. These tags are unable to express
-features of modern hardware configuration, such as the availability of
+features of modern hardware configurations, such as the availability of
 GPU acceleration, or to provide custom package variants, such as builds
 against different dependency ABIs. This is particularly challenging for
 the scientific computing, artificial intelligence (AI), machine learning
@@ -36,8 +36,8 @@ This PEP proposes “Wheel Variants,” an extension to the
 extension introduces a mechanism for package maintainers to declare
 multiple build variants for the same package version, while allowing
 installers to automatically select the most appropriate variant based on
-system hardware and software capabilities, and characteristics. More
-specifically, it proposes:
+system hardware and software characteristics. More specifically, it
+proposes:
 
 - An evolution of the wheel format called **Wheel Variant** that allows
   wheels to be distinguished by hardware or software attributes.
@@ -64,15 +64,15 @@ The Python packaging ecosystem has evolved to support increasingly
 diverse computing environments. The current software ecosystem often
 relies on platform-specific features to determine which binaries are
 compatible with a particular machine. Unfortunately the current wheel
-format cannot adequately express the diversity of features of present
+format cannot adequately express the diversity of features present
 in modern hardware.
 
 For example, packages such as `PyTorch <https://pytorch.org/>`__ need to
 be built for specific CUDA or ROCm versions, and that information cannot
 currently be included in the wheel tag. Having to build multiple wheels
 targeting very different hardware configurations forces maintainers into
-various distribution strategies that are suboptimal and create friction
-for users and authors of other software that wish to depend on the
+various distribution strategies that are suboptimal, and create friction
+for users and authors of other software who wish to depend on the
 package in question.
 
 A few existing approaches are explored in the subsequent subsections.
@@ -93,9 +93,9 @@ packaging.
 
 This issue is often crossing the boundaries of scientific computing.
 Wheels currently cannot express more specific CPU requirements, forcing
-the maintainers to build and ship only for the oldest CPU they wish to
-support. Newer CPU features are sometimes utilized through runtime CPU
-detection and dispatching, but for example they cannot benefit from
+the maintainers to build and ship only for the oldest CPU baseline they wish to
+support. Newer CPU features are sometimes utilized through runtime
+dispatching, but for example this does not let software benefit from the
 performance improvements related to auto-vectorization for x86-64-v4
 CPUs.
 
@@ -151,16 +151,16 @@ dimensions, they cannot express modern requirements:
 
 **GPU Accelerated Frameworks:** A wheel filename like
 ``torch-2.9.0-cp313-cp313-manylinux_2_28_x86_64.whl`` provides no
-indication whether it contains NVIDIA CUDA support, AMD ROCm support,
-Intel XPU support, or is CPU-only. Users cannot determine compatibility
+indication whether it supports NVIDIA CUDA, AMD ROCm,
+Intel XPU, or is CPU-only. Users cannot determine compatibility
 with their GPU hardware or drivers.
 
 **CPU Instruction Sets:** A wheel filename like
 ``numpy-2.3.2-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl``
-provides no indication whether it contains CPUs optimized instructions
-ranging from basic x86-64 to modern processors with AVX512, SHA-NI, and
-other specialized instructions. Packages cannot indicate whether they
-require specific CPU features. This forces maintainers to either use
+provides no indication whether it uses optimized instructions
+for modern processors with AVX512, SHA-NI, and other specialized
+instruction sets. Packages cannot indicate whether they
+require specific CPU baseline. This forces maintainers to either use
 inconvenient runtime dispatching, or rely on the lowest common
 denominator, leaving performance improvements on the table.
 
@@ -189,8 +189,8 @@ Current workarounds and their limitations
 Separate package indexes as variants
 ''''''''''''''''''''''''''''''''''''
 
-Projects like `PyTorch <https://pytorch.org/get-started/locally/>`__,
-`RAPIDS <https://docs.rapids.ai/install/#selector>`__ and other packages
+Projects such as `PyTorch <https://pytorch.org/get-started/locally/>`__
+and `RAPIDS <https://docs.rapids.ai/install/#selector>`__
 currently distribute packages that approximate “variants” through
 separate package indexes with custom URLs. We will use the
 example of PyTorch, while the problem, the workarounds and the impact for
@@ -218,11 +218,12 @@ system, and add an index specifically for PyTorch.
     pip install torch --index-url https://download.pytorch.org/whl/cu129
 
 Tools need to implement special handling for the way PyTorch uses local
-version segments. PyTorch breaks the pattern that packages are usually
-installed with through these requirements. Problems with installing Pytorch
-are a very common point of user confusion. To quantify this, on 2025-12-05
-the 552 out of 8136, or 6.8%, of issues on the [uv's issue
-tracker](https://github.com/astral-sh/uv/issues/) contain the term "torch".
+version segments. These requirements break the pattern that packages
+are usually installed with. Problems with installing PyTorch
+are a very common point of user confusion. To quantify this, on
+2025-12-05, 552 out of 8136, or 6.8%, of issues on the `uv's issue
+tracker <https://github.com/astral-sh/uv/issues/>`__ contained the term
+"torch".
 
 Wheel variants remove this special casing and make GPU and TPU packages work
 just as well as regular packages with native code. They also reduce the burden
@@ -245,22 +246,28 @@ upgraded packages being reverted to the default variant on subsequent upgrades.
 Package names as variants
 '''''''''''''''''''''''''
 
-Some packages use different names for variants (e.g., `xgboost -
-NVIDIA CUDA accelerated,
-xgboost-cpu <https://xgboost.readthedocs.io/en/stable/install.html>`__).
-However, then maintainers of other software cannot cleanly express
-a dependency on any of the available variants; it needs to either depend
-on a specific variant, provide multiple alternative dependency sets
-using extras, or even publish their own software using multiple packages
-with matching variants.
+Packages such as `XGBoost
+<https://xgboost.readthedocs.io/en/stable/install.html>`__ use different
+package names to approximate variants:
+
+.. code:: bash
+
+    pip install xgboost      # NVIDIA GPU variant
+    pip install xgboost-cpu  # CPU-only variant
+
+Maintainers of other software cannot express that they depend on either
+of the available variants being selected. They need to
+either depend on a specific variant, provide multiple alternative
+dependency sets using extras, or even publish their own software using
+multiple package names matching upstream variants.
 
 Commonly, these packages install overlapping files. Since Python
 packaging does not support expressing that two packages are mutually
 exclusive, installers can install both of them to the same environment,
 with the package installed second overwriting files from the one
-installed first. This could lead to unpredictable behavior, including
+installed first. This leads to runtime errors, and
 the possibility of incidentally switching between variants depending on
-upgrade ordering.
+the way package upgrades are ordered.
 
 An additional limitation of this approach is that publishing a new release
 synchronously across multiple package names is not currently possible.
@@ -273,19 +280,14 @@ squatting much easier. For example, one could create a malicious
 ``numpy-cuda`` package that users will be lead to believe it’s a CUDA
 variant of NumPy.
 
-.. code:: bash
-
-    pip install xgboost      # NVIDIA GPU variant
-    pip install xgboost-cpu  # CPU-only variant
-
-`cupy <https://github.com/cupy/cupy>`__ for diverse reasons had to build
+`CuPy <https://cupy.dev/>`__ had to build
 a total of 52 different packages - all with different names - which
 clearly highlights the limit of such an approach. End users need to
-carefully read the ``CuPy`` installation documentation to figure out
-which package they need. And for maintainers it’s labor-intensive to
-continuously have to create new PyPI packages, ask for limit increases,
-and keep their wheel build infrastructure and documentation in sync with
-those new package names.
+carefully read the CuPy installation documentation to figure out
+which package they need. Continuously having to create new PyPI
+packages, request increasing limits and keep the build infrastructure
+and documentation in sync, requires significant effort from software
+maintainers.
 
 .. code:: text
 
@@ -304,17 +306,17 @@ Extra-Dependency as variants
 plugin-based approach. The central ``jax`` package provides a number of
 extras that can be used to install additional plugins,
 e.g. ``jax[cuda12]`` or ``jax[tpu]``. This is far from ideal as
-``pip install jax`` (with no extra) leads to a broken installation for
-everybody and consequently dependency chains, a fundamental expected
-behavior in the Python ecosystem is dysfunctional.
+``pip install jax`` (with no extra) leads to a nonfunctional
+installation, and consequently dependency chains, a fundamental expected
+behavior in the Python ecosystem, are dysfunctional.
 
 JAX includes 12 extra selectors to cover all use cases - many of which
-overlap and could be misleading to users if they don’t read in detail
-the documentation.
+overlap and could be misleading to users if they don’t read the
+documentation in detail.
 
 It should be noted that most of these “extras” are technically mutually
 exclusive, though it is currently impossible to correctly express this
-incompatibility within the package metadata.
+within the package metadata.
 
 .. code:: email
 
@@ -336,7 +338,7 @@ Bundled universal packages - monolithic builds
 ''''''''''''''''''''''''''''''''''''''''''''''
 
 Including all possible variants in a single wheel is another option, but
-this leads to excessively large artifacts, wasting bandwidth and slower
+this leads to excessively large artifacts, wasting bandwidth and leading to slower
 installation times for users who only need one specific variant. In some
 cases, such artifacts cannot be hosted on PyPI because they exceed its
 size limits.
@@ -348,20 +350,21 @@ Wheel variant selection via source distribution
 `FlashAttention <https://github.com/Dao-AILab/flash-attention>`__ does
 not publish wheels on PyPI at all, but instead publishes a customized
 source distribution that performs platform detection, downloads the
-appropriate wheel from upstream server, and then provides it to the
+appropriate wheel from an upstream server, and then provides it to the
 installer. This approach can select the optimal variant automatically,
 but it prevents binary-only installs from working, requires a slow and
-error-prone source distribution build and breaks common caching assumptions
-based on the wheel filename. It also requires a specially prepared build
-environment that contains the torch package the wheel will be installed with,
-which means building without build isolation. On the project side, it requires
-hosting wheels separately.
+error-prone build via a source distribution, and breaks common caching
+assumptions tied to the wheel filename. It also requires a specially
+prepared build environment that contains the ``torch`` package matching
+the version that the software will run against, which requires building
+without build isolation. On the project side, it requires hosting wheels
+separately.
 
 **Induced Security Risk:** Similar to regular source builds, this
 model requires running arbitrary code at install time. The wheels
 are downloaded entirely outside package manager's control, extending
-the attack surface to two wheel fetching implementations and preventing
-proper provenance tracking.
+the attack surface to two separate wheel download implementations and
+preventing proper provenance tracking.
 
 
 Ecosystem fragmentation
@@ -601,8 +604,8 @@ only one package with a given name can exist at one time. Mutex
 metapackages are sets of packages with the same name, but different
 build string. Packages depend on specific mutex builds (e.g.,
 ``blas=*=openblas`` vs ``blas=*=mkl``) to avoid problems with related
-packages using different dependency libraries, such as numpy using
-openblas and scipy using mkl.
+packages using different dependency libraries, such as NumPy using
+OpenBLAS and SciPy using MKL.
 
 **Example software variants**:
 `BLAS <https://conda-forge.org/docs/maintainer/knowledge_base/#blas>`__,
@@ -642,7 +645,7 @@ descending from skylake, as each has unique AVX-512 extensions.
 **Implementation:** A language-agnostic JSON database stores
 microarchitecture metadata (features, compatibility relationships,
 compiler-specific optimization flags). Language bindings provide
-detection (queries /proc/cpuinfo, matches to microarchitecture with
+detection (queries ``/proc/cpuinfo``, matches to microarchitecture with
 largest compatible feature subset) and compatibility comparison
 operators.
 
@@ -667,7 +670,8 @@ achieved via `USE
 flags <https://devmanual.gentoo.org/general-concepts/use-flags/index.html>`__:
 boolean flags exposed by individual packages and permitting fine-tuning
 the enabled features, optional dependencies and some build parameters
-(e.g. ``jpegxl``, ``cpu_flags_x86_avx2``). Flags can be toggled
+(e.g. ``jpegxl`` for JPEG XL image format support,
+``cpu_flags_x86_avx2`` for AVX2 instruction set use). Flags can be toggled
 individually, and separate binary packages can be built for different
 sets of flags. The package manager can either pick a binary package with
 matching configuration or build from source.
@@ -677,18 +681,19 @@ API and ABI matching is primarily done through use of
 Slots are generally used to provide multiple versions or variants of
 given package that can be installed alongside (e.g. different major GTK+
 or LLVM versions, or GTK+3 and GTK4 builds of WebKitGTK), whereas
-subslots are merely used to group versions within a slot, usually
-corresponding to the library SOVERSION. Packages can then declare
+subslots are used to group versions within a slot, usually
+corresponding to the library ABI version. Packages can then declare
 dependencies bound to the slot and subslot used at build time. Again,
-separate binary packages can be built bound to different dependency
-slots, and when installing a dependency version falling into a different
-slot or subslot, the package manager may either choose a binary packages
-bound to that slot or rebuild from source.
+separate binary packages can be built against different dependency
+slots. When installing a dependency version falling into a different
+slot or subslot, the package manager may either replace the package
+needing that dependency with a binary packages built against the new
+slot, or rebuild it from source.
 
 Normally, the use of slots assumes that upgrading to the newest version
 possible is desirable. When more fine-grained control is desired, slots
 are used in conjunction with USE flags. For example,
-``llvm_slot_${major}`` flags are used to select a LLVM major version to
+``llvm_slot_{major}`` flags are used to select a LLVM major version to
 build against.
 
 
@@ -738,9 +743,13 @@ This behavior was confirmed for a number of existing tools:
 Variant properties system
 -------------------------
 
-Variant properties follow a key-value design, where namespace and
-feature name constitute the key. Namespaces are used to group features
-defined by a single provider, and avoid conflicts should multiple
+Variant properties serve the purpose of expressing the characteristics
+of the variant. Unlike platform compatibility tags, they are stored
+in the variant metadata and therefore do not affect the wheel filename
+length. They follow a hierarchical key-value design, with the key
+further broken into a namespace and a feature name.
+Namespaces are used to group features
+defined by a single provider, and to avoid conflicts should multiple
 providers define a feature with the same name. This permits independent
 governance and evolution of every namespace.
 
@@ -749,10 +758,12 @@ Uppercase characters are disallowed to avoid different spellings of the
 same name. The character set for values is more relaxed, to permit
 values resembling versions.
 
-Variant features can be declared as allowing multiple values. If that is
+Variant features can be declared as allowing multiple values to be
+present within a single variant wheel. If that is
 the case, these values are matched as a logical disjunction, i.e. only a
-single value needs to be supported. Features are treated conjunctively,
-i.e. all of them need to be supported. This provides some flexibility in
+single value needs to be compatible with the system for the wheel to be
+considered supported. On the other hand, features are treated conjunctively,
+i.e. all of them need to be compatible. This provides some flexibility in
 designating variant compatibility while avoiding having to implement a
 complete boolean logic.
 
@@ -770,36 +781,33 @@ Null variant
 The concept of a null variant makes it possible to distinguish a
 fallback wheel variant from a regular wheel published for backwards
 compatibility. For example, a package that features optional GPU support
-could publish the following wheels:
+could publish the following wheels during the transition period:
 
-- One or more wheel variants built for specific hardware for wheel
-  variant enabled systems with suitable hardware.
+- One or more wheel variants built for specific hardware, that will be
+  installed on systems with an installer supporting variants and
+  suitable hardware.
 
-- A CPU-only null variant for systems with wheel variant support but
-  without suitable hardware.
+- A CPU-only null variant, that will be installed on systems with an
+  installer supporting variants, but without hardware suitable for any
+  other variants.
 
-- A GPU+CPU regular wheel for systems without wheel variant support
-  (i.e. the “mega-wheel” approach)
+- A GPU+CPU regular wheel, that will be installed on systems without an
+  installer supporting variants.
 
-The null variant uses a reserved ``null`` label to make it clearly
-distinguishable from regular variants.
-
-In particular, this makes it possible to publish a smaller null variant
+Notably, this makes it possible to publish a smaller null variant
 for systems that do not feature suitable hardware, with a fallback
 regular wheel with support for CPU and all GPUs for systems where
 variants are not supported and therefore GPU support cannot be
 determined.
 
-Not being compatible with any of the available variants gives the
-installer more information about the system (e.g. not having specialized
-hardware) than systems which do not support wheel variants.
-Consequently, it makes sense that package maintainers may wish to
-propose a different “fallback” to their users whether their system is
-Wheel Variant enabled or not. Publishing a null variant is optional. If
-one is published, a wheel variant enabled installer must select in
-priority the null variant. If none is published, fallback on the
-non-variant wheel instead. The non-variant wheel is also used if variant
-support is explicitly disabled by an installer flag.
+Publishing a null variant is optional. If one is published, a wheel
+variant-enabled installer will prefer it over the non-variant wheel. If
+it is not, it will fall back to the non-variant wheel instead. The
+non-variant wheel is also used if variant support is explicitly disabled
+by an installer flag.
+
+The null variant uses a reserved ``null`` label to make it clearly
+distinguishable from regular variants.
 
 
 Install-time and Ahead-of-Time providers
@@ -821,7 +829,7 @@ determine package compatibility, and therefore involves the potential
 risks highlighted in the `security implications`_ section. The proposed
 mitigations incur a cost on installer implementations, making it
 desirable to avoid plugin use at install time for the second class of variants,
-where that is not strictly necessary.
+where it is not strictly necessary.
 
 To account for this, the specification proposes two classes of
 providers:
@@ -851,10 +859,10 @@ used as install-time providers, but not the other way around.
 Plugin stability and versioning
 -------------------------------
 
-Given that provider plugins may be necessary to install old variant
-wheels, it is important that provider plugin behavior remain stable
-within their lifetime. Ideally, no properties previously supported
-should ever be removed.
+Given that calling provider plugins may be necessary while installing
+variant wheels published in the past, it is important that provider
+plugin behavior remain stable within their lifetime. Ideally, no
+properties previously supported should ever be removed.
 
 If a breaking change needs to be performed, it is recommended to either
 introduce a new provider package for that, or add a new plugin API
@@ -870,8 +878,8 @@ caps on dependencies, as otherwise old wheels will start using
 incompatible plugin versions. This is already a problem with Python
 build backends used today.
 
-When vendoring or reimplementing plugins, installers need to follow the
-current API. In particular, they should recognize the relevant provider
+When vendoring or reimplementing plugins, installers need to follow
+their current behavior. In particular, they should recognize the relevant provider
 versions numbers, and possibly fall back to installing the external
 plugin when the package in question is incompatible with the installer’s
 implementation.
@@ -889,8 +897,8 @@ a total of seven variants for every release: a CPU-only variant, three
 CUDA variants with different minimal CUDA runtime versions and supported
 GPUs, two ROCm variants and a Linux XPU variant.
 
-This setup could be improved using two GPU plugins that query the
-installed runtime version and installed GPUs to filter out the wheels
+This setup could be improved using GPU/XPU plugins that query the
+installed runtime version and installed GPUs/XPUs to filter out the wheels
 for which the runtime is unavailable, it is too old or the user’s GPU is
 not supported, and order the remaining variants by the runtime version.
 The CPU-only version is published as a null variant that is always
@@ -898,9 +906,9 @@ supported.
 
 If a GPU runtime is available and supported, the installer automatically
 chooses the wheel for the newest runtime supported. Otherwise, it falls
-back to the CPU-only variant. In the corner case when both CUDA and ROCm
-are available and supported, PyTorch package maintainers indicate which
-one takes preference by default.
+back to the CPU-only variant. In the corner case when multiple
+accelerators are available and supported, PyTorch package maintainers
+indicate which one takes preference by default.
 
 
 Optimized CPU variants
@@ -910,13 +918,14 @@ Wheel variants can be used to provide variants requiring specific CPU
 extensions, beyond what platform tags currently provide. They can be
 particularly helpful when runtime dispatching is impractical, when the
 package relies on prebuilt components that use instructions above the
-baseline or when availability of instruction sets implies library ABI
-changes.
+baseline, when availability of instruction sets implies library ABI
+changes, or simply to benefit from compiler optimizations such as
+auto-vectorization applied across the code base.
 
 For example, an x86-64 CPU plugin can detect the capabilities for the
 installed CPU, mapping them onto the appropriate x86-64 architecture
 level and a set of extended instruction sets. Variant wheels indicate
-which level and/or instruction sets are required, filter out variants
+which level and/or instruction sets are required. The installer filters out variants
 that do not meet the requirements and select the best optimized variant.
 A non-variant wheel can be used to represent the architecture baseline,
 if supported.
@@ -935,10 +944,11 @@ BLAS / LAPACK variants
 Packages such as `NumPy <https://numpy.org/>`__ and
 `SciPy <https://scipy.org/>`__ can be built using different BLAS /
 LAPACK libraries. Users may wish to choose a specific library for
-improved performance on a particular hardware or license considerations.
-Furthermore, different libraries may use different OpenMP
-implementations, whereas using a consistent implementation across the
-stack can avoid performance degradation by spawning too many threads.
+improved performance on a particular hardware, or based on license
+considerations.  Furthermore, different libraries may use different
+OpenMP implementations, whereas using a consistent implementation across
+the stack can avoid degrading performance through spawning too many
+threads.
 
 BLAS / LAPACK variants do not require a plugin at install time, since
 all variants built for a particular platform are compatible with it.
@@ -971,7 +981,7 @@ results in unnecessarily strict pins in package versions, making it
 impossible to find a satisfactory resolution for an environment
 involving multiple packages requiring different versions of PyTorch, or
 resorting to source builds. Variant wheels can be used to publish
-variants of vLLM built against different PyTorch version, therefore
+variants of vLLM built against different PyTorch versions, therefore
 enabling upstream to easily provide support for multiple versions
 simultaneously.
 
@@ -1113,6 +1123,8 @@ variant properties are compatible with the system, and order selected wheels
 based on the priority of the compatible variant properties. This is done in
 addition to determining the compatibility and ordering through tags. The
 ordering by variant properties takes precedence over ordering by tags.
+Null variants (variants with no variant properties) are preferred over
+non-variant wheels with the same tags.
 
 Every variant namespace is governed by a variant provider. There are two
 kinds of variant providers: install-time providers and ahead-of-time
@@ -1120,12 +1132,12 @@ kinds of variant providers: install-time providers and ahead-of-time
 while installing wheels to determine the set of supported properties and
 their preference order. For AoT providers, this data is static and
 embedded in the wheel; it can be either provided directly by the
-wheel maintainer or queried at wheel build time from an AoT plugin. Both kinds
-of plugins are usually implemented as Python packages external
-to the resolver which implement the APIs specified in this document.
+wheel maintainer or queried at wheel build time from an AoT plugin. Both
+kinds of plugins are usually implemented as Python packages which
+implement the API specified in this document.
 
 Installers, as well as other tools that need to verify variant wheel
-compatibility and are run in security-sensitive contexts, must not
+compatibility and are run in security-sensitive context, must not
 install or run code from any untrusted package for variant resolution
 without explicit user opt-in. Provider packages should take measures to
 guard against supply chain attacks, for example by vendoring all
@@ -1149,9 +1161,10 @@ command-line interface options. It is important that the user is
 informed of the risk before giving such an approval.
 
 For a consistent experience between tools, variant wheels should be
-supported by default. Tools may provide an opt-out to only use
+supported by default. Tools may provide an option to only use
 non-variant wheels. For scenarios requiring more control, providers can
-be marked as optional and must be explicitly enabled by the user.
+be marked as optional and then must be explicitly enabled by the user
+for the wheels to become available for installation.
 
 
 Summary of changes
@@ -1191,7 +1204,7 @@ Extended wheel filename
 This PEP changes the wheel filename template originally defined by
 :pep:`427` to:
 
-.. code::
+.. code:: text
 
     {distribution}-{version}(-{build tag})?-{python tag}-{abi tag}-{platform tag}(-{variant label})?.whl
 
@@ -1257,7 +1270,7 @@ value defined by the respective variant provider for the feature.
 If a feature is marked as “multi-value” by the provider plugin, a single
 variant wheel may define multiple properties sharing the same namespace
 and feature name. Otherwise, only a single value can correspond to a
-single namespace and feature name within a variant wheel.
+single pair of namespace and feature name within a variant wheel.
 
 For a variant wheel to be considered compatible with the system, all of
 the features defined within it must be determined to be compatible. For
@@ -1318,7 +1331,7 @@ structure:
     +- variants
       +- {variant_label}
          +- {namespace}
-            +- {feature}  : list[str]  = []
+            +- {feature}   : list[str]  = []
 
 The top-level object is a dictionary rooted at a specific point in the
 containing file. Its individual keys are sub-dictionaries that are
@@ -1343,8 +1356,8 @@ Provider information
 dictionaries with provider information. It specifies how to install and
 use variant providers. A provider information dictionary must be
 declared in ``pyproject.toml`` for every variant namespace supported by
-the package. It must be copied to ``variant.json`` as-is, including data
-for providers that are not used in the particular wheel.
+the package. It must be copied to ``variant.json`` as-is, including
+the data for providers that are not used in the particular wheel.
 
 A provider information dictionary may contain the following keys:
 
@@ -1358,11 +1371,11 @@ A provider information dictionary may contain the following keys:
   Defaults to ``true``. ``false`` means that it is an AoT provider
   instead.
 
-- ``optional: bool``: Whether the provider is optional, as a boolean
-  value. Defaults to ``false``. If it is ``true``, the provider is
+- ``optional: bool``: Whether the provider is optional. Defaults
+  to ``false``. If it is ``true``, the provider is
   considered optional and should not be used unless the user opts in to
   it, effectively rendering the variants using its properties
-  incompatible. If it is ``false`` or missing, the provider is considered
+  incompatible. If it is ``false``, the provider is considered
   obligatory.
 
 - ``plugin-api: str``: The API endpoint for the plugin. If it is
@@ -1391,7 +1404,7 @@ All the fields are optional, with the following exceptions:
    ``requires`` key is optional. In that case:
 
    a. If ``requires`` is provided and non-empty, the provider dictionary
-      must reference an AOT provider plugin that will be queried at
+      must reference an AoT provider plugin that will be queried at
       build time to fill ``static-properties``.
 
    b. Otherwise, ``static-properties`` must be specified in
@@ -1438,15 +1451,15 @@ for AoT providers. It is a nested dictionary with namespaces as first
 level keys, feature name as second level keys and ordered lists of
 feature values as second level values.
 
-In ``pyproject.toml`` file, the namespaces present in this dictionary in
-``pyproject.toml`` file must correspond to all AoT providers without a
+In ``pyproject.toml`` file, the namespaces present in this dictionary
+must correspond to all AoT providers without a
 plugin (i.e. with ``install-time`` of ``false`` and no or empty
 ``requires``). When building a wheel, the build backend must query the
-AoT provider plugins (i.e. these with ``install-time`` being false and
+AoT provider plugins (i.e. these with ``install-time`` being ``false`` and
 non-empty ``requires``) to obtain supported properties and embed them
 into the dictionary. Therefore, the dictionary in ``variant.json`` and
 ``*-variants.json`` must contain namespaces for all AoT providers
-(i.e. all providers with ``install-time`` being false).
+(i.e. all providers with ``install-time`` being ``false``).
 
 Since TOML and JSON dictionaries are unsorted, so are the features in
 the ``static-properties`` dictionary. If more than one feature is
@@ -1564,8 +1577,8 @@ pyproject.toml file for x86-64-v3 would look like:
             "enable-if": "platform_machine == 'aarch64' or 'arm' in platform_machine",
             "plugin-api": "provider_variant_aarch64.plugin:AArch64Plugin",
             "requires": [
-               "provider-variant-aarch64 >=0.0.1; python_version >= '3.9'",
-               "legacy-provider-variant-aarch64 >=0.0.1; python_version < '3.9'"
+               "provider-variant-aarch64 >=0.0.1; python_version >= '3.12'",
+               "legacy-provider-variant-aarch64 >=0.0.1; python_version < '3.12'"
             ]
          },
          "blas_lapack": {
@@ -1716,10 +1729,15 @@ to the following algorithm:
    properties is sorted earlier.
 
 After this process, the variant wheels are sorted from the most
-preferred to the least preferred.
+preferred to the least preferred. The null variant naturally sorts after
+all the other variants, and the non-variant wheel must be sorted after
+the null variant. Multiple wheels with the same variant set (and
+multiple non-variant wheels) must then be ordered according to their
+platform compatibility tags.
 
-Alternatively, the sort algorithm could be described using the following
-pseudocode:
+Alternatively, the sort algorithm for variant wheels could be described
+using the following pseudocode. For simplicity, this code does not
+account for non-variant wheels or tags.
 
 .. code:: python
 
@@ -1802,7 +1820,8 @@ pseudocode:
 Integration with ``pylock.toml``
 --------------------------------
 
-The following section is added to the ``pylock.toml`` specification:
+The following section is added to the
+:doc:`packaging:specifications/pylock-toml`:
 
 .. code:: rst
 
@@ -1838,6 +1857,8 @@ The following section is added to the ``pylock.toml`` specification:
     ``packages.variants-json.hashes``
     '''''''''''''''''''''''''''''''''
 
+    See :ref:`pylock-packages-archive-hashes`.
+
 If there is a ``[packages.variants-json]`` section, the installer should
 resolve variants to select the best wheel file.
 
@@ -1861,8 +1882,8 @@ associated with the project they represent, and avoid namespaces that
 refer to other projects or generic terms that could lead to naming
 conflicts in the future.
 
-In different variants of the same package version, the same provider
-plugin must always be used for a given namespace. Attempting to load
+All variants published on a single index for a specific package version
+must use the same provider for a given namespace. Attempting to load
 more than one plugin for the same namespace in the same release version
 must result in a fatal error. While multiple plugins for the same
 namespace may exist across different packages or release versions (such
@@ -1875,10 +1896,21 @@ particular, packages published to PyPI must not rely on plugins that
 need to be installed from other indexes.
 
 Plugins are implemented as Python packages. They need to expose two
-kinds of Python objects at a specified API endpoint: attributes that
-return a specific value after being accessed via
-``{API endpoint}.{attribute name}``, and callables that are called via
-``{API endpoint}.{callable name}({arguments}...)``. These can be
+kinds of Python objects at a specified API endpoint:
+
+a. attributes that return a specific value after being accessed via:
+
+   .. code:: text
+
+       {API endpoint}.{attribute name}
+
+b. callables that are called via:
+
+   .. code:: text
+
+       {API endpoint}.{callable name}({arguments}...)
+
+These can be
 implemented either as modules, or classes with class methods or static
 methods. The specifics are provided in the subsequent sections.
 
@@ -1888,9 +1920,9 @@ API endpoint
 
 The location of the plugin code is called an “API endpoint”, and it is
 expressed using the object reference notation following the
-:doc:`packaging:specifications/entry-points`.
+:doc:`packaging:specifications/entry-points`:
 
-.. code::
+.. code:: text
 
     {import_path}(:{object_path})?
 
@@ -1899,7 +1931,6 @@ pseudocode:
 
 .. code:: python
 
-    import inspect
     import {import_path}
 
     if "{object_path}":
@@ -1955,14 +1986,14 @@ significant. It is defined using the following protocol:
 
 A “variant feature config” must provide the following properties or attributes:
 
-- ``name`` specifying the feature name, as a string.
+- ``name: str`` specifying the feature name.
 
-- ``multi_value`` specifying whether the feature is allowed to have
+- ``multi_value: bool`` specifying whether the feature is allowed to have
   multiple corresponding values within a single variant wheel. If it is
   ``False``, then it is an error to specify multiple values for the
   feature.
 
-- ``values`` specifying feature values, as a list of strings. In
+- ``values: list[str]`` specifying feature values. In
   contexts where the order is significant, the values must be ordered
   from the most preferred to the least preferred.
 
@@ -2054,7 +2085,7 @@ Example implementation
         multi_value: bool
 
 
-    internal -- provided for illustrative purpose
+    # internal -- provided for illustrative purpose
     _MAX_VERSION = 4
     _ALL_GPUS = ["narf", "poit", "zort"]
 
@@ -2136,7 +2167,7 @@ Build backends
 --------------
 
 As a build backend can’t determine whether the frontend supports variant
-wheels or not, PEP 517 and PEP 660 hooks must build non-variant wheels
+wheels or not, :pep:`517` and :pep:`660` hooks must build non-variant wheels
 by default. Build backends may provide ways to request variant builds.
 This specification does not define any specific configuration.
 
@@ -2164,16 +2195,23 @@ or ``not in`` operator, e.g.:
 
 .. code::
 
+    # satisfied by any "foo :: * :: *" property
     dep1; "foo" in variant_namespaces
+    # satisfied by any "foo :: bar :: *" property
     dep2; "foo :: bar" in variant_features
+    # satisfied only by "foo :: bar :: baz" property
     dep3; "foo :: bar :: baz" in variant_properties
 
 The ``variant_label`` marker is a plain string:
 
 .. code::
 
+    # satisfied by the variant "foobar"
     dep4; variant_label == "foobar"
+    # satisfied by any wheel other other than the null variant
+    # (including the non-variant wheel)
     dep5; variant_label != "null"
+    # satisfied by the non-variant wheel
     dep6; variant_label == ""
 
 Implementations must ignore differences in whitespace while matching the
@@ -2244,7 +2282,7 @@ Python package users
 
 The primary source of information for Python package users should be
 installer documentation, supplemented by helpful informational messages
-from command-line interface and tutorials. Users without special needs
+from command-line interface, and tutorials. Users without special needs
 should not require any special variant awareness. Advanced users would
 specifically need documentation on (provided the installer in question
 implements these features):
@@ -2288,7 +2326,7 @@ documentation needs to indicate:
 
 The maintainers will also need to peruse provider plugin documentation.
 They should also be aware which provider plugins are considered trusted
-by commonly used installers, and know the implications of used untrusted
+by commonly used installers, and know the implications of using untrusted
 plugins. These materials may also be supplemented by generic documents
 explaining publishing variant wheels, along with specific example use
 cases.
@@ -2366,16 +2404,16 @@ the available properties and their discovery methods as part of the
 specification, much like how wheel tags are implemented currently.
 However, the existing wheel tag logic already imposes a significant
 complexity on packaging tools that need to maintain the logic for
-generating supported tags, partially amortized by data available in the
-Python interpreter itself.
+generating supported tags, partially amortized by the data provided by
+the Python interpreter itself.
 
-Every new axis will be imposing even more effort on package manager
-maintainers, who will have to maintain an algorithm to determine
-property compatibility. This algorithm can be quite complex, possibly
+Every new axis would be imposing even more effort on package manager
+maintainers, who would have to maintain an algorithm to determine the
+property compatibility. This algorithm could become quite complex, possibly
 needing to account for different platforms, hardware versions and
-requiring more frequent updates than platform tags. This will also
+requiring more frequent updates than the one for platform tags. This would also
 significantly increase the barrier towards adding new axes and therefore
-the risk of incompatibility between different installers, as every new
+the risk of lack of feature parity between different installers, as every new
 axis will be imposing additional maintenance cost.
 
 For comparison, the plugin design essentially democratizes the variant
@@ -2383,7 +2421,9 @@ properties. Provider plugins can be maintained independently by people
 having the necessary knowledge and hardware. They can be updated as
 frequently as necessary, independently of package managers. The decision
 to use a particular provider falls entirely on the maintainer of package
-needing it.
+needing it, though they need to take into consideration that using
+plugins that are not vetted by the common installers will inconvenience
+their users.
 
 
 Resolving variants to separate packages
@@ -2414,7 +2454,7 @@ Furthermore, it requires significant changes to the dependency resolver
 and package metadata formats. In particular, the dependency resolver
 would need to query all “resolver” packages before performing
 resolution. It is unclear how to account for such variants while
-performing universal solution. The one-to-one mapping between
+performing universal resolution. The one-to-one mapping between
 dependencies and installed packages would be lost, as a ``torch``
 dependency could effectively be satisfied by ``torch-cu129``.
 
@@ -2423,7 +2463,7 @@ Acknowledgements
 ================
 
 This work would not have been possible without the contributions and
-feedbacks of many people in the Python packaging community. In
+feedback of many people in the Python packaging community. In
 particular, we would like to credit the following individuals for their
 help in shaping this PEP (in alphabetical order):
 
