@@ -1327,10 +1327,14 @@ their presence. The tools must ignore unknown keys in the dictionaries
 to permit future backwards compatible updates to the PEP. However, users
 should not introduce custom keys to avoid potential future conflicts.
 
-.. TODO: how to actually include it in generated files?
+A `JSON schema <https://json-schema.org/>`_ is included in the Appendix
+of this PEP, to ease comprehension and validation of the metadata
+format. This schema will be updated with each revision to the variant
+metadata specification. The schema is available in
+:ref:`0815-variant-json-schema`.
 
-`A JSON Schema is included in the Appendix of this PEP.  <pep-0815/variant_schema.json>`__
-
+Ultimately, the variant metadata JSON schema should be served by
+`packaging.python.org <https://packaging.python.org/>`__.
 
 Provider information
 ''''''''''''''''''''
