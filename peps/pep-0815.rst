@@ -520,7 +520,7 @@ The potential for improvement can be summarized as:
     growing AI/ML and scientific computing worlds.
 
     — Travis Oliphant, the author of NumPy_ and SciPy_ and Chief AI
-    Architect at `OpenTeams <https://openteams.com/>`_
+    Architect at OpenTeams
 
 
 Motivation summary
