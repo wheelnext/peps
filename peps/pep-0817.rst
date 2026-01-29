@@ -2509,6 +2509,39 @@ uses.
 Rejected ideas
 ==============
 
+Variants being entirely or transitionally opt-in
+------------------------------------------------
+
+In discussing the security concerns, proposals were made to make variant
+provider usage entirely opt-in, either permanently, or at least
+initially to facilitate further testing. While such approaches may
+naively avoid the immediate security risks by avoiding the new
+functionality by default, they are not suitable as long-term solutions.
+
+Most importantly, the opt-in mechanism would lead to far worse user
+experience out-of-the-box. For variant-enabled packages, the default
+experience would be installing a suboptimal variant. It should be noted
+that variant-enabled packages may not only be installed directly, but
+also as dependencies of other packages. Therefore, for optimal user
+experience, all packages that are variant-enabled or that feature
+dependencies that are variant-enabled, would have to document
+appropriate installer-specific mechanisms for enabling the respective
+provider plugins.
+
+The proliferation of this experience would eventually lead to users
+naively configuring their installers to enable all variant providers
+unconditionally. This in turn would effectively render the provider
+usage opt-out for a large number of users, enabling all kinds of supply
+chain attacks described in the `security implications`_ section.
+
+The authors would like to emphasize that security cannot be achieved at
+the cost of severely impaired user experience. Instead, the PEP attempts
+to strike a balance by introducing a pool of trusted providers that are
+subject to review. The list of such providers will be maintained
+centrally, both ensuring a more consistent user experience and
+increasing the level of scrutiny given to them.
+
+
 An approach without provider plugins
 ------------------------------------
 
