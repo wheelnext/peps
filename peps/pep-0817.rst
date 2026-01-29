@@ -752,7 +752,7 @@ wheel maintainer or queried at wheel build time from an AoT plugin.
 
 Both kinds of plugins are usually implemented as Python packages which
 implement the `provider plugin API`_, but they may also be vendored or
-reimplemented by installers to improve security, as outlined in
+reimplemented by installers to improve user experience, as outlined in
 `Providers`_. Plugin packages may be installed in isolated or
 non-isolated environments. In particular, all plugins may be returned by
 the ``get_requires_for_build_wheel()`` hook of a :pep:`517` backend, and
@@ -1207,14 +1207,22 @@ without explicit user consent.
 
 The `Providers`_ section of the specification provides further
 suggestions that aim to improve both security and the user experience.
-It is expected that a limited subset of popular provider plugins will
-be either vendored by the installer, eliminating the use of packages
-external to the tool altogether, or pinned to specific versions,
-providing the same level of code auditing as the tools themselves.
+Particularly, it is expected that the most popular provider plugins will
+be available out of the box, and a dedicated team of maintainers
+(initially including a subset of the PEP authors) will be responsible
+for inspecting them for security risks and vetting the plugins as safe
+to use. Installers will be able to either use a published allowlist,
+vendor specific provider plugin versions or reimplement them at their
+leisure.
+
 This will lead to the majority of packages focusing on these specific
-plugins. External plugins requiring explicit opt-in should be rare,
-minimizing the workflow disruption and reducing the risk that users
-blanket-allow all plugins.
+plugins, rather than implementing competing solutions. Plugins requiring
+explicit opt-in should be rare, and primarily affect expert users. This
+is important, as many users are not expected to have sufficient
+expertise to judge plugins' trustworthiness. Furthermore, the frequent
+disruption of workflows would inevitably lead to a number of users
+learning to blanket-allow all plugins, making supply chain attacks
+trivial.
 
 Furthermore, the specification permits using static configuration as
 input to skip running plugins altogether.
@@ -1342,10 +1350,10 @@ compatible with the system and to select the best variant through
 verification and install a specified variant explicitly.
 
 Providers can be marked as install-time or ahead-of-time. For
-install-time providers, installers MUST use the provider package or an
-equivalent reimplementation to query variant property compatibility. For
-ahead-of-time providers, they MUST use the static metadata embedded in
-the wheel instead.
+install-time providers, installers MUST query the provider for variant
+property compatibility. Installers MAY vendor or reimplement specific
+providers. For ahead-of-time providers, they MUST use the static
+metadata embedded in the wheel instead.
 
 Providers can be marked as optional. If a provider is marked optional,
 then the installer MUST NOT query said provider by default, and instead
@@ -1360,19 +1368,14 @@ markers do not match, and instead assume that their properties are
 incompatible.
 
 All the tools that need to query variant providers and are run in a
-security-sensitive context, MUST NOT install or run code from any
-untrusted package for variant resolution without explicit user opt-in.
+security-sensitive context, MUST NOT install or run provider packages,
+unless they can determine the particular provider package version to be
+trusted. The exact mechanism used to do that is implementation-specific.
+However, installers SHOULD ensure that the most commonly used providers
+can be securely used without an explicit user opt-in.
+
 Install-time provider packages SHOULD take measures to guard against
 supply chain attacks, for example by vendoring all dependencies.
-
-It is RECOMMENDED that said tools vendor, reimplement or lock the most
-commonly used plugins to specific wheels. For plugins and their
-dependencies that are neither reimplemented, vendored nor otherwise
-vetted, a trust-on-first-use mechanism for every version is RECOMMENDED.
-In interactive sessions, the tool can explicitly ask the user for
-approval. In non-interactive sessions, the approval can be given using
-command-line interface options. It is important that the user is
-informed of the risk before giving such an approval.
 
 For a consistent experience between tools, variant wheels SHOULD be
 supported by default. Tools MAY provide an option to only use
