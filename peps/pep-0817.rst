@@ -675,8 +675,8 @@ are used in conjunction with USE flags. For example,
 build against.
 
 
-Rationale
-=========
+Overview and rationale
+======================
 
 Wheel variant glossary
 ----------------------
