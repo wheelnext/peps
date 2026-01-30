@@ -1055,6 +1055,48 @@ optional. This implies that any packages using it need to provide
 non-variant wheels as well.
 
 
+Outline of tool behavior
+------------------------
+
+Installing a package from remote index
+''''''''''''''''''''''''''''''''''''''
+
+When asked to install a package from a remote index, the proposed
+behavior would be to:
+
+1. Query the remote index for the package in question.
+2. Initially select a potentially suitable package version, as usual.
+3. Filter available wheels based on Platform Compatibility Tags.
+4. Determine if among remaining wheels any feature variant labels.
+   If not, proceed as with non-variant wheels.
+5. If any wheels feature variant labels, download the index-level
+   variant metadata file, ``{name}-{version}-variants.json``. If this
+   file is missing, assume all variant wheels are incompatible and
+   proceed as with non-variant wheels.
+6. Map the variant labels into sets of variant properties using the
+   index-level variant metadata file.
+7. Obtain the ordered lists of supported variant properties using
+   providers specified in the index-level variant metadata file:
+
+   - for enabled AoT providers, obtain them from static property data in
+     the index-level variant metadata file.
+   - for enabled install-time providers that are vendored or
+     reimplemented in the installer, query them in
+     implementation-speciifc manner.
+   - for enabled install-time providers that were vetted for
+     installation, install them in an isolated environment and query
+     them via the plugin API.
+   - for disabled providers (e.g. opt-in providers that were not enabled
+     by the user, providers excluded via environment markers, providers
+     not considered secure, etc.), assume that all variant properties
+     are incompatible.
+8. Filter and order variants based on the lists of supported properties.
+   Select the most preferred variant.
+9. If multiple wheels for a given version share the same variant label,
+   order them by Platform compatibility tags and build number, and
+   select the best wheel.
+
+
 Example use cases
 -----------------
 
