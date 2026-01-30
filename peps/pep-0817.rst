@@ -2515,7 +2515,7 @@ Variants being entirely or transitionally opt-in
 In discussing the security concerns, proposals were made to make variant
 provider usage entirely opt-in, either permanently, or at least
 initially to facilitate further testing. While such approaches may
-naively avoid the immediate security risks by avoiding the new
+avoid the immediate security risks by avoiding the new
 functionality by default, they are not suitable as long-term solutions.
 
 Most importantly, the opt-in mechanism would lead to far worse user
