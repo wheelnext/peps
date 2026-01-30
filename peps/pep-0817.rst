@@ -1220,7 +1220,7 @@ plugins, rather than implementing competing solutions. Plugins requiring
 explicit opt-in should be rare, and primarily affect expert users. This
 is important, as many users are not expected to have sufficient
 expertise to judge plugins' trustworthiness. Furthermore, the frequent
-disruption of workflows would inevitably lead to a number of users
+disruption of workflows incentivises users to blanket-allow all plugins (security fatigue)
 learning to blanket-allow all plugins, making supply chain attacks
 trivial.
 
