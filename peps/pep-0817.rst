@@ -1212,17 +1212,15 @@ be available out of the box, and a dedicated team of maintainers
 (initially including a subset of the PEP authors) will be responsible
 for inspecting them for security risks and vetting the plugins as safe
 to use. Installers will be able to either use a published allowlist,
-vendor specific provider plugin versions or reimplement them at their
-leisure.
+vendor specific provider plugin versions, reimplement them or use them
+as a Python library at their leisure.
 
 This will lead to the majority of packages focusing on these specific
 plugins, rather than implementing competing solutions. Plugins requiring
 explicit opt-in should be rare, and primarily affect expert users. This
-is important, as many users are not expected to have sufficient
-expertise to judge plugins' trustworthiness. Furthermore, the frequent
-disruption of workflows incentivises users to blanket-allow all plugins (security fatigue)
-learning to blanket-allow all plugins, making supply chain attacks
-trivial.
+is important to make variant usage secure-by-default. Furthermore, the
+frequent disruption of workflows incentivises users to blanket-allow all
+plugins (security fatigue).
 
 Furthermore, the specification permits using static configuration as
 input to skip running plugins altogether.
@@ -2520,26 +2518,28 @@ functionality by default, they are not suitable as long-term solutions.
 
 Most importantly, the opt-in mechanism would lead to far worse user
 experience out-of-the-box. For variant-enabled packages, the default
-experience would be installing a suboptimal variant. It should be noted
-that variant-enabled packages may not only be installed directly, but
-also as dependencies of other packages. Therefore, for optimal user
-experience, all packages that are variant-enabled or that feature
-dependencies that are variant-enabled, would have to document
-appropriate installer-specific mechanisms for enabling the respective
-provider plugins.
+experience would be installing a suboptimal or outright broken variant.
+It should be noted that variant-enabled packages may not only be
+installed directly, but also as dependencies of other packages.
+Therefore, for optimal user experience, all packages that are
+variant-enabled or that feature dependencies that are variant-enabled,
+would have to document appropriate installer-specific mechanisms for
+enabling the respective provider plugins.
 
-The proliferation of this experience would eventually lead to users
-naively configuring their installers to enable all variant providers
-unconditionally. This in turn would effectively render the provider
-usage opt-out for a large number of users, enabling all kinds of supply
-chain attacks described in the `security implications`_ section.
+The proliferation of this experience could have two significant
+outcomes. The inability to make variants work out of the box for users
+could lead to package maintainers refraining from using them, and
+instead sticking to the earlier workarounds. What's even worse, it could
+also lead to users eventually naively configuring their installers
+to enable all variant providers unconditionally, effectively rendering
+the provider usage opt-out for a large number of users, enabling all
+kinds of supply chain attacks described in the `security implications`_
+section.
 
 The authors would like to emphasize that security cannot be achieved at
 the cost of severely impaired user experience. Instead, the PEP attempts
-to strike a balance by introducing a pool of trusted providers that are
-subject to review. The list of such providers will be maintained
-centrally, both ensuring a more consistent user experience and
-increasing the level of scrutiny given to them.
+to strike a balance by introducing a centrally maintained and vetted
+pool of trusted providers.
 
 
 An approach without provider plugins
