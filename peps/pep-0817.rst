@@ -2207,6 +2207,9 @@ The value returned by ``get_supported_configs()`` MUST be a subset of
 the feature names and values returned by ``get_all_configs()`` (modulo
 ordering).
 
+The value returned by ``get_supported_configs()`` MAY be cached
+throughout multiple packages in a single install session.
+
 
 Example implementation
 ''''''''''''''''''''''
