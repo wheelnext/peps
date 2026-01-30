@@ -1764,6 +1764,12 @@ in the file, though careful merging is possible, as long as no
 conflicting information is introduced, and the resolution results within
 a subset of variants do not change.
 
+The index MAY generate the index level variant metadata file
+automatically from uploaded wheel metadata. However, if it does not
+generate it automatically, it MUST permit package maintainers to upload
+it. Once the variant level metadata file is uploaded, the package
+maintainers SHOULD NOT upload new variants for the version in question.
+
 The ``foo-1.2.3-variants.json`` corresponding to the package with two
 wheel variants, one of them listed in the previous example, would look
 like:
