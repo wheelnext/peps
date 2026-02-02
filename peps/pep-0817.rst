@@ -1118,6 +1118,32 @@ to:
 5. Verify the wheel compatibility via supported properties.
 
 
+Building a variant wheel
+''''''''''''''''''''''''
+
+In order to build a variant wheel, the build backend needs to receive a
+list of variant properties and a variant label. The recommended way to
+do that is to use backend-defined keys in the ``config_settings``
+dictionary passed to the build backend hooks.
+
+When building a variant wheel, the proposed behavior for the build
+backend would be to:
+
+1. Read variant provider metadata from ``pyproject.toml``.
+2. Verify that all namespaces specified in the user-defined variant
+   properties have a corresponding provider in the metadata.
+3. In the ``get_requires_for_build_wheel()`` hook, return variant
+   provider plugin packages along with other build dependencies.
+4. In the ``build_wheel()`` hook, query the provider plugins
+   ``get_all_configs()`` function to obtain all valid property keys and
+   values. Use it to verify that the specified properties are correct.
+5. Convert the variant metadata from ``pyproject.toml`` to JSON, append
+   the mapping from variant label to variant properties and write the
+   result into the wheel's ``*.dist-info/variant.json`` file.
+6. Build the wheel as usual, except for including the
+   ``*.dist-info/variant.json`` and the variant label in the filename.
+
+
 Example use cases
 -----------------
 
