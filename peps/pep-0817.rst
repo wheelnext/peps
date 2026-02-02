@@ -1384,16 +1384,19 @@ Providers
 ---------
 
 When installing or resolving variant wheels, installers SHOULD query the
-variant provider to verify whether a given wheel's properties are
+variant providers to verify whether a given wheel's properties are
 compatible with the system and to select the best variant through
 `variant ordering`_. However, they MAY provide an option to omit the
 verification and install a specified variant explicitly.
 
 Providers can be marked as install-time or ahead-of-time. For
-install-time providers, installers MUST query the provider for variant
-property compatibility. Installers MAY vendor or reimplement specific
-providers. For ahead-of-time providers, they MUST use the static
-metadata embedded in the wheel instead.
+install-time providers, installers MUST either query the provider for
+variant property compatibility, or use user-provided compatibility
+information. Installers MAY vendor or reimplement specific providers.
+The format of user-provided information is left implementation-defined.
+
+For ahead-of-time providers, they MUST use the static metadata embedded
+in the wheel instead.
 
 Providers can be marked as optional. If a provider is marked optional,
 then the installer MUST NOT query said provider by default, and instead
