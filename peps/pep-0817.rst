@@ -1144,6 +1144,33 @@ backend would be to:
    ``*.dist-info/variant.json`` and the variant label in the filename.
 
 
+Publishing variant wheels on an index
+'''''''''''''''''''''''''''''''''''''
+
+An index with full support for variant wheels should ideally generate
+the index-level ``{name}-{version}-variants.json`` file for every
+package version itself:
+
+1. Upon uploading the first variant wheel for a given package version,
+   copy the data from its ``*.dist-info/variant.json`` file.
+2. Upon uploading subsequent wheels, merge the data from their
+   ``*.dist-info/variant.json`` files into the existing data:
+
+   - disjoint keys of ``providers``, ``static-properties`` and
+     ``variants`` dictionaries are merge together
+   - common keys of these dictionaries must have exactly the same value
+   - ``default-priorities.namespace`` list can be replaced if the new
+     value starts with the old value
+   - ``default-priorities.feature`` and ``default-priorities.value``
+     keys can be added if they were not present in the previous
+     ``default-priorities.namespace`` value
+   - other keys must have exactly the same value
+
+If the index does not wish to generate
+``{name}-{version}-variants.json`` file itself, it should permit
+uploading one.
+
+
 Example use cases
 -----------------
 
