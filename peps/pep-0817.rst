@@ -1438,6 +1438,9 @@ trusted. The exact mechanism used to do that is implementation-specific.
 However, installers SHOULD ensure that the most commonly used providers
 can be securely used without an explicit user opt-in.
 
+When installing provider packages, tools SHOULD use an isolated virtual
+environment.
+
 Install-time provider packages SHOULD take measures to guard against
 supply chain attacks, for example by vendoring all dependencies.
 
@@ -2061,6 +2064,9 @@ packages MUST be provided for plugins. However, as noted in the
 `Providers`_ section, these plugins can also be reimplemented by tools
 needing them. In the latter case, the resulting reimplementation does
 not need to follow the API defined in this section.
+
+Plugin packages may be run in an isolated environment. They MUST NOT
+make decisions based on installed packages.
 
 A plugin implemented as Python package exposes two kinds of objects at a
 specified API endpoint:
