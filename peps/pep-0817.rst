@@ -1102,6 +1102,22 @@ behavior would be to:
    select the best wheel.
 
 
+Installing a local wheel
+''''''''''''''''''''''''
+
+When asked to install a local wheel file, the proposed behavior would be
+to:
+
+1. If no variant label is present in the filename, proceed as with
+   non-variant wheels.
+2. Verify the wheel compatibility via Platform compatibility tags.
+3. Read variant metadata from ``*.dist-info/variant.json`` inside the
+   wheel file.
+4. Obtain the ordered lists of supported variant properties, as when
+   `installing a package from remote index`_.
+5. Verify the wheel compatibility via supported properties.
+
+
 Example use cases
 -----------------
 
