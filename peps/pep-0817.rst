@@ -2802,6 +2802,7 @@ Change history
   - Clarified that the value returned by ``get_supported_configs()`` may
     be cached.
   - Emphasized the risks of a full scale opt-in approach.
+  - Updated the GROMACS plot to respect dark theme.
 
 
 Copyright
