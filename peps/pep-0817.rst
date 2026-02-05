@@ -1061,6 +1061,11 @@ Outline of tool behavior
 Installing a package from an index
 ''''''''''''''''''''''''''''''''''
 
+    .. figure:: pep-0817/conceptual_diagram_installers.svg
+        :alt: TODO.
+
+        A conceptual diagram of installing a wheel.
+
 When asked to install a version of a package from an index, the proposed
 behavior would be to:
 
