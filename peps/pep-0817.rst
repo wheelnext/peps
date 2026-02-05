@@ -1068,7 +1068,7 @@ behavior would be to:
 2. Initially select a package version meeting the version constraints,
    as usual.
 3. Filter available wheels based on Platform Compatibility Tags.
-4. Determine if among the remaining wheels any feature variant labels.
+4. Determine if any of the remaining wheels are variant wheels.
    If not, proceed as with non-variant wheels.
 5. If any wheels feature variant labels, download the index-level
    variant metadata file, ``{name}-{version}-variants.json``. If this
