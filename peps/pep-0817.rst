@@ -1087,7 +1087,7 @@ behavior would be to:
      compatibility information if provided
    - otherwise, for enabled install-time providers that are vendored or
      reimplemented in the installer, query them in
-     implementation-speciifc manner.
+     implementation-specific manner.
    - for the remaining enabled install-time providers that were vetted
      for installation, install them in an isolated environment and query
      them via the plugin API.
