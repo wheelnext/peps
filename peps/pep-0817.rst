@@ -1058,15 +1058,15 @@ non-variant wheels as well.
 Outline of tool behavior
 ------------------------
 
-Installing a package from remote index
-''''''''''''''''''''''''''''''''''''''
+Installing a package from an index
+''''''''''''''''''''''''''''''''''
 
-When asked to install a package from a remote index, the proposed
+When asked to install a version of a package from an index, the proposed
 behavior would be to:
 
 1. Query the remote index for the package in question.
 2. Initially select a package version meeting the version constraints,
-   as usual.
+   as usual (this does not take variant metadata into account).
 3. Filter available wheels based on Platform Compatibility Tags.
 4. Determine if any of the remaining wheels are variant wheels.
    If not, proceed as with non-variant wheels.
@@ -1081,22 +1081,28 @@ behavior would be to:
 7. Obtain the ordered lists of supported variant properties using
    providers specified in the index-level variant metadata file:
 
-   - for enabled AoT providers, obtain them from static property data in
-     the index-level variant metadata file.
-   - for enabled install-time providers, use user-provided property
-     compatibility information if provided
-   - otherwise, for enabled install-time providers that are vendored or
-     reimplemented in the installer, query them in
-     implementation-specific manner.
-   - for the remaining enabled install-time providers that were vetted
-     for installation, install them in an isolated environment and query
-     them via the plugin API.
-   - for disabled providers (e.g. opt-in providers that were not enabled
-     by the user, providers excluded via environment markers, providers
-     not considered secure, etc.), assume that all variant properties
-     are incompatible.
-8. Filter and order variants based on the lists of supported properties.
-   Select the most preferred variant.
+   - for the enabled AoT providers, obtain them from static property
+     data in the index-level variant metadata file.
+   - for the enabled install-time providers:
+
+     - if the user provided static compatibility information, use that.
+     - otherwise, if the provider is vendored or reimplemented, query it
+       in implementation-specific manner.
+     - otherwise, if the Python provider package is considered secure
+       (either by the installer or via explicit user opt-in), install it
+       in an isolated environment, and query it via the plugin API.
+     - if none of the above applies, do not run the provider and either
+       consider the variant properties incompatible, or fail the
+       installation.
+
+   - for the disabled providers (e.g. opt-in providers that were not
+     enabled by the user, providers excluded via environment markers),
+     assume that all variant properties in the namespace are
+     incompatible.
+
+8. Filter and order variants based on the lists of supported properties,
+   and select the most preferred variant. If no variant wheel matched,
+   use the non-variant wheels by their rules.
 9. If multiple wheels for a given version share the same variant label,
    order them by Platform compatibility tags and build number, and
    select the best wheel.
@@ -1114,7 +1120,7 @@ to:
 3. Read variant metadata from ``*.dist-info/variant.json`` inside the
    wheel file.
 4. Obtain the ordered lists of supported variant properties, as when
-   `installing a package from remote index`_.
+   `installing a package from an index`_.
 5. Verify the wheel compatibility via supported properties.
 
 
@@ -1151,9 +1157,9 @@ An index with full support for variant wheels should ideally generate
 the index-level ``{name}-{version}-variants.json`` file for every
 package version itself:
 
-1. Upon uploading the first variant wheel for a given package version,
-   copy the data from its ``*.dist-info/variant.json`` file.
-2. Upon uploading subsequent wheels, merge the data from their
+1. For the first variant wheel for a given package version, copy the
+   data from its ``*.dist-info/variant.json`` file.
+2. For subsequent wheels, merge the data from their
    ``*.dist-info/variant.json`` files into the existing data:
 
    - disjoint keys of ``providers``, ``static-properties`` and
@@ -1165,6 +1171,9 @@ package version itself:
      keys can be added if they were not present in the previous
      ``default-priorities.namespace`` value
    - other keys must have exactly the same value
+
+If possible, the index should defer publishing the file until the upload
+session is finished, to avoid clients fetching partial data.
 
 If the index does not wish to generate
 ``{name}-{version}-variants.json`` file itself, it should permit
