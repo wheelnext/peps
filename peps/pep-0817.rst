@@ -1062,6 +1062,7 @@ Installing a package from an index
 ''''''''''''''''''''''''''''''''''
 
     .. figure:: pep-0817/conceptual_diagram_installers.svg
+        :target: _images/conceptual_diagram_installers.svg
         :alt: TODO.
 
         A conceptual diagram of installing a wheel.
