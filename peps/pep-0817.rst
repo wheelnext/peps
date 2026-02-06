@@ -1072,7 +1072,7 @@ behavior would be to:
 
 1. Query the remote index for the package in question.
 2. Initially select a package version meeting the version constraints,
-   as usual (this does not take variant metadata into account).
+   as usual (this does not need to take variant metadata into account).
 3. Filter available wheels based on Platform Compatibility Tags.
 4. Determine if any of the remaining wheels are variant wheels.
    If not, proceed as with non-variant wheels.
@@ -1159,9 +1159,19 @@ backend would be to:
 Publishing variant wheels on an index
 '''''''''''''''''''''''''''''''''''''
 
-An index with full support for variant wheels should ideally generate
-the index-level ``{name}-{version}-variants.json`` file for every
-package version itself:
+Variant wheels are uploaded to an index just like regular wheels.
+There are two possible approaches to publishing the index-level
+``{name}-{version}-variants.json`` file for every package version:
+it can either be prepared and uploaded by the user, or it can be
+generated automatically by the index.
+
+The file should not be changed once it is published, as clients may have
+already cached it or locked to the existing hash. For this reason, if
+the index is responsible for generating the file, it should use some
+mechanism to defer publishing it until the release is fully uploaded
+(for example, :pep:`694`).
+
+To generate the ``{name}-{version}-variants.json`` file:
 
 1. For the first variant wheel for a given package version, copy the
    data from its ``*.dist-info/variant.json`` file.
@@ -1177,13 +1187,6 @@ package version itself:
      keys can be added if they were not present in the previous
      ``default-priorities.namespace`` value
    - other keys must have exactly the same value
-
-If possible, the index should defer publishing the file until the upload
-session is finished, to avoid clients fetching partial data.
-
-If the index does not wish to generate
-``{name}-{version}-variants.json`` file itself, it should permit
-uploading one.
 
 
 Example use cases
@@ -1860,10 +1863,14 @@ conflicting information is introduced, and the resolution results within
 a subset of variants do not change.
 
 The index MAY generate the index level variant metadata file
-automatically from uploaded wheel metadata. However, if it does not
-generate it automatically, it MUST permit package maintainers to upload
-it. Once the variant level metadata file is uploaded, the package
-maintainers SHOULD NOT upload new variants for the version in question.
+automatically from uploaded wheel metadata. If that is the case, the
+file SHOULD NOT be published until it is final, and once published, it
+SHOULD NOT change, as clients MAY cache it.
+
+If the file is not generated automatically, the index MUST permit
+package maintainers to upload it. Once the variant level metadata file
+is uploaded, the package maintainers SHOULD NOT upload new variants for
+the version in question.
 
 The ``foo-1.2.3-variants.json`` corresponding to the package with two
 wheel variants, one of them listed in the previous example, would look
