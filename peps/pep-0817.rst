@@ -1055,8 +1055,8 @@ optional. This implies that any packages using it need to provide
 non-variant wheels as well.
 
 
-Outline of tool behavior
-------------------------
+Suggested implementation logic per type of packaging tool
+---------------------------------------------------------
 
 Installing a package from an index
 ''''''''''''''''''''''''''''''''''
