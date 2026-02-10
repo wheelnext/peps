@@ -50,7 +50,7 @@ jobs:
 
       - name: Deploy to GitHub pages
         # This allows CI to build branches for testing
-        if: (!startsWith(github.ref, 'refs/heads/norender')) && (matrix.python-version == '3.x')
+        if: (github.ref == 'refs/heads/main') && (matrix.python-version == '3.x')
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: build # Synchronise with Makefile -> BUILDDIR
