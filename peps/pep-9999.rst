@@ -84,6 +84,7 @@ wheel, in the `variant metadata`_ file. A variant wheel can specify
 multiple values corresponding to a variant feature. For the wheel to be
 considered compatible with a system, at least one value for every
 feature listed in its properties MUST be compatible with the system.
+A variant wheel with zero properties is always deemed compatible.
 
 The available properties and the rules governing their compatibility
 will be defined in a subsequent PEP.
@@ -612,16 +613,97 @@ to:
    mechanism for this will be specified in a subsequent PEP.
 5. Verify the wheel compatibility via compatible properties.
 
+
 Rationale
 =========
 
-[Describe why particular design decisions were made.]
+Variant wheels use structured `variant properties`_ to express
+multidimensional wheel compatibility matrices. For example, it permits
+expressing that a single variant requires certain CPU and GPU features
+independently. It can express both AND-style dependencies (such as
+different CPU instruction sets) and OR-style dependencies (such as
+different GPUs supported by a single package).
+
+The specification does not impose any formal limits on the number of
+properties expressed, and specifically accounts for the possibility of
+property sets being very long (for example, a long list of GPUs or CPU
+extension sets). To avoid wheel filenames becoming very long, the
+property lists are stored inside the wheel and mapped to a short label
+that is intended to be human-readable.
+
+To facilitate variant selection while installing from remote index,
+the variant metadata is mirrored in a JSON file published on the index.
+This enables installers to obtain variant property mapping without
+having to fetch individual wheels.
+
+The variant ordering algorithm has been proposed with the assumption
+that variant properties take precedence over Platform compatibility
+tags, as they are primarily used to express user preferences. This
+accounts for possible divergence of platform tags, e.g. because a CUDA
+variant may require a different minimal libc version, in which case the
+selection should be driven by the desired CUDA preference rather than
+incidental platform tag difference.
+
+While the provision of variant properties is deferred to a future PEP to
+keep the specification easier to comprehend, a baseline assumption is
+made that the compatible properties will be provided in specific order
+corresponding to their preference, much like Platform compatibility tags
+are. The variant metadata provides the ability to override this order at
+package level. However, namespaces are unordered by design (e.g. we will
+not decide upfront which GPU providers take precedence) and therefore
+they always need to be ordered by the package maintainer.
+
+A concept of null variant is introduced that is distinct from
+non-variant wheels to facilitate a transition period. This variant is
+always supported by tools implementing this PEP, and takes precedence
+over non-variant wheel. It can therefore be used to provide a distinct
+fallback for the cases of no other variant being supported and variant
+wheels being unsupported altogether. For example, PyTorch could provide
+a much smaller null variant that is used when no GPU is supported, and a
+fallback non-variant wheel built for the default CUDA version.
 
 
 Backwards Compatibility
 =======================
 
-[Describe potential impact and severity on pre-existing code.]
+Variant wheels add an additional `variant label`_ component to the wheel
+filename, causing them to be rejected while verifying the filename. This
+permits publishing them on an index alongside non-variant wheels,
+without risking previous installer versions accidentally installing
+them. It was confirmed that the filename validation algorithms in tools
+commonly used today reject it:
+
+- If both the build tag and the variant label are present, the filename
+  contains too many components. Example:
+
+  .. code-block:: text
+
+     numpy-2.3.2-1-cp313-cp313t-musllinux_1_2_x86_64-x86_64_v3.whl
+                                                    ^^^^^^^^^^
+
+- If only the variant label is present, the Python tag at third position
+  will be misinterpreted as a build number. Since the build number must
+  start with a digit and no Python tags at the time start with digits,
+  the filename is considered invalid. Example:
+
+  .. code-block:: text
+
+     numpy-2.3.2-cp313-cp313t-musllinux_1_2_x86_64-x86_64_v3.whl
+                 ^^^^^
+
+Aside from this explicit incompatibility, the specification makes
+minimal and non-intrusive changes to the binary package format. The
+`variant metadata`_ is stored in a separate file in the ``.dist-info``
+directory. Tools that are not directly concerned with variants need only
+to update their filename verification algorithm (if there is one) and
+preserve the contents of said directory.
+
+If the new `environment markers`_ are used in wheel dependencies, these
+wheels will be incompatible with existing tools. This is a general
+problem with the design of environment markers, and not specific to
+wheel variants. It is possible to work around this problem by partially
+evaluating environment markers at build time, and removing the markers
+or dependencies specific to variant wheels from the non-variant wheel.
 
 
 Security Implications
@@ -645,7 +727,34 @@ Reference Implementation
 Rejected Ideas
 ==============
 
-[Why certain ideas that were brought while discussing this PEP were not ultimately pursued.]
+Predictable variant labels
+--------------------------
+
+The specification proposes that variant labels are arbitrary, and
+variant properties are mapped to them via a `variant metadata`_ file
+rather than expressed directly in them. While it could be technically
+possible to create variant labels from variant properties, this would
+either require permitting very long filenames that will cause issues
+with some platforms, or imposing arbitrary limits on variant property
+counts, making the specification less suitable for addressing
+multidimensional compatibility matrices.
+
+
+Variant label as part of Platform compatibility tag
+---------------------------------------------------
+
+The specification adds the variant label as a separate component,
+therefore breaking compatibility with existing tools. It could be
+technically possible to preserve partial compatibility by appending it
+to one of the Platform compatibility tags instead, in which case
+installers would reject the wheel based on platform (or Python
+interpreter) incompatibility, while other tools could still use it.
+However, the authors decided it safer to break the backwards
+compatibility. Additionally, reusing tags posed a potential risk of
+wheel labels being incorrectly combined with compressed tag sets. For
+example, a ``manylinux_2_27_x86_64.manylinux_2_28_x86_64+x8664v3`` tag
+would be incorrectly deemed compatible because of the
+``manylinux_2_27_x86_64`` part.
 
 
 Open Issues
