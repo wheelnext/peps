@@ -21,7 +21,16 @@ Post-History:
 Abstract
 ========
 
-[A short (~200 word) description of the technical issue being addressed.]
+This PEP proposes variant wheels, an extension to
+:doc:`packaging:specifications/binary-distribution-format` that permits
+building multiple variants of the same package while embedding arbitrary
+compatibility data. The specific properties are stored inside the wheel,
+and expressed via a human-readable variant label in the filename, which
+is then mapped to the actual properties via a separately hosted JSON
+mapping. This aims to make ``{tool} install {package}`` capable of
+selecting the most appropriate variant of packages such as PyTorch,
+where additional compatibility dimensions such as GPU support need to be
+accounted for.
 
 
 Motivation
@@ -560,8 +569,8 @@ If there is a ``[packages.variants-json]`` section, the tool SHOULD
 resolve variants to select the best wheel file.
 
 
-Suggested implementation logic for installers (non-normative)
--------------------------------------------------------------
+Suggested implementation logic for tools (non-normative)
+--------------------------------------------------------
 
 Installing a package from an index
 ''''''''''''''''''''''''''''''''''
@@ -612,6 +621,37 @@ to:
 4. Obtain the ordered lists of compatible variant properties. The
    mechanism for this will be specified in a subsequent PEP.
 5. Verify the wheel compatibility via compatible properties.
+
+
+Publishing variant wheels on an index
+'''''''''''''''''''''''''''''''''''''
+
+Variant wheels are uploaded to an index just like regular wheels.
+There are two possible approaches to publishing the index-level
+``{name}-{version}-variants.json`` file for every package version:
+it can either be prepared and uploaded by the user, or it can be
+generated automatically by the index.
+
+The file should not be changed once it is published, as clients may have
+already cached it or locked to the existing hash. For this reason, if
+the index is responsible for generating the file, it should use some
+mechanism to defer publishing it until the release is fully uploaded
+(for example, :pep:`694`).
+
+To generate the ``{name}-{version}-variants.json`` file:
+
+1. For the first variant wheel for a given package version, copy the
+   data from its ``*.dist-info/variant.json`` file.
+2. For subsequent wheels, merge the data from their
+   ``*.dist-info/variant.json`` files into the existing data:
+
+   - disjoint keys of ``variants`` dictionary are merged together
+   - common keys of these dictionaries must have exactly the same value
+   - ``default-priorities.namespace`` list can be replaced if the new
+     value starts with the old value
+   - ``default-priorities.feature`` and ``default-priorities.value``
+     keys can be added if they were not present in the previous
+     ``default-priorities.namespace`` value
 
 
 Rationale
@@ -709,7 +749,14 @@ or dependencies specific to variant wheels from the non-variant wheel.
 Security Implications
 =====================
 
-[How could a malicious user take advantage of this new feature?]
+The presence of variant wheels may lead to some of the variants being
+subject to less scrutiny than others, and as such becoming easier attack
+targets. Particularly, once variant wheel support becomes commonplace,
+the non-variant wheels for some packages may be only consumed by users
+with outdated tools. However, such attacks assume that the package
+publishing workflow is already compromised, in which case more plausible
+attack vectors are available, for example via modifying compiled
+extensions.
 
 
 How to Teach This
@@ -721,7 +768,13 @@ How to Teach This
 Reference Implementation
 ========================
 
-[Link to any existing implementation and details about its state, e.g. proof-of-concept.]
+The `variantlib <https://github.com/wheelnext/variantlib>`__ project
+contains a reference implementation of a complete variant wheel
+solution. It is compliant with this PEP, but also goes beyond it,
+providing example solutions to `open issues`_.
+
+A client for installing variant wheels is implemented in a
+`uv branch <https://github.com/astral-sh/uv/pull/12203>`__.
 
 
 Rejected Ideas
@@ -760,35 +813,34 @@ would be incorrectly deemed compatible because of the
 Open Issues
 ===========
 
-[Any points that are still being decided/discussed.]
+The following problems are deferred to subsequent PEPs:
+
+- governance of variant namespaces
+- determining which variant properties are compatible with the system
+- building variant wheels
 
 
 Acknowledgements
 ================
 
-[Thank anyone who has helped with the PEP.]
+This work would not have been possible without the contributions and
+feedback of many people in the Python packaging community. In
+particular, we would like to credit the following individuals for their
+help in shaping this PEP (in alphabetical order):
 
-
-Footnotes
-=========
-
-[A collection of footnotes cited in the PEP, and a place to list non-inline hyperlink targets.]
+Alban Desmaison, Bradley Dice, Chris Gottbrath, Dmitry Rogozhkin,
+Emma Smith, Geoffrey Thomas, Henry Schreiner, Jeff Daily, Jeremy Tanner,
+Jithun Nair, Keith Kraus, Leo Fang, Mike McCarty, Nikita Shulga,
+Paul Ganssle, Philip Hyunsu Cho, Robert Maynard, Vyas Ramasubramani,
+and Zanie Blue.
 
 
 Change History
 ==============
 
-[A summary of major changes the PEP has undergone.  Whenever you update the
-``Post-History``, add a new bullet item in newest-first (i.e. reverse
-chronological) order, using the same ``DD-MMM-YYYY`` format, with sub-bullets
-summarizing the changes.  You can use the same link for the date bullet as you
-do in the ``Post-History`` addition.]
+- TBD
 
-
-References
-==========
-
-.. _uv: https://pypi.org/project/uv/
+  - Initial version, split from :pep:`817` draft.
 
 
 Copyright
