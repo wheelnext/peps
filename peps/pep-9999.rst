@@ -1,0 +1,689 @@
+PEP: 9999
+Title: Wheel Variants: Package Format
+Author: Jonathan Dekhtiar <jonathan@dekhtiar.com>,
+        Michał Górny <mgorny@quansight.com>,
+        Konstantin Schütze <konstin@mailbox.org>,
+        Ralf Gommers <ralf.gommers@gmail.com>,
+        Andrey Talman <atalman@meta.com>,
+        Charlie Marsh <charlie@astral.sh>,
+        Michael Sarahan <msarahan@gmail.com>,
+        Eli Uriegas <eliuriegas@meta.com>,
+        Barry Warsaw <barry@python.org>,
+        Donald Stufft <donald@stufft.io>,
+        Andy R. Terrel <andy.terrel@gmail.com>
+Discussions-To: Pending
+Status: Draft
+Type: Standards Track
+Topic: Packaging
+Created: 10-Feb-2026
+Post-History:
+
+Abstract
+========
+
+[A short (~200 word) description of the technical issue being addressed.]
+
+
+Motivation
+==========
+
+This PEP proposes a way to record arbitrary compatibility data in binary
+packages, to allow tools to pick the correct package to use in
+situations where
+:doc:`packaging:specifications/platform-compatibility-tags` are
+insufficient. There are many cases where this is necessary, most notably
+in the case of scientific and ML libraries, where high performance
+requires extension code that is carefully tailored to the precise
+hardware available in the user's environment. Well known examples of
+this include:
+
+- PyTorch and other ML tools which depend on the user's GPU details.
+- Scientific libraries like SciPy, which can be linked to different
+  linear algebra libraries.
+- Libraries such as XGBoost that can be linked to different OpenMP
+  runtimes.
+- Libraries that ship performance enhanced builds which can be used when
+  certain CPU instruction sets are available, such as AVX2 or AVX-512.
+
+The problem space has been explored in greater detail in :pep:`817`.
+
+
+Specification
+=============
+
+Definitions
+-----------
+
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+"SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
+document are to be interpreted as described in :rfc:`2119`.
+
+
+Variant wheel
+-------------
+
+A variant wheel is an extension of the wheel format, defined in
+:doc:`packaging:specifications/binary-distribution-format`. A variant
+wheel has zero or more `variant properties`_. It MUST feature a `variant
+label`_ in the filename, which makes it distinct from non-variant
+wheels. It MUST feature a `variant metadata`_ file.
+
+
+Variant properties
+------------------
+
+Variant properties express the compatibility of binary packages with
+specific platforms, in addition to
+:doc:`packaging:specifications/platform-compatibility-tags`. They follow
+a key-value format, whereas a key is called a *variant feature*. The
+keys are further grouped into independently governed *variant
+namespaces*.
+
+The properties with which the wheel was built are stored within the
+wheel, in the `variant metadata`_ file. A variant wheel can specify
+multiple values corresponding to a variant feature. For the wheel to be
+considered compatible with a system, at least one value for every
+feature listed in its properties MUST be compatible with the system.
+
+The available properties and the rules governing their compatibility
+will be defined in a subsequent PEP.
+
+Variant properties are serialized into a structured 3-tuple of the
+following format::
+
+    {namespace} :: {feature_name} :: {feature_value}
+
+The namespace and feature name components MUST consist only of ``0-9``,
+``a-z`` and ``_`` ASCII characters (``^[a-z0-9_]+$``). The feature
+value MUST consist only of ``0-9``, ``a-z``, ``_`` and ``.`` ASCII
+Characters (``^[a-z0-9_.]+$``).
+
+Examples:
+
+.. code:: text
+
+    # all of the following must be compatible
+    x86_64 :: level :: v3
+    x86_64 :: avx512_bf16 :: on
+    nvidia :: cuda_version_lower_bound :: 12.8
+    # additionally, at least one of the following must be compatible
+    nvidia :: sm_arch :: 120_real
+    nvidia :: sm_arch :: 110_real
+
+
+Variant label
+-------------
+
+The wheel filename template originally defined by :pep:`427` is changed
+to:
+
+.. code:: text
+
+    {distribution}-{version}(-{build tag})?-{python tag}-{abi tag}-{platform tag}(-{variant label})?.whl
+                                                                                 +++++++++++++++++++
+
+Variant wheels MUST feature the variant label component. Conversely,
+wheels without variant label are non-variant wheels. The variant label
+MUST consist only of ``0-9``, ``a-z`` and ``_`` ASCII characters and be
+1-16 characters long (``^[0-9a-z._]{1,16}$``).
+
+Every label MUST uniquely correspond to a specific set of variant
+properties, which MUST be the same for all wheels using the same label
+within a single package version. The label ``null`` is reserved and
+always corresponds to the variant with zero properties, called a null
+variant. The mechanism for specifying a variant label will be defined in
+a subsequent PEP.
+
+Examples:
+
+- Non-variant wheel:
+  ``numpy-2.3.2-cp313-cp313t-musllinux_1_2_x86_64.whl``
+- Wheel with variant label:
+  ``numpy-2.3.2-cp313-cp313t-musllinux_1_2_x86_64-x86_64_v3.whl``
+- Null variant:
+  ``numpy-2.3.2-cp313-cp313t-musllinux_1_2_x86_64-null.whl``
+
+
+Variant metadata
+----------------
+
+The additional metadata specific to variant wheels is stored inside the
+wheel, in ``*.dist-info/variant.json`` file, using the JSON format. This
+PEP defines the following structure:
+
+.. code:: text
+
+    +- $schema
+    +- default-priorities
+    |  +- namespace        : list[str]
+    |  +- feature
+    |     +- {namespace}   : list[str]  = []
+    |  +- property
+    |     +- {namespace}
+    |        +- {feature}  : list[str]  = []
+    +- variants
+      +- {variant_label}
+         +- {namespace}
+            +- {feature}   : list[str]  = []
+
+The top-level keys are described in the subsequent sections. Future PEPs
+may introduce additional keys and subkeys, therefore the tools MUST
+ignore unknown keys.
+
+
+Schema
+''''''
+
+The ``$schema`` key is the standard way of specifying the JSON schema
+used. Its value MUST be the URL of a JSON schema corresponding to this
+specification, hosted on ``packaging.python.org``. This schema will be
+updated as new keys are introduced.
+
+
+Default priorities
+''''''''''''''''''
+
+The ``default-priorities`` dictionary governs the ordering of variants.
+The exact algorithm is described in the `Variant ordering`_ section.
+
+It has a single REQUIRED key:
+
+- ``namespace: list[str]``: All variant namespaces used in variant
+  wheels for a given package version, ordered in decreasing priority.
+
+It MAY have the following OPTIONAL keys:
+
+- ``feature: dict[str, list[str]]``: A dictionary with namespaces as
+  keys, and ordered list of corresponding feature names as values.
+  The feature names are ordered in decreasing priority. It is used to
+  override the default feature ordering.
+
+- ``property: dict[str, dict[str, list[str]]]``: A nested dictionary
+  with namespaces as first-level keys, feature names as second-level
+  keys and ordered lists of corresponding property values as
+  second-level values. The feature values are ordered in decreasing
+  priority. It is used to override the default value ordering.
+
+
+Variants
+''''''''
+
+The ``variants`` dictionary provides a mapping from variant labels
+to variant properties. In the variant wheel, it MUST contain the label
+present in that wheel's filename.
+
+It is a 3-level. The first level keys are variant labels, the second
+level keys are namespaces, the third level are feature names, and the
+third level values are lists of feature values.
+
+
+Example
+'''''''
+
+.. code:: json5
+
+    {
+      // The schema URL will be replaced with the final URL on packaging.python.org
+      "$schema": "https://variants-schema.wheelnext.dev/v0.0.3.json",
+      "default-priorities": {
+        "feature": {
+          "aarch64": ["version"],
+          "x86_64": ["level"]
+        },
+        "namespace": ["x86_64", "aarch64", "blas_lapack"],
+        "property": {
+          "x86_64": {
+            "level": ["v3", "v2", "v1"]
+          }
+        }
+      },
+      "variants": {
+        // always a single entry, expressing the variant properties of the wheel
+        "x8664v3_openblas": {
+          "blas_lapack": {
+            "provider": ["openblas"]
+          },
+          "x86_64": {
+            "level": ["v3"]
+          }
+        }
+      }
+    }
+
+
+Index-level metadata
+--------------------
+
+For every package version that includes at least one variant wheel,
+there MUST exist a corresponding ``{name}-{version}-variants.json``
+file, hosted and served by the package index. The ``{name}`` and
+``{version}`` placeholders correspond to the package name and version,
+normalized according to the same rules as wheel files, as found in the
+:ref:`packaging:wheel-file-name-spec` of the Binary Distribution Format
+specification. The link to this file MUST be present on all index pages
+where the variant wheels are linked. It is presented in the same simple
+repository format as source distribution and wheel links in the index,
+including an (OPTIONAL) hash.
+
+This file uses the same structure as `variant metadata`_, except that
+the ``variants`` object MUST list all variants available on the package
+index for the package version in question. It is RECOMMENDED that tools
+enforce the same contents of the ``default-priorities``, ``providers``
+and ``static-properties`` sections for all variants listed in the file,
+though careful merging is possible, as long as no conflicting
+information is introduced, and the resolution results within a subset of
+variants do not change.
+
+The ``foo-1.2.3-variants.json`` corresponding to the package with two
+wheel variants, one of them listed in the previous example, would look
+like:
+
+.. code:: json5
+
+    {
+      // The schema URL will be replaced with the final URL on packaging.python.org
+      "$schema": "https://variants-schema.wheelnext.dev/v0.0.3.json",
+      "default-priorities": {
+        // identical to above
+      },
+      "variants": {
+        // all available wheel variants
+        "x8664v3_openblas": {
+          "blas_lapack": {
+            "provider": ["openblas"]
+          },
+          "x86_64": {
+            "level": ["v3"]
+          }
+        },
+        "x8664v4_mkl": {
+          "blas_lapack": {
+            "provider": ["mkl"]
+          },
+          "x86_64": {
+            "level": ["v4"]
+          }
+        }
+      }
+    }
+
+
+Variant ordering
+----------------
+
+To determine which variant wheel to install when multiple wheels are
+compatible, variant wheels MUST be ordered by their variant properties.
+
+For the purpose of ordering, variant properties are grouped into
+features, and features into namespaces. For every namespace, the tool
+MUST obtain an ordered list of compatible features, and for every
+feature, a list of compatible values. The method of obtaining these
+lists will be defined in a subsequent PEP.
+
+The ordering MUST be performed equivalent to the following algorithm:
+
+1. Construct the ordered list of namespaces by copying the value of the
+   ``default-priorities.namespace`` key from `index-level metadata`_.
+   This is ``namespace_order`` in the example.
+
+2. For every namespace:
+
+   i. Construct the initial ordered list of feature names by copying the
+      value of the respective ``default-priorities.feature.{namespace}``
+      key.
+
+   ii. Obtain the compatible feature names, in order. For every feature
+       name that is not present in the constructed list, append it to
+       the end.
+
+   After this step, a list of ordered feature names is available for
+   every namespace. This is ``feature_order`` in the example.
+
+3. For every feature:
+
+   i. Construct the initial ordered list of values by copying the value
+      of the respective
+      ``default-priorities.property.{namespace}.{feature_name}`` key.
+
+   ii. Obtain the compatible feature values, in order. For every value
+       that is not present in the constructed list, append it to the
+       end.
+
+   After this step, a list of ordered property values is available for
+   every feature. This is ``value_order`` in the example.
+
+4. For every variant property present in at least one of the compatible
+   variant wheels, construct a sort key that is a 3-tuple consisting of
+   its namespace, feature name and feature value indices in the
+   respective ordered lists. This is done by the ``property_key()``
+   function in the example.
+
+5. For every compatible variant wheel, order its properties by their
+   sort keys, in ascending order. This is done by the penultimate step
+   of the example algorithm.
+
+6. To order variant wheels, compare their sorted properties. If the
+   properties at the first position are different, the variant with the
+   lower 3-tuple of the respective property is sorted earlier. If they
+   are the same, compare the properties at the second position, and so
+   on, until either a tie-breaker is found or the list of properties of
+   one wheel is exhausted. In the latter case, the variant with more
+   properties is sorted earlier. This is done by the ultimate step of
+   the example algorithm, with the comparison function being implemented
+   as ``VariantWheel.__lt__()``.
+
+After this process, the variant wheels are sorted from the most
+preferred to the least preferred. The null variant naturally sorts after
+all the other variants, and the non-variant wheel MUST be sorted after
+the null variant. Multiple wheels with the same variant set (and
+multiple non-variant wheels) MUST then be ordered according to their
+platform compatibility tags.
+
+Alternatively, the sort algorithm for variant wheels could be described
+using the following pseudocode. For simplicity, this code does not
+account for non-variant wheels or tags.
+
+.. code:: python
+
+    from typing import Self
+
+
+    def get_compatible_feature_names(namespace: str) -> list[str]:
+        """Get an ordered list of compatible features"""
+        ...
+
+
+    def get_compatible_feature_values(namespace: str, feature_name: str) -> list[str]:
+        """Get an ordered list of compatible values"""
+        ...
+
+
+    # default-priorities dict from index-level metadata
+    default_priorities = {
+        "namespace": [...],  # : list[str]
+        "feature": {...},    # : dict[str, list[str]]
+        "property": {...},   # : dict[str, dict[str, list[str]]]
+    }
+
+
+    # 1. Construct the ordered list of namespaces.
+    namespace_order = default_priorities["namespace"]
+    feature_order = {}
+    value_order = {}
+
+    for namespace in namespace_order:
+        # 2. Construct the ordered lists of feature names.
+        feature_order[namespace] = default_priorities["feature"].get(namespace, [])
+        for feature_name in get_compatible_feature_names(namespace):
+            if feature_name not in feature_order[namespace]:
+                feature_order[namespace].append(feature_name)
+
+       value_order[namespace] = {}
+       for feature_name in feature_order[namespace]:
+            # 3. Construct the ordered lists of feature values.
+            value_order[namespace][feature_name] = (
+                default_priorities["property"].get(namespace, {}).get(feature_name, [])
+            )
+            for feature_value in get_compatible_feature_values(namespace, feature_name):
+                if feature_value not in value_order[namespace][feature_name]:
+                    value_order[namespace][feature_name].append(feature_value)
+
+
+    def property_key(prop: tuple[str, str, str]) -> tuple[int, int, int]:
+        """Construct a sort key for variant property (akin to step 4.)"""
+        namespace, feature_name, feature_value = prop
+        return (
+            namespace_order.index(namespace),
+            feature_order[namespace].index(feature_name),
+            value_order[namespace][feature_name].index(feature_value),
+        )
+
+
+    class VariantWheel:
+        """Example class exposing properties of a variant wheel"""
+        properties: list[tuple[str, str, str]]
+
+        def __lt__(self: Self, other: Self) -> bool:
+            """Variant comparison function for sorting (akin to step 6.)"""
+            for self_prop, other_prop in zip(self.properties, other.properties):
+                if self_prop != other_prop:
+                    return property_key(self_prop) < property_key(other_prop)
+            return len(self.properties) > len(other.properties)
+
+
+    # A list of variant wheels to sort.
+    wheels: list[VariantWheel] = [...]
+
+
+    for wheel in wheels:
+        # 5. Order variant wheel properties by their sort keys.
+        wheel.properties.sort(key=property_key)
+    # 6. Order variant wheels by comparing their sorted properties
+    # (see VariantWheel.__lt__())
+    wheels.sort()
+
+
+Environment markers
+-------------------
+
+Four new :ref:`environment markers
+<dependency-specifiers-environment-markers>` are introduced in
+dependency specifications:
+
+1. ``variant_namespaces`` corresponding to the set of namespaces of all
+   the variant properties that the wheel variant was built for.
+2. ``variant_features`` corresponding to the set of
+   ``namespace :: feature`` pairs of all the variant properties that the
+   wheel variant was built for.
+3. ``variant_properties`` corresponding to the set of
+   ``namespace :: feature :: value`` tuples of all the variant
+   properties that the wheel variant was built for.
+4. ``variant_label`` corresponding to the exact variant label that the
+   wheel was built with. For the non-variant wheel, it is an empty
+   string.
+
+The markers evaluating to sets of strings MUST be matched via the ``in``
+or ``not in`` operator, e.g.:
+
+.. code::
+
+    # satisfied by any "foo :: * :: *" property
+    dep1; "foo" in variant_namespaces
+    # satisfied by any "foo :: bar :: *" property
+    dep2; "foo :: bar" in variant_features
+    # satisfied only by "foo :: bar :: baz" property
+    dep3; "foo :: bar :: baz" in variant_properties
+
+The ``variant_label`` marker is a plain string:
+
+.. code::
+
+    # satisfied by the variant "foobar"
+    dep4; variant_label == "foobar"
+    # satisfied by any wheel other other than the null variant
+    # (including the non-variant wheel)
+    dep5; variant_label != "null"
+    # satisfied by the non-variant wheel
+    dep6; variant_label == ""
+
+Implementations MUST ignore differences in whitespace while matching the
+features and properties.
+
+Variant marker expressions MUST be evaluated against the variant
+properties stored in the wheel being installed.
+
+
+Integration with pylock.toml
+----------------------------
+
+The following section is added to the
+:doc:`packaging:specifications/pylock-toml`:
+
+.. code:: rst
+
+    .. _pylock-packages-variants-json:
+
+    ``[packages.variants-json]``
+    ----------------------------
+
+    - **Type**: table
+    - **Required?**: no; requires that :ref:`pylock-packages-wheels` is used,
+     mutually-exclusive with :ref:`pylock-packages-vcs`,
+     :ref:`pylock-packages-directory`, and :ref:`pylock-packages-archive`.
+    - **Inspiration**: uv_
+    - The URL or path to the ``variants.json`` file.
+    - Only used if the project uses :ref:`wheel variants <wheel-variants>`.
+
+    .. _pylock-packages-variants-json-url:
+
+    ``packages.variants-json.url``
+    ''''''''''''''''''''''''''''''
+
+    See :ref:`pylock-packages-archive-url`.
+
+    .. _pylock-packages-variants-json-path:
+
+    ``packages.variants-json.path``
+    '''''''''''''''''''''''''''''''
+
+    See :ref:`pylock-packages-archive-path`.
+
+    .. _pylock-packages-variants-json-hashes:
+
+    ``packages.variants-json.hashes``
+    '''''''''''''''''''''''''''''''''
+
+    See :ref:`pylock-packages-archive-hashes`.
+
+If there is a ``[packages.variants-json]`` section, the tool SHOULD
+resolve variants to select the best wheel file.
+
+
+Suggested implementation logic for installers (non-normative)
+-------------------------------------------------------------
+
+Installing a package from an index
+''''''''''''''''''''''''''''''''''
+
+When asked to install a version of a package from an index, the proposed
+behavior would be to:
+
+1. Query the remote index for the package in question.
+2. Initially select a package version meeting the version constraints
+   (this does not need to take variant metadata into account).
+3. Filter available wheels based on Platform Compatibility Tags.
+4. Determine if any of the remaining wheels are variant wheels.
+   If not, proceed as with non-variant wheels.
+5. If any wheels feature a `variant label`_, download the `index-level
+   metadata`_ file, ``{name}-{version}-variants.json``. If this
+   file is missing, assume all variant wheels are incompatible and
+   proceed as with non-variant wheels.
+6. Map the variant labels into sets of variant properties using the
+   index-level variant metadata file. If any of the labels present in
+   wheel filenames are missing in the file, assume that the respective
+   wheels are incompatible.
+7. Obtain the ordered lists of compatible variant properties. The
+   mechanism for this will be specified in a subsequent PEP.
+8. Filter and order variants based on the lists of compatible
+   properties, per `variant ordering`_, and select the most preferred
+   variant. If no variant wheel matched, use the non-variant wheels by
+   their rules.
+9. If multiple wheels for a given version share the same variant label,
+   order them by Platform compatibility tags and build number, and
+   select the best wheel.
+
+Note that steps 4. through 8. are introduced specifically for variant
+wheels. The remaining steps correspond to the current installer
+behavior.
+
+
+Installing a local wheel
+''''''''''''''''''''''''
+
+When asked to install a local wheel file, the proposed behavior would be
+to:
+
+1. If no variant label is present in the filename, proceed as with
+   non-variant wheels.
+2. Verify the wheel compatibility via Platform compatibility tags.
+3. Read the `variant metadata`_ from ``*.dist-info/variant.json`` inside
+   the wheel file.
+4. Obtain the ordered lists of compatible variant properties. The
+   mechanism for this will be specified in a subsequent PEP.
+5. Verify the wheel compatibility via compatible properties.
+
+Rationale
+=========
+
+[Describe why particular design decisions were made.]
+
+
+Backwards Compatibility
+=======================
+
+[Describe potential impact and severity on pre-existing code.]
+
+
+Security Implications
+=====================
+
+[How could a malicious user take advantage of this new feature?]
+
+
+How to Teach This
+=================
+
+[How to teach users, new and experienced, how to apply the PEP to their work.]
+
+
+Reference Implementation
+========================
+
+[Link to any existing implementation and details about its state, e.g. proof-of-concept.]
+
+
+Rejected Ideas
+==============
+
+[Why certain ideas that were brought while discussing this PEP were not ultimately pursued.]
+
+
+Open Issues
+===========
+
+[Any points that are still being decided/discussed.]
+
+
+Acknowledgements
+================
+
+[Thank anyone who has helped with the PEP.]
+
+
+Footnotes
+=========
+
+[A collection of footnotes cited in the PEP, and a place to list non-inline hyperlink targets.]
+
+
+Change History
+==============
+
+[A summary of major changes the PEP has undergone.  Whenever you update the
+``Post-History``, add a new bullet item in newest-first (i.e. reverse
+chronological) order, using the same ``DD-MMM-YYYY`` format, with sub-bullets
+summarizing the changes.  You can use the same link for the date bullet as you
+do in the ``Post-History`` addition.]
+
+
+References
+==========
+
+.. _uv: https://pypi.org/project/uv/
+
+
+Copyright
+=========
+
+This document is placed in the public domain or under the
+CC0-1.0-Universal license, whichever is more permissive.
