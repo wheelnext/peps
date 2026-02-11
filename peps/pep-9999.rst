@@ -278,11 +278,10 @@ including an (OPTIONAL) hash.
 This file uses the same structure as `variant metadata`_, except that
 the ``variants`` object MUST list all variants available on the package
 index for the package version in question. It is RECOMMENDED that tools
-enforce the same contents of the ``default-priorities``, ``providers``
-and ``static-properties`` sections for all variants listed in the file,
-though careful merging is possible, as long as no conflicting
-information is introduced, and the resolution results within a subset of
-variants do not change.
+enforce the same contents of the ``default-priorities`` for all variants
+listed in the file, though careful merging is possible, as long as no
+conflicting information is introduced, and the resolution results within
+a subset of variants do not change.
 
 The ``foo-1.2.3-variants.json`` corresponding to the package with two
 wheel variants, one of them listed in the previous example, would look
