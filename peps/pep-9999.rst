@@ -36,13 +36,12 @@ accounted for.
 Motivation
 ==========
 
-This PEP proposes a way to record arbitrary compatibility data in binary
-packages, to allow tools to pick the correct package to use in
-situations where
-:doc:`packaging:specifications/platform-compatibility-tags` are
+This PEP proposes a protocol to record arbitrary compatibility data in binary
+packages, to allow tools to pick the correct package to use in situations
+where :doc:`packaging:specifications/platform-compatibility-tags` are
 insufficient. There are many cases where this is necessary, most notably
-in the case of scientific and ML libraries, where high performance
-requires extension code that is carefully tailored to the precise
+in the case of scientific and machine learning (ML) libraries, where high
+performance requires extension code that is carefully tailored to the precise
 hardware available in the user's environment. Well known examples of
 this include:
 
@@ -73,9 +72,9 @@ Variant wheel
 
 A variant wheel is an extension of the wheel format, defined in
 :doc:`packaging:specifications/binary-distribution-format`. A variant
-wheel has zero or more `variant properties`_. It MUST feature a `variant
+wheel has zero or more `variant properties`_. It MUST specify a `variant
 label`_ in the filename, which makes it distinct from non-variant
-wheels. It MUST feature a `variant metadata`_ file.
+wheels. It MUST include a `variant metadata`_ file.
 
 
 Variant properties
@@ -88,25 +87,32 @@ a key-value format, whereas a key is called a *variant feature*. The
 keys are further grouped into independently governed *variant
 namespaces*.
 
-The properties with which the wheel was built are stored within the
-wheel, in the `variant metadata`_ file. A variant wheel can specify
-multiple values corresponding to a variant feature. For the wheel to be
-considered compatible with a system, at least one value for every
-feature listed in its properties MUST be compatible with the system.
-A variant wheel with zero properties is always deemed compatible.
-
-The available properties and the rules governing their compatibility
-will be defined in a subsequent PEP.
-
 Variant properties are serialized into a structured 3-tuple of the
 following format::
 
     {namespace} :: {feature_name} :: {feature_value}
 
-The namespace and feature name components MUST consist only of ``0-9``,
-``a-z`` and ``_`` ASCII characters (``^[a-z0-9_]+$``). The feature
-value MUST consist only of ``0-9``, ``a-z``, ``_`` and ``.`` ASCII
-Characters (``^[a-z0-9_.]+$``).
+The properties specified during the build are stored within the
+wheel, in the `variant metadata`_ file.
+
+The following properties apply:
+
+*   A variant wheel can specify multiple values (i.e. ``feature_value``) corresponding to a variant
+    feature (i.e. combination of ``namespace`` and ``feature_name``).
+
+*   For a given variant wheel to be considered compatible with a system,
+    at least one value for every variant feature listed in its variant
+    properties MUST be compatible with the system (i.e. each variant-feature
+    must be compatible)
+
+*   A variant wheel with zero properties is always deemed compatible.
+
+Input Validation Rules:
+
+*   ``namespace`` and ``feature_name`` MUST only consist of ``0-9``, ``a-z``
+    and ``_`` ASCII characters (``^[a-z0-9_]+$``) with ``len(value) >= 1``.
+*   The ``feature_value`` MUST only consist of ``0-9``, ``a-z``, ``_`` and
+    ``.`` ASCII characters (``^[a-z0-9_.]+$``) with ``len(value) >= 1``.
 
 Examples:
 
@@ -132,27 +138,30 @@ to:
     {distribution}-{version}(-{build tag})?-{python tag}-{abi tag}-{platform tag}(-{variant label})?.whl
                                                                                  +++++++++++++++++++
 
-Variant wheels MUST feature the variant label component. Conversely,
+Variant wheels MUST include the variant label component. Conversely,
 wheels without variant label are non-variant wheels. The variant label
-MUST consist only of ``0-9``, ``a-z`` and ``_`` ASCII characters and be
-1-16 characters long (``^[0-9a-z._]{1,16}$``).
+MUST consist only of ``0-9``, ``a-z``, ``_`` and ``.`` ASCII characters
+and be 1-16 characters long (``^[0-9a-z._]{1,16}$``).
 
-Every label MUST uniquely correspond to a specific set of variant
+Every variant label MUST uniquely correspond to a unique set of variant
 properties, which MUST be the same for all wheels using the same label
-within a single package version. The label ``null`` is reserved and
-always corresponds to the variant with zero properties, called a null
-variant. The mechanism for specifying a variant label will be defined in
-a subsequent PEP.
+within a single package version.
+
+The variant label ``null`` is reserved and always corresponds to the
+variant with zero properties, called a "null variant". This variant
+acts as a variant default or fallback that is always compatible.
 
 Examples:
 
 - Non-variant wheel:
   ``numpy-2.3.2-cp313-cp313t-musllinux_1_2_x86_64.whl``
-- Wheel with variant label:
+- Wheel with variant label ``x86_64_v3``:
   ``numpy-2.3.2-cp313-cp313t-musllinux_1_2_x86_64-x86_64_v3.whl``
 - Null variant:
   ``numpy-2.3.2-cp313-cp313t-musllinux_1_2_x86_64-null.whl``
 
+The mechanism for specifying a variant label will be defined in a
+subsequent PEP.
 
 Variant metadata
 ----------------
@@ -187,19 +196,30 @@ Schema
 The ``$schema`` key is the standard way of specifying the JSON schema
 used. Its value MUST be the URL of a JSON schema corresponding to this
 specification, hosted on ``packaging.python.org``. This schema will be
-updated as new keys are introduced.
+updated as new keys are introduced. This PEP highly recommends the
+inclusion of a version number in the URL of the JSON schema.
+Installers and package indexes SHOULD verify the validity of the JSON
+file with respect to the ``$schema``. The ``$schema`` MAY be vendored
+in installers if necessary directly in the tools.
+
+A `JSON schema <https://json-schema.org/>`__ is included in the Appendix
+of this PEP, to ease comprehension and validation of the metadata
+format. This schema will be updated with each revision to the variant
+metadata specification. The schema is available in
+:ref:`9999-variant-json-schema`.
 
 
 Default priorities
 ''''''''''''''''''
 
-The ``default-priorities`` dictionary governs the ordering of variants.
+The ``default-priorities`` dictionary governs the total ordering of variants.
 The exact algorithm is described in the `Variant ordering`_ section.
 
-It has a single REQUIRED key:
+The following key is REQUIRED:
 
 - ``namespace: list[str]``: All variant namespaces used in variant
   wheels for a given package version, ordered in decreasing priority.
+  This list MUST not be empty.
 
 It MAY have the following OPTIONAL keys:
 
@@ -282,6 +302,10 @@ enforce the same contents of the ``default-priorities`` for all variants
 listed in the file, though careful merging is possible, as long as no
 conflicting information is introduced, and the resolution results within
 a subset of variants do not change.
+
+Variant indexes MAY elect to either auto-generate the file from the
+uploaded variant wheels or allow the user to manually generate it themselves
+and upload it to the index.
 
 The ``foo-1.2.3-variants.json`` corresponding to the package with two
 wheel variants, one of them listed in the previous example, would look
@@ -427,8 +451,8 @@ account for non-variant wheels or tags.
             if feature_name not in feature_order[namespace]:
                 feature_order[namespace].append(feature_name)
 
-       value_order[namespace] = {}
-       for feature_name in feature_order[namespace]:
+        value_order[namespace] = {}
+        for feature_name in feature_order[namespace]:
             # 3. Construct the ordered lists of feature values.
             value_order[namespace][feature_name] = (
                 default_priorities["property"].get(namespace, {}).get(feature_name, [])
@@ -840,6 +864,12 @@ Change History
 - TBD
 
   - Initial version, split from :pep:`817` draft.
+
+
+Appendices
+==========
+
+- :ref:`9999-variant-json-schema`
 
 
 Copyright
