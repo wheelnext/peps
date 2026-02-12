@@ -143,7 +143,7 @@ wheels without variant label are non-variant wheels. The variant label
 MUST consist only of ``0-9``, ``a-z``, ``_`` and ``.`` ASCII characters
 and be 1-16 characters long (``^[0-9a-z._]{1,16}$``).
 
-Every variant label MUST uniquely correspond to a unique set of variant
+Every variant label MUST uniquely correspond to a specific set of variant
 properties, which MUST be the same for all wheels using the same label
 within a single package version.
 
