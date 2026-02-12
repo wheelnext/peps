@@ -199,8 +199,7 @@ specification, hosted on ``packaging.python.org``. This schema will be
 updated as new keys are introduced. This PEP highly recommends the
 inclusion of a version number in the URL of the JSON schema.
 Installers and package indexes SHOULD verify the validity of the JSON
-file with respect to the ``$schema``. The ``$schema`` MAY be vendored
-in installers if necessary directly in the tools.
+file with respect to the ``$schema``.
 
 A `JSON schema <https://json-schema.org/>`__ is included in the Appendix
 of this PEP, to ease comprehension and validation of the metadata
