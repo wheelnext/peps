@@ -345,7 +345,8 @@ Variant ordering
 ----------------
 
 To determine which variant wheel to install when multiple wheels are
-compatible, variant wheels MUST be ordered by their variant properties.
+compatible, variant wheels MUST be totally ordered by their variant
+properties.
 
 For the purpose of ordering, variant properties are grouped into
 features, and features into namespaces. For every namespace, the tool
@@ -385,32 +386,35 @@ The ordering MUST be performed equivalent to the following algorithm:
    After this step, a list of ordered property values is available for
    every feature. This is ``value_order`` in the example.
 
-4. For every variant property present in at least one of the compatible
-   variant wheels, construct a sort key that is a 3-tuple consisting of
-   its namespace, feature name and feature value indices in the
-   respective ordered lists. This is done by the ``property_key()``
-   function in the example.
+4. Using the ordered lists from the previous steps, construct a lookup
+   table mapping each feature (identified by its namespace and feature
+   name) to its ordered list of compatible values. The entries in the
+   lookup table MUST preserve the ordering established in the previous
+   steps: features are ordered first by their namespace index, then by
+   their feature name index within that namespace. This is
+   ``property_lookup_table`` in the example.
 
-5. For every compatible variant wheel, order its properties by their
-   sort keys, in ascending order. This is done by the penultimate step
-   of the example algorithm.
+5. For every compatible variant wheel, construct a rank tuple with one
+   entry per feature in the lookup table. The value at each position
+   MUST be the index of the wheel's property value in that feature's
+   ordered value list. If the wheel has multiple values for the same
+   feature, the minimum (i.e., most preferred) index MUST be used. If
+   the wheel does not have a property for a given feature, the entry
+   MUST be set to a value that sorts after all valid indices. This is
+   done by the ``_get_rank_tuple()`` function in the example.
 
-6. To order variant wheels, compare their sorted properties. If the
-   properties at the first position are different, the variant with the
-   lower 3-tuple of the respective property is sorted earlier. If they
-   are the same, compare the properties at the second position, and so
-   on, until either a tie-breaker is found or the list of properties of
-   one wheel is exhausted. In the latter case, the variant with more
-   properties is sorted earlier. This is done by the ultimate step of
-   the example algorithm, with the comparison function being implemented
-   as ``VariantWheel.__lt__()``.
+6. To order variant wheels, compare their rank tuples. The variant with
+   the lexicographically lower rank tuple is sorted earlier (more
+   preferred). This is done by the ultimate step of the example
+   algorithm.
 
 After this process, the variant wheels are sorted from the most
 preferred to the least preferred. The null variant naturally sorts after
-all the other variants, and the non-variant wheel MUST be sorted after
-the null variant. Multiple wheels with the same variant set (and
-multiple non-variant wheels) MUST then be ordered according to their
-platform compatibility tags.
+all the other variants, as all entries in its rank tuple are set to the
+sentinel value. The non-variant wheel MUST be sorted after the null
+variant. Multiple wheels with the same variant set (and multiple
+non-variant wheels) MUST then be ordered according to their platform
+compatibility tags.
 
 Alternatively, the sort algorithm for variant wheels could be described
 using the following pseudocode. For simplicity, this code does not
@@ -418,7 +422,7 @@ account for non-variant wheels or tags.
 
 .. code:: python
 
-    from typing import Self
+    import sys
 
 
     def get_compatible_feature_names(namespace: str) -> list[str]:
@@ -462,38 +466,43 @@ account for non-variant wheels or tags.
                     value_order[namespace][feature_name].append(feature_value)
 
 
-    def property_key(prop: tuple[str, str, str]) -> tuple[int, int, int]:
-        """Construct a sort key for variant property (akin to step 4.)"""
-        namespace, feature_name, feature_value = prop
-        return (
-            namespace_order.index(namespace),
-            feature_order[namespace].index(feature_name),
-            value_order[namespace][feature_name].index(feature_value),
-        )
+    # 4. Construct the lookup table mapping features to ordered values.
+    property_lookup_table: dict[tuple[str, str], list[str]] = {}
+    for namespace in namespace_order:
+        for feature_name in feature_order[namespace]:
+            property_lookup_table[(namespace, feature_name)] = (
+                value_order[namespace][feature_name]
+            )
+
+
+    def _get_rank_tuple(
+        properties: list[tuple[str, str, str]],
+    ) -> tuple[int, ...]:
+        """Construct a rank tuple for a variant wheel (akin to step 5.)"""
+        ranking = [sys.maxsize] * len(property_lookup_table)
+        for namespace, feature_name, feature_value in properties:
+            feat_key = (namespace, feature_name)
+            feat_idx = list(property_lookup_table.keys()).index(feat_key)
+            try:
+                val_idx = property_lookup_table[feat_key].index(feature_value)
+            except ValueError:
+                continue
+            ranking[feat_idx] = min(ranking[feat_idx], val_idx)
+        return tuple(ranking)
 
 
     class VariantWheel:
         """Example class exposing properties of a variant wheel"""
         properties: list[tuple[str, str, str]]
 
-        def __lt__(self: Self, other: Self) -> bool:
-            """Variant comparison function for sorting (akin to step 6.)"""
-            for self_prop, other_prop in zip(self.properties, other.properties):
-                if self_prop != other_prop:
-                    return property_key(self_prop) < property_key(other_prop)
-            return len(self.properties) > len(other.properties)
-
 
     # A list of variant wheels to sort.
     wheels: list[VariantWheel] = [...]
 
 
-    for wheel in wheels:
-        # 5. Order variant wheel properties by their sort keys.
-        wheel.properties.sort(key=property_key)
-    # 6. Order variant wheels by comparing their sorted properties
-    # (see VariantWheel.__lt__())
-    wheels.sort()
+    # 5-6. Compute rank tuples and sort variant wheels by
+    # lexicographic comparison of their rank tuples.
+    wheels.sort(key=lambda w: _get_rank_tuple(w.properties))
 
 
 Environment markers
