@@ -97,8 +97,8 @@ wheel, in the `variant metadata`_ file.
 
 The following properties apply:
 
-*   A variant wheel can specify multiple values (i.e. ``feature_value``) corresponding to a variant
-    feature (i.e. combination of ``namespace`` and ``feature_name``).
+*   A variant wheel can specify multiple values corresponding to a variant
+    feature (i.e. a combination of namespace and feature_name).
 
 *   For a given variant wheel to be considered compatible with a system,
     at least one value for every variant feature listed in its variant
