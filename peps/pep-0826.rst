@@ -1,0 +1,135 @@
+PEP: 826
+Title: Wheel Variants: Providers
+Author: Jonathan Dekhtiar <jonathan@dekhtiar.com>,
+        Michał Górny <mgorny@quansight.com>,
+        Konstantin Schütze <konstin@mailbox.org>,
+        Ralf Gommers <ralf.gommers@gmail.com>,
+        Andrey Talman <atalman@meta.com>,
+        Charlie Marsh <charlie@astral.sh>,
+        Michael Sarahan <msarahan@gmail.com>,
+        Eli Uriegas <eliuriegas@meta.com>,
+        Barry Warsaw <barry@python.org>,
+        Donald Stufft <donald@stufft.io>,
+        Andy R. Terrel <andy.terrel@gmail.com>
+Discussions-To: https://discuss.python.org/t/pep-817-split-wheel-variants-package-format/106196
+Status: Draft
+Type: Standards Track
+Topic: Packaging
+Created: 17-Feb-2026
+Post-History: `17-Feb-2026 <https://discuss.python.org/t/pep-817-split-wheel-variants-package-format/106196>`__
+
+Abstract
+========
+
+
+
+Motivation
+==========
+
+:pep:`825` introduced a protocol for recording additional compatibility
+data in binary packages, in the form of variant properties. It provided
+the foundations by organizing the variant properties into namespaces.
+However, it did not specify how variant namespaces are governed, nor how
+to determine which variant properties are compatible with a particular
+use system. This PEP aims to fill this gap.
+
+The PEP is specifically aiming to make variant wheels suitable for
+satisfying three use cases:
+
+1. Variants that express platform compatibility, for example GPU or CPU
+   capabilities. In this case, the goal is to select the best wheel that
+   is compatible with the particular system.
+
+2. Variants that express non-platform properties, such as different
+   BLAS/LAPACK or OpenMP implementations, or debug builds. Here all
+   variants that were built are compatible, and the goal is to provide
+   user with the ability to explicitly select a non-default variant.
+
+3. Variants that express compatibility with different dependency
+   versions, particularly aiming to express Application Binary Interface
+   (ABI) compatibility. The goal is to enable matching variants against
+   other packages, especially if they adapt new versions of common
+   dependencies at different rates.
+
+
+Specification
+=============
+
+Definitions
+-----------
+
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+"SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
+document are to be interpreted as described in :rfc:`2119`.
+
+
+Rationale
+=========
+
+
+Backwards Compatibility
+=======================
+
+Security Implications
+=====================
+
+
+How to Teach This
+=================
+
+
+Reference Implementation
+========================
+
+The `variantlib <https://github.com/wheelnext/variantlib>`__ project
+contains a reference implementation of a complete variant wheel
+solution. It is compliant with this PEP, but also goes beyond it,
+providing example solutions to `open issues`_.
+
+A client for installing variant wheels is implemented in a
+`uv branch <https://github.com/astral-sh/uv/pull/12203>`__.
+
+
+Rejected Ideas
+==============
+
+
+
+Open Issues
+===========
+
+
+Acknowledgements
+================
+
+This work would not have been possible without the contributions and
+feedback of many people in the Python packaging community. In
+particular, we would like to credit the following individuals for their
+help in shaping this PEP (in alphabetical order):
+
+Alban Desmaison, Bradley Dice, Chris Gottbrath, Dmitry Rogozhkin,
+Emma Smith, Geoffrey Thomas, Henry Schreiner, Jeff Daily, Jeremy Tanner,
+Jithun Nair, Keith Kraus, Leo Fang, Mike McCarty, Nikita Shulga,
+Paul Ganssle, Philip Hyunsu Cho, Robert Maynard, Vyas Ramasubramani,
+and Zanie Blue.
+
+
+Change History
+==============
+
+- 17-Feb-2026
+
+  - Initial version, split from :pep:`817` draft.
+
+
+Appendices
+==========
+
+- :ref:`pep826-variant-json-schema`
+
+
+Copyright
+=========
+
+This document is placed in the public domain or under the
+CC0-1.0-Universal license, whichever is more permissive.
