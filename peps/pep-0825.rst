@@ -375,7 +375,7 @@ MUST obtain an ordered list of compatible features, and for every
 feature, an ordered list of compatible values. The method of obtaining
 these lists will be defined in a subsequent PEP.
 
-The initial ordering MUST be performed equivalent to the following
+The default ordering MUST be performed equivalent to the following
 algorithm:
 
 1. Construct the ordered list of namespaces by copying the value of the
