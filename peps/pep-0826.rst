@@ -63,6 +63,393 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
 document are to be interpreted as described in :rfc:`2119`.
 
 
+Providers
+---------
+
+Variant properties, as defined in :pep:`825`, are organized into variant
+namespaces. Every variant namespace used in a variant wheel MUST be
+governed by a *variant provider*. Variant providers supply ordered lists
+of compatible features and feature values corresponding to their
+namespaces, as required by :pep:`825`.
+
+The namespace ``abi_dependency`` is reserved for the `ABI Dependency
+Variant Provider <#abi-dependency-variant-provider-optional>`_. All
+other namespaces used MUST be defined in the `provider information`_
+dictionary in `variant metadata`_. For every namespace, the following
+rules apply, in order:
+
+1. A variant provider MAY be enabled or disabled by default. The tools
+   MUST provide a way to explicitly enable a provider, and MAY provide a
+   way to disable one. If a provider is disabled, the tools MUST assume
+   that the list of supported features is empty and they MUST NOT use
+   the provider in any way. Otherwise, proceed to step 2.
+
+2. A variant provider metadata MAY include a static list of supported
+   features and their values. If that is the case, the tools MUST use
+   the static lists. Otherwise, proceed to step 3.
+
+3. The tools SHOULD implement a way for the user to provide a static
+   list of supported features and their values. If the user provides
+   said list, the tools MUST use it. Otherwise, proceed to step 4.
+
+4. If no static list of supported features and their values is provided,
+   the variant provider metadata MUST specify a list of required Python
+   packages that provide a variant provider plugin. The tools MAY choose
+   to vendor or reimplement plugin packages at their leisure. If that is
+   the case, they MUST obtain the list from their implementation.
+   Otherwise, proceed to step 5.
+
+5. The tools MAY provide list of trusted packages that are permitted to
+   be used default. They SHOULD provide a way for the user to trust
+   additional packages. If the list of required provider packages
+   contains any untrusted package, the tools MUST assume that the list
+   of supported features is empty and they MUST NOT install or use the
+   provider packages. Otherwise, proceed to step 6.
+
+6. The tools MUST install the specified provider packages and query them
+   via the `provider plugin API`_. The tools SHOULD use an isolated
+   virtual environment for that purpose.
+
+
+Variant metadata
+----------------
+
+This PEP extends the metadata introduced in :pep:`825` with additional
+``providers`` key. Therefore, the metadata has the following structure:
+
+.. code:: text
+
+    (root)
+    |
+    +- $schema
+    +- default-priorities
+    +- variants
+    +- providers
+       +- {namespace}
+          +- optional          : bool       = False
+          +- plugin-api        : str | None = None
+          +- requires          : list[str]  = []
+          +- static-properties
+             +- {feature}      : list[str]  = []
+
+This structure corresponds to the version ``0.0.2`` of the format. An
+update of the proposed JSON schema for the current format version is
+included in the Appendix of this PEP. The schema is available in
+:ref:`pep826-variant-json-schema`.
+
+
+Provider information
+''''''''''''''''''''
+
+``providers`` is a dictionary, the keys are namespaces, the values are
+dictionaries with provider information. It specifies how to install and
+use variant providers.
+
+The use of provider information is described in the `Providers`_ and
+`Provider plugin API`_ sections.
+
+One of the following keys MUST be present in the provider information
+dictionary:
+
+- ``static-properties: dict[str, list[str]]``: A dictionary whose keys
+  specify set of supported features and values the ordered lists of
+  their respective supported values. Since the dictionaries in JSON are
+  unsorted, if more than one key is specified, then the order for all
+  features MUST be specified in
+  ``default-priorities.feature.{namespace}``.
+
+- ``requires: list[str]``: A list of zero or more package
+  :ref:`dependency specifiers <dependency-specifiers>`, that are used to
+  install the provider plugin. If the dependency specifiers include
+  environment markers, these are evaluated against the environment where
+  the plugin is being installed and the requirements for which the
+  markers evaluate to false are filtered out. In that case, at least
+  one dependency MUST remain present in every possible environment.
+  Additionally, if ``plugin-api`` is not specified, the first dependency
+  present after filtering MUST always evaluate to the same API endpoint.
+
+If both are provided, the ``requires`` key MUST be ignored.
+
+A provider information dictionary MAY additionally contain the following
+keys:
+
+- ``optional: bool``: Whether the provider is optional. Defaults
+  to ``false``. If it is ``true``, the provider is disabled by default
+  and needs to be enabled explicitly.
+
+- ``plugin-api: str``: The API endpoint for the plugin. If it is
+  specified, it MUST be an object reference as explained in the `API
+  endpoint`_ section. If it is missing, the package name from the first
+  dependency specifier in ``requires`` is used, after replacing all
+  ``-`` characters with ``_`` in the normalized package name.
+
+
+Provider plugin API
+-------------------
+
+High level design
+'''''''''''''''''
+
+All variants published on a single index for a specific package version
+MUST use the same provider for a given namespace. Attempting to load
+more than one plugin for the same namespace in the same release version
+MUST result in a fatal error. While multiple plugins for the same
+namespace MAY exist across different packages, release versions or
+indexes (such as when a plugin is forked due to being unmaintained),
+they are mutually exclusive within any single release version on an
+index.
+
+To make it easier to discover and install plugins, they SHOULD be
+published in the same indexes that the packages using them. In
+particular, packages published to PyPI MUST NOT rely on plugins that
+need to be installed from other indexes.
+
+Except for namespaces reserved as part of this PEP, installable Python
+packages MUST be provided for plugins. However, as noted in the
+`Providers`_ section, these plugins can also be reimplemented by tools
+needing them. In the latter case, the resulting reimplementation does
+not need to follow the API defined in this section.
+
+A plugin implemented as Python package exposes callables that are called
+via:
+
+   .. code:: text
+
+       {API endpoint}.{callable name}({arguments}...)
+
+These can be implemented either as module-level functions, class methods
+or static methods. The specifics are provided in the subsequent
+sections.
+
+
+API endpoint
+''''''''''''
+
+The location of the plugin code is called an "API endpoint", and it is
+expressed using the object reference notation following the
+:doc:`packaging:specifications/entry-points`:
+
+.. code:: text
+
+    {import_path}(:{object_path})?
+
+An API endpoint specification is equivalent to the following Python
+pseudocode:
+
+.. code:: python
+
+    import {import_path}
+
+    if "{object_path}":
+        plugin = {import_path}.{object_path}
+    else:
+        plugin = {import_path}
+
+API endpoints are used in two contexts:
+
+a. in the ``plugin-api`` key of variant metadata, either explicitly or
+   inferred from the package name in the ``requires`` key. This is the
+   primary method of using the plugin when building and installing
+   wheels.
+
+b. as the value of an installed entry point in the ``variant_plugins``
+   group. The name of said entry point is insignificant. This is
+   OPTIONAL but RECOMMENDED, as it permits variant-related utilities to
+   discover variant plugins installed to the user's environment.
+
+
+Variant feature config class
+''''''''''''''''''''''''''''
+
+The variant feature config class is used as a return value in plugin API
+functions. It defines a single variant feature, along with a list of
+possible values. Depending on the context, the order of values MAY be
+significant. It is defined using the following protocol:
+
+.. code:: python
+
+    from abc import abstractmethod
+    from typing import Protocol
+
+
+    class VariantFeatureConfigType(Protocol):
+        @property
+        @abstractmethod
+        def name(self) -> str:
+            """Feature name"""
+            raise NotImplementedError
+
+        @property
+        @abstractmethod
+        def multi_value(self) -> bool:
+            """Does this property allow multiple values per variant?"""
+            raise NotImplementedError
+
+        @property
+        @abstractmethod
+        def values(self) -> list[str]:
+            """List of values, possibly ordered from most preferred to least"""
+            raise NotImplementedError
+
+The instance MUST provide the following properties or attributes:
+
+- ``name: str`` specifying the feature name.
+
+- ``multi_value: bool`` specifying whether the feature is allowed to
+  have multiple corresponding values within a single variant wheel. If
+  it is ``False``, then it is an error to specify multiple values for
+  the feature.
+
+- ``values: list[str]`` specifying feature values. In contexts where the
+  order is significant, the values MUST be ordered from the most
+  preferred to the least preferred.
+
+
+Plugin interface
+''''''''''''''''
+
+The plugin interface MUST follow the following protocol:
+
+.. code:: python
+
+    from abc import abstractmethod
+    from typing import Protocol
+
+
+    class PluginType(Protocol):
+        @classmethod
+        @abstractmethod
+        def get_supported_configs(cls) -> list[VariantFeatureConfigType]:
+            """Get supported configs for the current system"""
+            raise NotImplementedError
+
+The plugin interface MUST provide the following function:
+
+- ``get_supported_configs() -> list[VariantFeatureConfigType]`` that
+  returns a list of feature names and their values that are compatible
+  with the system the plugin is running on. The variant feature and
+  value lists MUST be ordered from the most preferred to the least
+  preferred.
+
+
+Example implementation
+''''''''''''''''''''''
+
+.. code:: python
+
+    from dataclasses import dataclass
+
+
+    @dataclass
+    class VariantFeatureConfig:
+        name: str
+        values: list[str]
+        multi_value: bool
+
+
+    # internal -- provided for illustrative purpose
+    _ALL_GPUS = ["narf", "poit", "zort"]
+
+
+    def _get_current_version() -> int:
+        """Returns currently installed runtime version"""
+        ...  # implementation not provided
+
+
+    def _is_gpu_available(codename: str) -> bool:
+        """Is specified GPU installed?"""
+        ...  # implementation not provided
+
+
+    class MyPlugin:
+        @staticmethod
+        def get_supported_configs() -> list[VariantFeatureConfig]:
+            current_version = _get_current_version()
+            if current_version is None:
+                # no runtime found, system not supported at all
+                return []
+
+            return [
+                VariantFeatureConfig(
+                    name="min_version",
+                    # [current, current - 1, ..., 1]
+                    values=[str(x) for x in range(current_version, 0, -1)],
+                    multi_value=False,
+                ),
+                VariantFeatureConfig(
+                    name="gpu",
+                    # this may be empty if no GPUs are supported --
+                    # 'example :: gpu feature' is not supported then;
+                    # but wheels with no GPU-specific code and only
+                    # 'example :: min_version' could still be installed
+                    values=[x for x in _ALL_GPUS if _is_gpu_available(x)],
+                    multi_value=True,
+                ),
+            ]
+
+
+Future extensions
+'''''''''''''''''
+
+The future versions of this specification, as well as third-party
+extensions MAY introduce additional attributes on the plugin instances.
+The implementations SHOULD ignore them.
+
+For best compatibility, all private attributes SHOULD be prefixed with
+an underscore (``_``) character to avoid incidental conflicts with
+future extensions.
+
+
+ABI Dependency Variant Provider (Optional)
+-------------------------------------------
+
+This section describes an OPTIONAL extension to the wheel variant
+specification. Tools that choose to implement this feature MUST follow
+this specification. Tools that do not implement this feature MUST treat
+the variants using it as incompatible, and SHOULD inform users when such
+wheels are skipped.
+
+The variant namespace ``abi_dependency`` is reserved for expressing that
+different builds of the same version of a package are compatible with
+different versions or version ranges of a dependency. This namespace
+MUST NOT be listed in the `provider information`_ dictionary, and can
+only appear in a built wheel variant property.
+
+Within this namespace, zero or more properties can be used to express
+compatible dependency versions. For each property, the feature name MUST
+be the :ref:`normalized name <packaging:name-normalization>` of the
+dependency, whereas the value MUST be a valid release segment of
+a public version identifier, as defined by the
+:doc:`packaging:specifications/version-specifiers` specification.
+It MUST contain up to three version components, that are matched against
+the installed version same as the ``=={value}.*`` specifier. Notably,
+trailing zeroes match versions with fewer components (e.g. ``2.0``
+matches release ``2`` but not ``2.1``). This also implies that the
+property values have different semantics than PEP 440 versions, in
+particular ``2``, ``2.0`` and ``2.0.0`` represent different ranges.
+
+Versions with nonzero epoch are not supported.
+
+==================================== ==================
+Variant Property                     Matching Rule
+==================================== ==================
+``abi_dependency :: torch :: 2``     ``torch==2.*``
+``abi_dependency :: torch :: 2.9``   ``torch==2.9.*``
+``abi_dependency :: torch :: 2.8.0`` ``torch==2.8.0.*``
+==================================== ==================
+
+Multiple variant properties with the same feature name can be used to
+indicate wheels compatible with multiple providing package versions,
+e.g.:
+
+.. code:: text
+
+    abi_dependency :: torch :: 2.8.0
+    abi_dependency :: torch :: 2.9.0
+
+This means the wheel is compatible with both PyTorch 2.8.0 and 2.9.0.
+
+
 Rationale
 =========
 
