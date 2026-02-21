@@ -498,6 +498,18 @@ Furthermore, individual providers can be disabled by default (made
 optional), to introduce variants that can only be selected explicitly,
 for example debug or experimental builds of packages.
 
+Installing provider plugins in isolated environments is recommended, as
+that permits tools to automatically deploy them without affecting the
+system packages. However, this is not a requirement to permit other
+options. For example, build backends may prefer reusing the isolated
+build environment for this.
+
+The ``requires`` and ``plugin-api`` keys follow the precedent of
+``build-system.requires`` and ``build-system.build-backend`` keys of
+:pep:`517`. However, following the criticism of that design,
+``plugin-api`` has been made optional and defaults to being inferred
+from the package name.
+
 The `ABI Dependency Variant Provider
 <#abi-dependency-variant-provider-optional>`_ is defined separately, as
 it needs to interact with the dependency resolver. To avoid adding
