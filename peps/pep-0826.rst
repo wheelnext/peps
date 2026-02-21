@@ -205,10 +205,14 @@ particular, packages published to PyPI MUST NOT rely on plugins that
 need to be installed from other indexes.
 
 Except for namespaces reserved as part of this PEP, installable Python
-packages MUST be provided for plugins. However, as noted in the
-`Providers`_ section, these plugins can also be reimplemented by tools
-needing them. In the latter case, the resulting reimplementation does
-not need to follow the API defined in this section.
+packages MUST be provided for plugins. The entire dependency tree of
+such a plugin MUST be installable using non-variant wheels, and variant
+wheels MUST NOT be used.
+
+As noted in the `Providers`_ section, these plugins can also be
+reimplemented by tools needing them. In the latter case, the resulting
+reimplementation does not need to follow the API defined in this
+section.
 
 A plugin implemented as Python package exposes callables that are called
 via:
