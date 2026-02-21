@@ -81,29 +81,29 @@ rules apply, in order:
 1. A variant provider MAY be enabled or disabled by default. The tools
    MUST provide a way to explicitly enable a provider, and MAY provide a
    way to disable one. If a provider is disabled, the tools MUST assume
-   that the list of supported features is empty and they MUST NOT use
+   that the list of compatible features is empty and they MUST NOT use
    the provider in any way. Otherwise, proceed to step 2.
 
-2. A variant provider metadata MAY include a static list of supported
+2. A variant provider metadata MAY include a static list of compatible
    features and their values. If that is the case, the tools MUST use
    the static lists. Otherwise, proceed to step 3.
 
 3. The tools SHOULD implement a way for the user to provide a static
-   list of supported features and their values. If the user provides
+   list of compatible features and their values. If the user provides
    said list, the tools MUST use it. Otherwise, proceed to step 4.
 
-4. If no static list of supported features and their values is provided,
-   the variant provider metadata MUST specify a list of required Python
-   packages that provide a variant provider plugin. The tools MAY choose
-   to vendor or reimplement plugin packages at their leisure. If that is
-   the case, they MUST obtain the list from their implementation.
-   Otherwise, proceed to step 5.
+4. If no static list of compatible features and their values is
+   provided, the variant provider metadata MUST specify a list of
+   required Python packages that provide a variant provider plugin. The
+   tools MAY choose to vendor or reimplement plugin packages at their
+   leisure. If that is the case, they MUST obtain the list from their
+   implementation.  Otherwise, proceed to step 5.
 
 5. The tools MAY provide list of trusted packages that are permitted to
    be used default. They SHOULD provide a way for the user to trust
    additional packages. If the list of required provider packages
    contains any untrusted package, the tools MUST assume that the list
-   of supported features is empty and they MUST NOT install or use the
+   of compatible features is empty and they MUST NOT install or use the
    provider packages. Otherwise, proceed to step 6.
 
 6. The tools MUST install the specified provider packages and query them
@@ -152,8 +152,8 @@ One of the following keys MUST be present in the provider information
 dictionary:
 
 - ``static-properties: dict[str, list[str]]``: A dictionary whose keys
-  specify set of supported features and values the ordered lists of
-  their respective supported values. Since the dictionaries in JSON are
+  specify set of compatible features and values the ordered lists of
+  their respective compatible values. Since the dictionaries in JSON are
   unsorted, if more than one key is specified, then the order for all
   features MUST be specified in
   ``default-priorities.feature.{namespace}``.
@@ -320,7 +320,7 @@ The plugin interface MUST follow the following protocol:
         @classmethod
         @abstractmethod
         def get_supported_configs(cls) -> list[VariantFeatureConfigType]:
-            """Get supported configs for the current system"""
+            """Get ordered lists of compatible features and their values"""
             raise NotImplementedError
 
 The plugin interface MUST provide the following function:
@@ -453,9 +453,63 @@ This means the wheel is compatible with both PyTorch 2.8.0 and 2.9.0.
 Rationale
 =========
 
+The primary use case for providers is determining platform
+compatibility, which implies that they need to be used at install time.
+The specification proposes a plugin mechanism using Python packages,
+with the interface inspired by :pep:`517`. Such a mechanism has a few
+advantages:
+
+- The individual plugins can be governed independently, by the
+  stakeholders having necessary knowledge and hardware. Additional
+  compatibility axes (new CPUs, GPUs) do not impose direct maintenance
+  costs on tools interacting with variant wheels, nor on
+  centrally-maintained libraries such as ``packaging``.
+
+- The plugins can be updated as frequently as necessary, without being
+  tied to tool release schedules.
+
+- The plugins provide a unified interface for testing new providers. New
+  plugins can be developed and tested locally without having to patch
+  multiple tools, and released to the public after proving the concept.
+
+At the same time, it is understood that installing additional Python
+packages and running the code from them at install time introduces
+additional attack vector (as discussed in `security considerations`_).
+For this reason, plugin packages are entirely opt-in, and a few
+mechanisms are provided to improve the user experience without
+compromising security:
+
+- Users can provide static compatibility lists to avoid querying the
+  providers. This also permits deploying packages for different systems
+  than the one running the installer.
+
+- Tools can maintain their own lists of trusted provider plugins that
+  are enabled by default, or they can vendor or reimplement some
+  providers. This is entirely voluntary, as not to impose maintenance
+  effort on tool maintainers. At the same time, the ability to
+  reimplement providers avoids introducing a performance bottleneck on
+  tools that aren't written in Python.
+
+- Variant wheels can include static lists of compatible properties, to
+  facilitate variants that do not need querying platform capabilities,
+  such as builds done against different BLAS/LAPACK libraries.
+
+Furthermore, individual providers can be disabled by default (made
+optional), to introduce variants that can only be selected explicitly,
+for example debug or experimental builds of packages.
+
+The `ABI Dependency Variant Provider
+<#abi-dependency-variant-provider-optional>`_ is defined separately, as
+it needs to interact with the dependency resolver. To avoid adding
+significant complexity to the plugin API and at the same time
+restricting the actual implementation, it has been made a special case.
+It is entirely optional to avoid adding maintenance burden to tool
+maintainers.
+
 
 Backwards Compatibility
 =======================
+
 
 Security Implications
 =====================
