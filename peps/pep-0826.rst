@@ -577,6 +577,13 @@ Change History
 - 17-Feb-2026
 
   - Initial version, split from :pep:`817` draft.
+  - Namespaces have been removed from the `provider plugin API`_.
+    Instead, the namespace is named by the package in `variant
+    metadata`_.
+  - The ``enable-if`` key has been removed from `provider information`_,
+    as it was deemed redundant.
+  - The ``static-properties`` table has been moved into `provider
+    information`_.
 
 
 Appendices
