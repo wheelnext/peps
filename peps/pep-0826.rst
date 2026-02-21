@@ -526,9 +526,46 @@ maintainers.
 Backwards Compatibility
 =======================
 
+This PEP does not introduce any new backwards compatibility
+considerations, compared to :pep:`825`.
+
 
 Security Implications
 =====================
+
+This PEP introduces a plugin system for querying the platform
+capabilities. Tools may install these packages and execute the code
+within them during dependency resolution or wheel processing. This
+elevates the supply-chain attack potential by introducing two new points
+for malicious actors to inject arbitrary code payload:
+
+1. Publishing a version of a variant provider plugin or one of its
+   dependencies with malicious code.
+2. Introducing a malicious variant provider plugin in an existing
+   package metadata.
+
+While such attacks are already possible at the package dependency level,
+it needs to be emphasized that in some scenarios the affected tools are
+executed with elevated privileges, for example when installing packages
+for multi-user systems. On the other hand, the code in installed
+packages will be used with regular user privileges afterwards.
+Therefore, variant provider plugins could introduce a Remote Code
+Execution vulnerability with elevated privileges.
+
+A similar issue already exists in the packaging ecosystem when packages
+are installed from source distributions, where build backends and other
+build dependencies are installed and executed. However, various tools
+operating purely on wheels, as well as users using tool-specific options
+to disable the use of source distributions, have been relying on the
+assumption that no such code execution will happen. To uphold this
+assumption, the proposal makes plugin packages opt-in.
+
+Unfortunately, an opt-in system creates a risk of security fatigue.
+Users wishing to use variant wheels may start blanket-enabling all use
+of provider plugins, reintroducing the RCE danger. To avoid this and
+improve user experience, the PEP permits tool maintainers to provide
+opt-out experience for selected plugins. A subsequent PEP will give
+further recommendations for improved user experience.
 
 
 How to Teach This
@@ -550,10 +587,26 @@ A client for installing variant wheels is implemented in a
 Rejected Ideas
 ==============
 
+An approach without provider plugins
+------------------------------------
+
+Rather than introducing provider plugins, the rules governing every
+variant namespace could be defined via PEPs. However, such an approach
+would be less scalable and impose additional effort on stakeholders, PEP
+editors and tool maintainers.
+
+Every new namespace would have to go through standardization process,
+followed by explicit implementation process. Deployment of new variant
+properties would be entirely dependent on tool updates. The added
+maintenance cost could lead to support for less popular variant axes not
+being accepted, or lack of feature parity between different tools.
 
 
 Open Issues
 ===========
+
+This PEP is concerned with installing wheels only. A subsequent PEP will
+address building variant wheels.
 
 
 Acknowledgements
