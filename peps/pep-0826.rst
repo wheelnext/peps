@@ -213,9 +213,9 @@ not need to follow the API defined in this section.
 A plugin implemented as Python package exposes callables that are called
 via:
 
-   .. code:: text
+.. code:: text
 
-       {API endpoint}.{callable name}({arguments}...)
+   {API endpoint}.{callable name}({arguments}...)
 
 These can be implemented either as module-level functions, class methods
 or static methods. The specifics are provided in the subsequent
