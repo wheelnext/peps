@@ -474,7 +474,7 @@ advantages:
 
 At the same time, it is understood that installing additional Python
 packages and running the code from them at install time introduces
-additional attack vector (as discussed in `security considerations`_).
+additional attack vector (as discussed in `security implications`_).
 For this reason, plugin packages are entirely opt-in, and a few
 mechanisms are provided to improve the user experience without
 compromising security:
