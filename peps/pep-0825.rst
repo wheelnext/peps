@@ -841,13 +841,11 @@ commonly used today reject it:
      numpy-2.3.2-cp313-cp313t-musllinux_1_2_x86_64-x86_64_v3.whl
                  ^^^^^
 
-The addition of the variant label increases the filename length, making
-is slightly more likely for wheel filenames to cause issues on systems
-where total path length is severely limited. However, given that the
-name and version components are unrestricted, and the actual filename
-length is largely dependent on them, it is better to recommend package
-maintainers to bear total filename length in mind rather than impose
-arbitrary limitations on variant label lengths.
+The addition of the variant label increases the filename length. On platforms
+with a low total path length limit such as Windows, long filenames are a
+concern. However, given that the name and version components are already
+unrestricted, we do not set a specific limit in this PEP. Others, such as PyPI,
+may set a limit for total filename length.
 
 Aside from this explicit incompatibility, the specification makes
 minimal and non-intrusive changes to the binary package format. The
