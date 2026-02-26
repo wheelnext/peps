@@ -186,7 +186,7 @@ version number is stored as part of the schema_ URL. Whenever the format
 changes, the version number must be incremented. Tools MUST assume that
 all variant wheels using an unknown format version are unsupported.
 
-The version numbers starting with zero are reserved for drafts and SHOULD
+The version numbers starting with zero are reserved for drafts and MUST
 NOT be used in production. Once the proposal is complete, the latest
 draft will be promoted to version ``1.0.0``.
 
@@ -634,14 +634,11 @@ Variant wheels can be listed in ``pylock.toml`` file in the same manner
 as wheels with different Platform compatibility tags: either all variant
 (and non-variant) wheels can be listed, or a subset of them.
 
-A new ``[packages.variants-json]`` subtable is added to the file. As the
-``{name}-{version}-variants.json`` file CAN be mutable, linking to the file
-is not sufficient, ``pylock.toml`` MUST inline the content of the
-``{name}-{version}-variants.json`` directly into ``pylock.toml``. Effectively
-locking the content of the ``{name}-{version}-variants.json`` file itself
-instead of the URL of the file with its hash (which can change). Doing so
-also guarantee the highest performance possible by avoiding network calls
-at install time.
+A new ``[packages.variants-json]`` subtable is added to the file. It MUST
+inline the content of the ``{name}-{version}-variants.json`` file, converting
+the JSON structure into the respective TOML types. The ``$schema`` key MUST
+be preserved to facilitate versioning. The tools MAY remove keys that are not
+relevant to variant wheels present in ``pylock.toml``.
 
 If variant wheels are listed, the tool SHOULD resolve variants to select
 the best wheel file.
@@ -655,6 +652,7 @@ follows:
 - **Type**: table
 - **Required?**: no
 - **Functions**:
+
   - Inline variant selection metadata for the package.
   - The structure of this table MUST conform to the JSON Schema.
   - Tools that support variant-aware resolution MUST validate this table
