@@ -325,7 +325,7 @@ Variant indexes MAY elect to either auto-generate the file from the
 uploaded variant wheels or allow the user to manually generate it
 themselves and upload it to the index.
 
-The variant JSON SHOULD NOT be considered immutable and MAY BE updated in
+This file SHOULD NOT be considered immutable and MAY BE updated in
 a backward compatible way at any point (e.g. adding a new type of variant).
 
 The ``foo-1.2.3-variants.json`` corresponding to the package with two
