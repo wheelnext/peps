@@ -643,11 +643,15 @@ that are not relevant to variant wheels present in ``pylock.toml``.
 If variant wheels are listed, the tool SHOULD resolve variants to select
 the best wheel file.
 
+
+Proposed specification update
+'''''''''''''''''''''''''''''
+
 The proposed text for :doc:`packaging:specifications/pylock-toml`
 follows:
 
 ``[packages.variant_json]``
-'''''''''''''''''''''''''''
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 - **Type**: table
 - **Required?**: no
@@ -659,6 +663,38 @@ follows:
     against the referenced schema.
   - Tools that do not support variant-aware resolution MAY ignore this table
     but SHOULD preserve it when rewriting the lock file.
+
+
+Example
+'''''''
+
+.. code:: toml
+
+    lock-version = "1.0"
+    created-by = "uv"
+    requires-python = ">=3.14"
+
+    [[packages]]
+    name = "numpy"
+    version = "2.3.4"
+    index = "https://pypi.anaconda.org/mgorny/simple"
+    wheels = [
+        { url = "https://pypi.anaconda.org/mgorny/simple/numpy/2.3.4/numpy-2.3.4-cp314-cp314-linux_x86_64-openblas.whl", hashes = {} },
+        { url = "https://pypi.anaconda.org/mgorny/simple/numpy/2.3.4/numpy-2.3.4-cp314-cp314-linux_x86_64-x8664v4_mkl.whl", hashes = {} },
+        { url = "https://pypi.anaconda.org/mgorny/simple/numpy/2.3.4/numpy-2.3.4-cp314-cp314-macosx_13_0_x86_64-accelerate.whl", hashes = {} },
+        { url = "https://pypi.anaconda.org/mgorny/simple/numpy/2.3.4/numpy-2.3.4-cp314-cp314-macosx_13_0_x86_64-openblas.whl", hashes = {} },
+    ]
+
+    [packages.variant_json]
+    "$schema" = "https://variants-schema.wheelnext.dev/peps/825/v0.1.0.json"
+
+    [packages.variant_json.default-priorities]
+    namespace = [ "x86_64", "aarch64", "blas_lapack" ]
+
+    [packages.variant_json.variants]
+    null = { }
+    x8664v3_openblas = { "blas_lapack" = { "library" = ["openblas"]}, "x86_64" = { "level" = ["v3"]}  }
+    x8664v4_mkl = { "blas_lapack" = { "library" = ["mkl"]}, "x86_64" = { "level" = ["v4"]}  }
 
 
 Suggested implementation logic for tools (non-normative)
