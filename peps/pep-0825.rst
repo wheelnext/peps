@@ -795,6 +795,13 @@ wheels being unsupported altogether. For example, PyTorch could provide
 a much smaller null variant that is used when no GPU is supported, and a
 fallback non-variant wheel built for the default CUDA version.
 
+``pylock.toml`` integration inlines the variant metadata to keep the
+file standalone. This can avoid the additional network call that would
+be required to fetch the file, and avoids having to pin to a specific
+hash that could cause problems if the file changed on the index, either
+due to the variant metadata being updated or being generated in a way
+that does not guarantee stable bytewise output.
+
 
 Backwards Compatibility
 =======================
