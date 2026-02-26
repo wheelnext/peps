@@ -657,9 +657,9 @@ follows:
   - Inline variant selection metadata for the package.
   - The structure of this table MUST conform to the JSON Schema.
   - Tools that support variant-aware resolution MUST validate this table
-  against the referenced schema.
+    against the referenced schema.
   - Tools that do not support variant-aware resolution MAY ignore this table
-  but SHOULD preserve it when rewriting the lock file.
+    but SHOULD preserve it when rewriting the lock file.
 
 
 Suggested implementation logic for tools (non-normative)
