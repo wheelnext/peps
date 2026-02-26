@@ -321,12 +321,12 @@ or they may carefully merge their values, provided that no conflicting
 information is introduced, and the resolution results within a subset of
 variants do not change.
 
+This file SHOULD NOT be considered immutable and MAY be updated in a
+backward compatible way at any point (e.g. when adding a new variant).
+
 Variant indexes MAY elect to either auto-generate the file from the
 uploaded variant wheels or allow the user to manually generate it
 themselves and upload it to the index.
-
-This file SHOULD NOT be considered immutable and MAY BE updated in
-a backward compatible way at any point (e.g. adding a new type of variant).
 
 The ``foo-1.2.3-variants.json`` corresponding to the package with two
 wheel variants, one of them listed in the previous example, would look
@@ -634,11 +634,12 @@ Variant wheels can be listed in ``pylock.toml`` file in the same manner
 as wheels with different Platform compatibility tags: either all variant
 (and non-variant) wheels can be listed, or a subset of them.
 
-A new ``[packages.variants-json]`` subtable is added to the file. It MUST
-inline the content of the ``{name}-{version}-variants.json`` file, converting
-the JSON structure into the respective TOML types. The ``$schema`` key MUST
-be preserved to facilitate versioning. The tools MAY remove keys that are not
-relevant to variant wheels present in ``pylock.toml``.
+A new ``[packages.variants-json]`` subtable is added to the file. It
+MUST inline the content of the ``{name}-{version}-variants.json`` file,
+converting the JSON structure into the respective TOML types. The
+``$schema`` key MUST be preserved to facilitate versioning. The tools
+MAY remove keys that are not relevant to variant wheels present in
+``pylock.toml``.
 
 If variant wheels are listed, the tool SHOULD resolve variants to select
 the best wheel file.
