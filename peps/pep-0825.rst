@@ -724,9 +724,9 @@ There are two possible approaches to publishing the index-level
 it can either be prepared and uploaded by the user, or it can be
 generated automatically by the index.
 
-The file should not be changed once it is published, as clients may have
-already cached it or locked to the existing hash. For this reason, if
-the index is responsible for generating the file, it should use some
+Since the clients may cache the file at any point, it is recommended not
+to publish it until it contains the metadata for all variants. If the
+index is responsible for generating the file, it should use some
 mechanism to defer publishing it until the release is fully uploaded
 (for example, :pep:`694`).
 
