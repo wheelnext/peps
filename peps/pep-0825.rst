@@ -647,7 +647,7 @@ The proposed text for :doc:`packaging:specifications/pylock-toml`
 follows:
 
 ``[packages.variant_json]``
----------------------------
+'''''''''''''''''''''''''''
 
 - **Type**: table
 - **Required?**: no
