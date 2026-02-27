@@ -998,6 +998,8 @@ Change History
     rather than all compatible values, and add a fallback to ordering
     on variant label.
   - Removed the variant label length limitation.
+  - Changed ``pylock.toml`` integration to inline variant metadata
+    rather than storing a URL and a hash.
 
 
 Appendices
