@@ -200,7 +200,7 @@ Example
 
     {
       // The schema URL will be replaced with the final URL on packaging.python.org
-      "$schema": "https://variants-schema.wheelnext.dev/v0.0.3.json",
+      "$schema": "https://variants-schema.wheelnext.dev/peps/9999/v0.2.0.json",
 
       "default-priorities": {
         // MUST list all namespaces used.
