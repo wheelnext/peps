@@ -184,8 +184,8 @@ key:
   to ``false``. If it is ``true``, the provider is disabled by default
   and needs to be enabled explicitly.
 
-If ``requires`` key is present, it MAY additionally contain the
-following key:
+If the ``requires`` key is present, the dictionary MAY additionally
+contain the following key:
 
 - ``plugin-api: str``: The API endpoint for the plugin. If it is
   specified, it MUST be an object reference as explained in the `API
@@ -223,10 +223,9 @@ in the following way:
         "aarch64": {
           // Specifies provider plugin package. REQUIRED since there is no
           // "static-properties" -- plugin will be queried at install time.
-          "requires": ["provider-variant-aarch64 >=0.0.1"],
-          // Overrides plugin API endpoint. OPTIONAL; without it, the API
-          // endpoint "provider_variant_aarch64" would be used.
-          "plugin-api": "provider_variant_aarch64.plugin:AArch64Plugin"
+          "requires": ["provider-variant-aarch64 >=0.0.1"]
+          // "plugin-api" is OPTIONAL here. It is inferred from "requires":
+          // "plugin-api": "provider_variant_aarch64"
         },
         "blas_lapack": {
           // Specifies compatible properties. No install-time querying is
