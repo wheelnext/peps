@@ -82,6 +82,11 @@ following interface for building variant wheels:
 - the ``config_settings`` dictionary of wheel building hooks accepts a
   ``variant-label`` key that enables building the specified variant from
   ``variant.variants`` dictionary
+- the ``get_requires_for_build_wheel()`` hook of :pep:`517`,
+  ``get_requires_for_build_editable()`` hook of :pep:`660`, and hooks of
+  similar purpose include the necessary provider plugin packages for the
+  variant being built, and the build backend uses the version installed
+  in the build environment as a result
 
 
 pyproject.toml integration
@@ -256,9 +261,27 @@ Rationale
 Backwards Compatibility
 =======================
 
+As noted in :pep:`825`, variant wheels are incompatible with the
+existing tooling. To avoid disrupting existing workflows, this PEP
+requires (in `build backend support`_) that build backends do not build
+variant wheels by default.
+
+The introduction of a new ``variant`` table (in `pyproject.toml
+integration`_) follows from :pep:`518` specifying that such tables are
+"reserved for future use by other PEPs". Nevertheless, it is possible
+that overly strict tools will reject such ``pyproject.toml`` files as
+unsupported, even if the use of wheel variants is not relevant to their
+use.
+
 
 Security Implications
 =====================
+
+There are no new security implications beyond what is already noted in
+:pep:`9999`. In particular, the use of provider plugins during build
+time is not seen as an additional risk, given that the dependencies are
+provider by the user directly (for example, in ``pyproject.toml``) and
+they are treated equivalently to other build dependencies.
 
 
 How to Teach This
