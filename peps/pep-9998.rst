@@ -95,10 +95,10 @@ pyproject.toml integration
 This specification extends the ``pyproject.toml`` file originally
 defined in :pep:`518`. Said file MAY contain a top-level ``variant``
 table that contains variant metadata for the project, as defined by
-:pep:`9999` or a subsequent specification, converted into the respective
-TOML types. When building variant wheels, tools SHOULD use the
-information from this file to seed the variant metadata in the built
-variant wheels. More specifically:
+:pep:`9999` or a subsequent specification, with the extensions listed
+in this PEP, converted into the respective TOML types. When building
+variant wheels, tools SHOULD use the information from this file to seed
+the variant metadata in the built variant wheels. More specifically:
 
 - the ``default-priorities`` dictionary is used to seed
   ``default-priorities`` in the wheels
@@ -110,6 +110,24 @@ variant wheels. More specifically:
 
 Tools MAY provide additional methods of providing the necessary variant
 metadata.
+
+
+Extension to provider metadata
+''''''''''''''''''''''''''''''
+
+The provider information dictionaries used as values in the
+``providers`` dictionary MAY contain the following key:
+
+- ``build-requires: list[str]``: A list of one or more
+  :ref:`dependency specifiers <dependency-specifiers>`, same as
+  ``requires`` but used only to populate ``static-properties`` at build
+  time, as explained in `populating static properties from provider
+  plugins`_.
+
+If ``build-requires`` is specified, both ``requires`` and
+``static-properties`` MUST NOT be present. In the resulting variant
+wheel, the ``build-requires`` and ``plugin-api`` keys MUST be removed,
+and ``static-properites`` MUST be added instead.
 
 
 Example
@@ -154,11 +172,8 @@ could look like the following:
     plugin-api = "provider_variant_aarch64.plugin:AArch64Plugin"
 
     [variant.providers.blas_lapack]
-    # Specifies compatible properties. No install-time querying is
-    # necessary.
-    static-properties.library = ["accelerate", "openblas", "mkl"]
-    # OPTIONAL: unused since "static-properties" are provided.
-    requires = ["blas-lapack-variant-provider"]
+    # REQUIRED: used to populate "static-properties".
+    build-requires = ["blas-lapack-variant-provider"]
 
     [variant.providers.x86_64]
     # Specifies provider plugin package. REQUIRED since there is no
@@ -192,6 +207,10 @@ could look like the following:
 Extensions to provider plugin API
 ---------------------------------
 
+Provider plugins MAY be used at build time, if the provider metadata
+specifies either ``requires`` or ``build-requires`` key, per the
+`extension to provider metadata`_ section.
+
 The plugin interface specified in :pep:`9999` is extended by adding the
 following REQUIRED function:
 
@@ -204,6 +223,13 @@ following REQUIRED function:
 The value returned by ``get_supported_configs()`` MUST be a subset of
 the feature names and values returned by ``get_all_configs()`` (modulo
 ordering).
+
+Additionally, the following OPTIONAL attribute is added:
+
+- ``is_aot_plugin: bool = False``; if it set to ``True``, then all valid
+  feature names and values are always supported. In that case, the
+  ``get_supported_configs()`` function MUST always return the same value
+  as ``get_all_configs()`` (modulo ordering).
 
 
 Example implementation
@@ -252,6 +278,80 @@ the following way:
                     multi_value=True,
                 ),
             ]
+
+
+Example AoT plugin implementation
+'''''''''''''''''''''''''''''''''
+
+.. code:: python
+
+    from dataclasses import dataclass
+
+
+    @dataclass
+    class _VariantFeatureConfig:
+        name: str
+        values: list[str]
+        multi_value: bool
+
+
+    is_aot_plugin = True
+
+
+    def get_supported_configs() -> list[_VariantFeatureConfig]:
+        return [
+            VariantFeatureConfig(
+                name="library",
+                values=["accelerate", "openblas", "mkl"],
+                multi_value=False,
+            ),
+        ]
+
+    def get_all_configs() -> list[_VariantFeatureConfig]:
+        return get_supported_configs()
+
+
+Populating static properties from provider plugins
+--------------------------------------------------
+
+If a variant provider metadata used at build time contains the
+``build-requires`` key (as specified in the `extension to provider
+metadata`_ section), the specified provider plugin is used to populate
+the ``static-properties`` dictionary while building the variant wheel.
+
+The packages to install and the plugin interface to use are determined
+as specified in :pep:`9999`, except that:
+
+- the ``build-requires`` key is used in place of ``requires`` key
+- all providers are assumed to be enabled and trusted
+
+In particular, the ``plugin-api`` key MAY be specified to override the
+plugin API endpoint.
+
+When populating static properties, the tool MUST:
+
+1. Ensure that the loaded plugin has ``is_aot_plugin == True``
+   attribute. It is invalid to use a plugin without that attribute in
+   ``build-requires``.
+
+2. Call ``get_supported_configs()`` to obtain the ordered lists of
+   supported feature name and their values.
+
+3. Verify that the properties the wheel is built with are compatible per
+   ``get_supported_configs()``. It is invalid to build a variant wheel
+   with properties that are not permitted by ``static-properties``.
+
+4. Remove ``build-requires`` and ``plugin-api`` keys from the provider
+   metadata.
+
+5. Add ``static-properties`` key to the provider metadata, populating it
+   using the lists obtained from ``get_supported_configs()``.
+
+6. If ``get_supported_configs()`` returned more than one feature name,
+   ensure that all feature names are present in
+   ``default-priorities.feature.{namespace}`` list. Any feature names
+   missing should be appended in the same order as returned by
+   ``get_supported_configs()``.
 
 
 Rationale
