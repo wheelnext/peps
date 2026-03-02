@@ -157,8 +157,8 @@ the ``default-priorities.namespace`` list of variant metadata.
 The use of provider information is described in the `Providers`_ and
 `Provider plugin API`_ sections.
 
-One of the following keys MUST be present in the provider information
-dictionary:
+Exactly one of the following keys MUST be present in the provider
+information dictionary:
 
 - ``static-properties: dict[str, list[str]]``: The dictionary of static
   variant compatibility data. The keys correspond to feature names,
@@ -177,20 +177,24 @@ dictionary:
   Additionally, if ``plugin-api`` is not specified, the first dependency
   present after filtering MUST always evaluate to the same API endpoint.
 
-If both keys are provided, the ``requires`` key MUST be ignored.
-
 A provider information dictionary MAY additionally contain the following
-keys:
+key:
 
 - ``optional: bool``: Whether the provider is optional. Defaults
   to ``false``. If it is ``true``, the provider is disabled by default
   and needs to be enabled explicitly.
+
+If ``requires`` key is present, it MAY additionally contain the
+following key:
 
 - ``plugin-api: str``: The API endpoint for the plugin. If it is
   specified, it MUST be an object reference as explained in the `API
   endpoint`_ section. If it is missing, the package name from the first
   dependency specifier in ``requires`` is used, after replacing all
   ``-`` characters with ``_`` in the normalized package name.
+
+It is invalid to specify ``requires`` or ``plugin-api`` if
+``static-properties`` are present.
 
 
 Example
@@ -232,8 +236,6 @@ in the following way:
             // over mkl, and accelerate over the other two.
             "library": ["accelerate", "openblas", "mkl"]
           },
-          // OPTIONAL: unused since "static-properties" are available.
-          "requires": ["blas-lapack-variant-provider"]
         },
         "x86_64": {
           // Specifies provider plugin package. REQUIRED since there is no
