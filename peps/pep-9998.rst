@@ -101,7 +101,7 @@ variant wheels. More specifically:
   wheels and to query providers at build time, if necessary
 - the ``variants`` dictionary MAY be used to provide a mapping from
   variant labels to variant properties, to facilitate requesting a build
-  of a specific variant
+  of a specific variant (``null`` variant does not need to be specified)
 
 Tools MAY provide additional methods of providing the necessary variant
 metadata.
@@ -113,42 +113,71 @@ Example
 .. code:: toml
 
     [variant]
-    $schema =
+    "$schema" = "https://variants-schema.wheelnext.dev/peps/9999/v0.2.0.json"
 
     [variant.default-priorities]
-    # prefer CPU features over BLAS/LAPACK variants
+    # REQUIRED: specifies that x86_64 CPU properties are more important than
+    # aarch64 CPU properties (both are mutually exclusive, so the exact order
+    # does not matter), and both are more important than specific BLAS/LAPACK
+    # library:
     namespace = ["x86_64", "aarch64", "blas_lapack"]
 
-    # prefer aarch64 version and x86_64 level features over other features
-    # (specific CPU extensions like "sse4.1")
-    feature.aarch64 = ["version"]
-    feature.x86_64 = ["level"]
+    # OPTIONAL: makes "library" the most important feature in "blas_lapack"
+    # namespace
+    feature.blas_lapack = ["library"]
 
-    # prefer x86-64-v3 and then older (even if CPU is newer)
-    property.x86_64.level = ["v3", "v2", "v1"]
+    # OPTIONAL: makes ["mkl", "openblas"] the most important values of
+    # "blas_lapack :: library" feature
+    property.blas_lapack.library = ["mkl", "openblas"]
+
+    # REQUIRED: variant providers
+    # ---------------------------
+    # (keys must matchdefault-priorities.namespace)
 
     [variant.providers.aarch64]
-    # example using different package based on Python version
+    # Specifies provider plugin package. REQUIRED since there is no
+    # "static-properties" -- plugin will be queried at install time.
     requires = [
-       "provider-variant-aarch64 >=0.0.1; python_version >= '3.12'",
-       "legacy-provider-variant-aarch64 >=0.0.1; python_version < '3.12'",
+      "provider-variant-aarch64 >=0.0.1",
     ]
-    # use only on aarch64/arm machines
-    enable-if = "platform_machine == 'aarch64' or 'arm' in platform_machine"
+    # Overrides plugin API endpoint. OPTIONAL; without it, the API
+    # endpoint "provider_variant_aarch64" would be used.
     plugin-api = "provider_variant_aarch64.plugin:AArch64Plugin"
 
+    [variant.providers.blas_lapack]
+    # Specifies compatible properties. No install-time querying is
+    # necessary.
+    static-properties.library = ["accelerate", "openblas", "mkl"]
+    # OPTIONAL: unused since "static-properties" are provided.
+    requires = ["blas-lapack-variant-provider"]
+
     [variant.providers.x86_64]
-    requires = ["provider-variant-x86-64 >=0.0.1"]
-    # use only on x86_64 machines
-    enable-if = "platform_machine == 'x86_64' or platform_machine == 'AMD64'"
+    # Specifies provider plugin package. REQUIRED since there is no
+    # "static-properties" -- plugin will be queried at install time.
+    requires = [
+      "provider-variant-x86-64 >=0.0.1; python_version >= '3.12'",
+      "legacy-provider-variant-x86-64 >=0.0.1; python_version < '3.12'",
+    ]
+    # Overrides plugin API endpoint. REQUIRED since "requires" may
+    # evaluate to two different packages depending on Python version.
     plugin-api = "provider_variant_x86_64.plugin:X8664Plugin"
 
-    [variant.providers.blas_lapack]
-    # plugin-api inferred from requires
-    requires = ["blas-lapack-variant-provider"]
-    # plugin used only when building package, properties will be inlined
-    # into variant.json
-    install-time = false
+    # RECOMMENDED: variants that can be built
+    # ---------------------------------------
+
+    # "x8664v3_openblas" label corresponds to:
+    # - blas_lapack :: library :: openblas
+    # - x86_64 :: level :: v3
+    [variant.variants.x8664_v3_openblas]
+    blas_lapack.library = ["openblas"]
+    x86_64.level = ["v3"]
+
+    # "x8664v4_mkl" label corresponds to:
+    # - blas_lapack :: library :: mkl
+    # - x86_64 :: level :: v4
+    [variant.variants.x8664_v4_mkl]
+    blas_lapack.library = ["mkl"]
+    x86_64.level = ["v4"]
 
 
 Extensions to provider plugin API
