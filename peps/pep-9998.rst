@@ -1,0 +1,111 @@
+PEP: 9998
+Title: Wheel Variants: Building
+Author: Jonathan Dekhtiar <jonathan@dekhtiar.com>,
+        Michał Górny <mgorny@quansight.com>,
+        Konstantin Schütze <konstin@mailbox.org>,
+        Ralf Gommers <ralf.gommers@gmail.com>,
+        Andrey Talman <atalman@meta.com>,
+        Charlie Marsh <charlie@astral.sh>,
+        Michael Sarahan <msarahan@gmail.com>,
+        Eli Uriegas <eliuriegas@meta.com>,
+        Barry Warsaw <barry@python.org>,
+        Donald Stufft <donald@stufft.io>,
+        Andy R. Terrel <andy.terrel@gmail.com>
+Discussions-To: Pending
+Status: Draft
+Type: Standards Track
+Topic: Packaging
+Requires: 825, 9999
+Created: 02-Mar-2026
+Post-History: Pending
+
+Abstract
+========
+
+
+Motivation
+==========
+
+
+Specification
+=============
+
+Definitions
+-----------
+
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+"SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
+document are to be interpreted as described in :rfc:`2119`.
+
+
+Rationale
+=========
+
+
+Backwards Compatibility
+=======================
+
+
+Security Implications
+=====================
+
+
+How to Teach This
+=================
+
+
+Reference Implementation
+========================
+
+The `variantlib <https://github.com/wheelnext/variantlib>`__ project
+provides a reference implementation of low-level library functions for
+this PEP. The `pep_817_wheel_variants
+<https://github.com/wheelnext/pep_817_wheel_variants>`__ monorepo
+includes a demo ports of a few build systems.
+
+
+Rejected Ideas
+==============
+
+
+
+Open Issues
+===========
+
+
+Acknowledgements
+================
+
+This work would not have been possible without the contributions and
+feedback of many people in the Python packaging community. In
+particular, we would like to credit the following individuals for their
+help in shaping this PEP (in alphabetical order):
+
+Alban Desmaison, Bradley Dice, Chris Gottbrath, Dmitry Rogozhkin,
+Emma Smith, Geoffrey Thomas, Henry Schreiner, Jeff Daily, Jeremy Tanner,
+Jithun Nair, Keith Kraus, Leo Fang, Mike McCarty, Nikita Shulga,
+Paul Ganssle, Philip Hyunsu Cho, Robert Maynard, Vyas Ramasubramani,
+and Zanie Blue.
+
+
+Change History
+==============
+
+- xx-yyy-2026
+
+  - Initial version, split from :pep:`817` draft.
+
+
+Appendices
+==========
+
+::
+
+    - :ref:`pep9998-variant-json-schema`
+
+
+Copyright
+=========
+
+This document is placed in the public domain or under the
+CC0-1.0-Universal license, whichever is more permissive.
