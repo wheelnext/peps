@@ -26,6 +26,11 @@ Abstract
 Motivation
 ==========
 
+:pep:`825` and :pep:`9999` introduced variant wheels while focusing on
+the file format and installation process. This PEP follows up on that by
+defining a consistent data format and behavior for building variant
+wheels.
+
 
 Specification
 =============
@@ -36,6 +41,118 @@ Definitions
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
 "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
 document are to be interpreted as described in :rfc:`2119`.
+
+
+Building variant wheels
+-----------------------
+
+Tools MAY support building variant wheels. When building variant wheels,
+they MUST ensure that the produced wheels conform to :pep:`825` and
+:pep:`9999`. In particular, tools MUST ensure that:
+
+- variant metadata conforms to the schema
+- variant label matches the only key in the ``variants`` dictionary
+- there are entries in ``default-priorities.namespace`` and
+  ``providers`` dictionaries for all namespaces found in variant
+  properties
+- when ``providers.{namespace}.static-properties`` specifies more than
+  one feature name, there are entries for all feature names in
+  ``default-priorities.feature.{namespace}``
+
+Additionally, tools MAY verify that:
+
+- all specified variant properties are valid according to the respective
+  providers (using `extensions to provider plugin API`_)
+
+
+Build backend support
+---------------------
+
+Build backends MAY support building variant wheels. However, :pep:`517`
+and :pep:`660` hooks MUST NOT build variant wheels, unless they are
+explicitly requested by the user.
+
+For consistency, it is RECOMMENDED that build backends implement the
+following interface for building variant wheels:
+
+- variant metadata seed is stored in ``pyproject.toml`` file, as
+  described in `pyproject.toml integration`_
+- the available variants are described in ``variant.variants`` table
+  in said file
+- the ``config_settings`` dictionary of wheel building hooks accepts a
+  ``variant-label`` key that enables building the specified variant from
+  ``variant.variants`` dictionary
+
+
+pyproject.toml integration
+--------------------------
+
+This specification extends the ``pyproject.toml`` file originally
+defined in :pep:`518`. Said file MAY contain a top-level ``variant``
+table that contains variant metadata for the project, as defined by
+:pep:`9999` or a subsequent specification, converted into the respective
+TOML types. When building variant wheels, tools SHOULD use the
+information from this file to seed the variant metadata in the built
+variant wheels. More specifically:
+
+- the ``default-priorities`` dictionary is used to seed
+  ``default-priorities`` in the wheels
+- the ``providers`` dictionary is used to seed ``providers`` in the
+  wheels and to query providers at build time, if necessary
+- the ``variants`` dictionary MAY be used to provide a mapping from
+  variant labels to variant properties, to facilitate requesting a build
+  of a specific variant
+
+Tools MAY provide additional methods of providing the necessary variant
+metadata.
+
+
+Example
+'''''''
+
+.. code:: toml
+
+    [variant]
+    $schema =
+
+    [variant.default-priorities]
+    # prefer CPU features over BLAS/LAPACK variants
+    namespace = ["x86_64", "aarch64", "blas_lapack"]
+
+    # prefer aarch64 version and x86_64 level features over other features
+    # (specific CPU extensions like "sse4.1")
+    feature.aarch64 = ["version"]
+    feature.x86_64 = ["level"]
+
+    # prefer x86-64-v3 and then older (even if CPU is newer)
+    property.x86_64.level = ["v3", "v2", "v1"]
+
+    [variant.providers.aarch64]
+    # example using different package based on Python version
+    requires = [
+       "provider-variant-aarch64 >=0.0.1; python_version >= '3.12'",
+       "legacy-provider-variant-aarch64 >=0.0.1; python_version < '3.12'",
+    ]
+    # use only on aarch64/arm machines
+    enable-if = "platform_machine == 'aarch64' or 'arm' in platform_machine"
+    plugin-api = "provider_variant_aarch64.plugin:AArch64Plugin"
+
+    [variant.providers.x86_64]
+    requires = ["provider-variant-x86-64 >=0.0.1"]
+    # use only on x86_64 machines
+    enable-if = "platform_machine == 'x86_64' or platform_machine == 'AMD64'"
+    plugin-api = "provider_variant_x86_64.plugin:X8664Plugin"
+
+    [variant.providers.blas_lapack]
+    # plugin-api inferred from requires
+    requires = ["blas-lapack-variant-provider"]
+    # plugin used only when building package, properties will be inlined
+    # into variant.json
+    install-time = false
+
+
+Extensions to provider plugin API
+---------------------------------
 
 
 Rationale
