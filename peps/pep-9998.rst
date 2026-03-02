@@ -110,6 +110,10 @@ metadata.
 Example
 '''''''
 
+The ``pyproject.toml`` file corresponding to the package with variant
+metadata equivalent to the one provided in the example in :pep:`9999`
+could look like the following:
+
 .. code:: toml
 
     [variant]
@@ -199,6 +203,9 @@ ordering).
 
 Example implementation
 ''''''''''''''''''''''
+
+The example plugin implementation from :pep:`9999` can be extended in
+the following way:
 
 .. code:: python
 
