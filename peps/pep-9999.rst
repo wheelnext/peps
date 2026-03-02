@@ -196,6 +196,9 @@ keys:
 Example
 '''''''
 
+The ``foo-1.2.3-variants.json`` example from :pep:`825` can be extended
+in the following way:
+
 .. code:: json5
 
     {
