@@ -729,8 +729,8 @@ Change History
   - Namespaces have been removed from the `provider plugin API`_.
     Instead, the namespace is named by the package in `variant
     metadata`_.
-  - The ``enable-if`` key has been removed from `provider information`_,
-    as it was deemed redundant.
+  - The ``enable-if`` and ``install-time`` keys have been removed from
+    `provider information`_, as they were deemed redundant.
   - The ``static-properties`` table has been moved into `provider
     information`_.
 
