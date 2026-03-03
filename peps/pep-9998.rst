@@ -428,6 +428,15 @@ Change History
 - xx-yyy-2026
 
   - Initial version, split from :pep:`817` draft.
+  - A specific build backend interface for building variant wheels was
+    proposed.
+  - The ``variants`` dictionary is now permitted in ``pyproject.toml``
+    metadata, and it can be used to define available variants to build.
+  - A new ``build-requires`` key was introduced in provider metadata.
+    It can only be used ``pyproject.toml`` and it is used to populate
+    ``static-properties`` from a provider plugin at build time. It
+    replaced the previous combination of ``install-time = false`` with
+    non-empty ``requires``.
 
 
 Appendices
