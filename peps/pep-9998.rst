@@ -357,6 +357,36 @@ When populating static properties, the tool MUST:
 Rationale
 =========
 
+This PEP considers a variety of possible tools that may emit variant
+wheels, including build backends, build frontends and tools dedicated to
+converting regular wheels into variant wheels. A standardized interfaces
+for project tree metadata and build backends are proposed to offer
+consistent user experience, but are by no means mandatory. The standard
+``pyproject.toml`` file is used to avoid spreading the project
+configuration across multiple files, and the same schema as for variant
+metadata is used.
+
+When using build backends, using ``get_requires*()`` hooks for exposing
+provider plugin dependencies is recommended, to reuse the existing logic
+for creating isolated environments and installing packages. This implies
+that provider plugin packages are treated as regular build dependencies.
+
+The provider plugin API is extended to enable verifying whether the
+properties specified for a variant are correct. To this purpose, a
+``get_all_configs()`` function is introduced that is symmetric to
+``get_supported_configs()`` introduced in :pep:`9999`. However, the
+build tools are not required to perform this validation, as it requires
+installing and querying provider plugins.
+
+Furthermore, this PEP permits populating ``static-properties`` in
+provider information using provider plugins. This needs both to be
+supported by the plugin in question, and explicitly enabled in the
+package, through using ``build-requires`` in place of ``requires``. This
+can be used to ensure that multiple packages use the same properties for
+the same features, such as BLAS/LAPACK library names. The process is
+handled entirely at build time, and the resulting wheel is fully
+compliant with :pep:`9999`.
+
 
 Backwards Compatibility
 =======================
