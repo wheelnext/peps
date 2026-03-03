@@ -423,6 +423,12 @@ they are treated equivalently to other build dependencies.
 How to Teach This
 =================
 
+This PEP is primarily oriented towards package maintainers. The primary
+source of information will be the documentation of build backends and
+other tools that support building variant wheels. The documentation
+present on ``packaging.python.org`` will also be updated for the
+recommended build backend interface.
+
 
 Reference Implementation
 ========================
