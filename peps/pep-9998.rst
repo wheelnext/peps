@@ -227,7 +227,7 @@ ordering).
 Additionally, the following OPTIONAL attribute is added:
 
 - ``all_properties_compatible: bool = False``; if it set to ``True``,
-  then all valid feature names and values are always supported. In that
+  then all valid feature names and values are always compatible. In that
   case, the ``get_supported_configs()`` function MUST always return the
   same value as ``get_all_configs()`` (modulo ordering).
 
