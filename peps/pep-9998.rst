@@ -278,8 +278,8 @@ the following way:
         ]
 
 
-Example AoT plugin implementation
-'''''''''''''''''''''''''''''''''
+Example implementation of a plugin suitable for build-time use
+'''''''''''''''''''''''''''''''''-----------------------------
 
 .. code:: python
 
@@ -387,10 +387,10 @@ handled entirely at build time, and the resulting wheel is fully
 compliant with :pep:`9999`.
 
 Technically, the presence of both ``get_supported_configs()`` and
-``get_all_configs()`` for AoT plugins is redundant: both must return the
-same values, except that the latter may return them in any order.
-However, the specification requires both to keep a single interface for
-all provider plugins.
+``get_all_configs()`` when all properties are compatible is redundant:
+both must return the same values, except that the latter may return them
+in any order.  However, the specification requires both to keep a single
+interface for all provider plugins.
 
 
 Backwards Compatibility
