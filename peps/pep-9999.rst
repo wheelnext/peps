@@ -436,31 +436,29 @@ Example implementation
         ...  # implementation not provided
 
 
-    class MyPlugin:
-        @staticmethod
-        def get_supported_configs() -> list[VariantFeatureConfig]:
-            current_version = _get_current_version()
-            if current_version is None:
-                # no runtime found, system not supported at all
-                return []
+    def get_supported_configs() -> list[VariantFeatureConfig]:
+        current_version = _get_current_version()
+        if current_version is None:
+            # no runtime found, system not supported at all
+            return []
 
-            return [
-                VariantFeatureConfig(
-                    name="min_version",
-                    # [current, current - 1, ..., 1]
-                    values=[str(x) for x in range(current_version, 0, -1)],
-                    multi_value=False,
-                ),
-                VariantFeatureConfig(
-                    name="gpu",
-                    # this may be empty if no GPUs are supported --
-                    # 'example :: gpu feature' is not supported then;
-                    # but wheels with no GPU-specific code and only
-                    # 'example :: min_version' could still be installed
-                    values=[x for x in _ALL_GPUS if _is_gpu_available(x)],
-                    multi_value=True,
-                ),
-            ]
+        return [
+            VariantFeatureConfig(
+                name="min_version",
+                # [current, current - 1, ..., 1]
+                values=[str(x) for x in range(current_version, 0, -1)],
+                multi_value=False,
+            ),
+            VariantFeatureConfig(
+                name="gpu",
+                # this may be empty if no GPUs are supported --
+                # 'example :: gpu feature' is not supported then;
+                # but wheels with no GPU-specific code and only
+                # 'example :: min_version' could still be installed
+                values=[x for x in _ALL_GPUS if _is_gpu_available(x)],
+                multi_value=True,
+            ),
+        ]
 
 
 Future extensions
