@@ -255,29 +255,27 @@ the following way:
     _ALL_GPUS = ["narf", "poit", "zort"]
 
 
-    class MyPlugin:
-        @staticmethod
-        def get_supported_configs() -> list[VariantFeatureConfig]:
-            ...  # same as in PEP 9999
+    def get_supported_configs() -> list[VariantFeatureConfig]:
+        ...  # same as in PEP 9999
 
-        @staticmethod
-        def get_all_configs() -> list[VariantFeatureConfig]:
-            return [
-                VariantFeatureConfig(
-                    name="min_version",
-                    # [1, 2, 3, 4] (the order does not matter)
-                    values=[str(x) for x in range(1, _MAX_VERSION + 1)],
-                    # single-valued, since there is always one minimum
-                    multi_value=False,
-                ),
-                VariantFeatureConfig(
-                    name="gpu",
-                    # [narf, poit, zort]
-                    values=_ALL_GPUS,
-                    # multi-valued, since a package can target multiple GPUs
-                    multi_value=True,
-                ),
-            ]
+
+    def get_all_configs() -> list[VariantFeatureConfig]:
+        return [
+            VariantFeatureConfig(
+                name="min_version",
+                # [1, 2, 3, 4] (the order does not matter)
+                values=[str(x) for x in range(1, _MAX_VERSION + 1)],
+                # single-valued, since there is always one minimum
+                multi_value=False,
+            ),
+            VariantFeatureConfig(
+                name="gpu",
+                # [narf, poit, zort]
+                values=_ALL_GPUS,
+                # multi-valued, since a package can target multiple GPUs
+                multi_value=True,
+            ),
+        ]
 
 
 Example AoT plugin implementation
@@ -306,6 +304,7 @@ Example AoT plugin implementation
                 multi_value=False,
             ),
         ]
+
 
     def get_all_configs() -> list[_VariantFeatureConfig]:
         return get_supported_configs()
