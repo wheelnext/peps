@@ -226,10 +226,10 @@ ordering).
 
 Additionally, the following OPTIONAL attribute is added:
 
-- ``is_aot_plugin: bool = False``; if it set to ``True``, then all valid
-  feature names and values are always supported. In that case, the
-  ``get_supported_configs()`` function MUST always return the same value
-  as ``get_all_configs()`` (modulo ordering).
+- ``all_properties_compatible: bool = False``; if it set to ``True``,
+  then all valid feature names and values are always supported. In that
+  case, the ``get_supported_configs()`` function MUST always return the
+  same value as ``get_all_configs()`` (modulo ordering).
 
 
 Example implementation
@@ -293,7 +293,7 @@ Example AoT plugin implementation
         multi_value: bool
 
 
-    is_aot_plugin = True
+    all_properties_compatible = True
 
 
     def get_supported_configs() -> list[_VariantFeatureConfig]:
@@ -329,9 +329,9 @@ plugin API endpoint.
 
 When populating static properties, the tool MUST:
 
-1. Ensure that the loaded plugin has ``is_aot_plugin == True``
-   attribute. It is invalid to use a plugin without that attribute in
-   ``build-requires``.
+1. Ensure that the loaded plugin has ``all_properties_compatible ==
+   True`` attribute. It is invalid to use a plugin without that
+   attribute in ``build-requires``.
 
 2. Call ``get_supported_configs()`` to obtain the ordered lists of
    supported feature name and their values.
