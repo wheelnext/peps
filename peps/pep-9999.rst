@@ -50,7 +50,7 @@ satisfying three use cases:
 2. Variants that express non-platform properties, such as different
    BLAS/LAPACK or OpenMP implementations, or debug builds. Here all
    variants that were built are compatible, and the goal is to provide
-   user with the ability to explicitly select a non-default variant.
+   users with the ability to explicitly select a non-default variant.
 
 3. Variants that express compatibility with different dependency
    versions, particularly aiming to express Application Binary Interface
@@ -91,7 +91,7 @@ rules apply, in order:
    that the list of compatible features is empty and they MUST NOT use
    the provider in any way. Otherwise, proceed to step 2.
 
-2. A variant provider metadata MAY include a static list of compatible
+2. A variant provider's metadata MAY include a static list of compatible
    features and their values. If that is the case, the tools MUST use
    the static lists. Otherwise, proceed to step 3.
 
@@ -271,7 +271,7 @@ they are mutually exclusive within any single release version on an
 index.
 
 To make it easier to discover and install plugins, they SHOULD be
-published in the same indexes that the packages using them. In
+published in the same indexes as the packages using them. In
 particular, packages published to PyPI MUST NOT rely on plugins that
 need to be installed from other indexes.
 
