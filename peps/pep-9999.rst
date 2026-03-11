@@ -38,7 +38,7 @@ data in binary packages, in the form of variant properties. It provided
 the foundations by organizing the variant properties into namespaces.
 However, it did not specify how variant namespaces are governed, nor how
 to determine which variant properties are compatible with a particular
-use system. This PEP aims to fill this gap.
+system. This PEP aims to fill this gap.
 
 The PEP is specifically aiming to make variant wheels suitable for
 satisfying three use cases:
@@ -100,11 +100,11 @@ rules apply, in order:
    said list, the tools MUST use it. Otherwise, proceed to step 4.
 
 4. If no static list of compatible features and their values is
-   provided, the variant provider metadata MUST specify a list of
-   required Python packages that provide a variant provider plugin. The
-   tools MAY choose to vendor or reimplement plugin packages at their
-   leisure. If that is the case, they MUST obtain the list from their
-   implementation.  Otherwise, proceed to step 5.
+   provided, the variant provider metadata MUST specify a Python package
+   that provides a variant provider plugin. The tools MAY choose to
+   vendor or reimplement plugin packages. If that is the case, they
+   SHOULD obtain the list from their implementation.  Otherwise, proceed
+   to step 5.
 
 5. The tools MAY provide list of trusted packages that are permitted to
    be used by default. They SHOULD provide a way for the user to trust
@@ -262,28 +262,29 @@ High level design
 '''''''''''''''''
 
 All variants published on a single index for a specific package version
-MUST use the same provider for a given namespace. Attempting to load
-more than one plugin for the same namespace in the same release version
-MUST result in a fatal error. While multiple plugins for the same
-namespace MAY exist across different packages, release versions or
-indexes (such as when a plugin is forked due to being unmaintained),
-they are mutually exclusive within any single release version on an
-index.
+MUST use the same provider for a given namespace. While multiple plugins
+for the same namespace MAY exist across different packages, release
+versions or indexes (such as when a plugin is forked due to being
+unmaintained), they are mutually exclusive within any single release
+version on an index.
 
 To make it easier to discover and install plugins, they SHOULD be
 published in the same indexes as the packages using them. In
 particular, packages published to PyPI MUST NOT rely on plugins that
 need to be installed from other indexes.
 
-Except for namespaces reserved as part of this PEP, installable Python
-packages MUST be provided for plugins. The entire dependency tree of
-such a plugin MUST be installable using non-variant wheels, and variant
-wheels MUST NOT be used.
+Except for namespaces reserved as part of this PEP and variant providers
+that include static lists of compatible features and their values as
+part of their metadata, installable Python packages MUST be provided for
+plugins. The entire dependency tree of such packages MUST be installable
+using non-variant wheels, and variant wheels MUST NOT be used while
+installing them.
 
 As noted in the `Providers`_ section, these plugins can also be
-reimplemented by tools needing them. In the latter case, the resulting
-reimplementation does not need to follow the API defined in this
-section.
+reimplemented by tools needing them. If that is the case, the API
+defined in this section does not apply to these implementations.
+However, the reimplementer is responsible for ensuring consistent
+behavior with the published provider.
 
 A plugin implemented as Python package exposes callables that are called
 via:
@@ -575,7 +576,7 @@ for example debug or experimental builds of packages.
 Installing provider plugins in isolated environments is recommended, as
 that permits tools to automatically deploy them without affecting the
 system packages. However, this is not a requirement to permit other
-options. For example, build backends may prefer reusing the isolated
+options. For example, build frontends may prefer reusing the isolated
 build environment for this.
 
 The ``requires`` and ``plugin-api`` keys follow the precedent of
