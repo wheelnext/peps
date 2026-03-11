@@ -82,8 +82,12 @@ namespaces, as required by :pep:`825`.
 The namespace ``abi_dependency`` is reserved for the `ABI Dependency
 Variant Provider <#abi-dependency-variant-provider-optional>`_. All
 other namespaces used MUST be defined in the `provider information`_
-dictionary in `variant metadata`_. For every namespace, the following
-rules apply, in order:
+dictionary in `variant metadata`_.
+
+Installers and other tools that need to determine whether a variant is
+compatible with the system MUST follow the specified algorithm in order
+to obtain the list of compatible features and feature values for every
+namespace:
 
 1. A variant provider MAY be enabled or disabled by default. The tools
    MUST provide a way to explicitly enable a provider, and MAY provide a
