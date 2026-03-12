@@ -178,10 +178,11 @@ information dictionary:
   install the provider plugin. If the dependency specifiers include
   environment markers, these are evaluated against the environment where
   the plugin is being installed, and the requirements for which the
-  markers evaluate to false are filtered out. At least   one dependency
+  markers evaluate to false are filtered out. At least one dependency
   MUST remain present in every possible environment after filtering.
-  Additionally, if ``plugin-api`` is not specified, the first dependency
-  present after filtering MUST always evaluate to the same API endpoint.
+  Additionally, if ``plugin-api`` is not specified explicitly, the first
+  dependency that remains after filtering MUST always evaluate to the
+  same default ``plugin-api`` value.
 
 A provider information dictionary MAY additionally contain the following
 key:
@@ -195,9 +196,10 @@ contain the following key:
 
 - ``plugin-api: str``: The API endpoint for the plugin. If it is
   specified, it MUST be an object reference as explained in the `API
-  endpoint`_ section. If it is missing, the package name from the first
-  dependency specifier in ``requires`` is used, after replacing all
-  ``-`` characters with ``_`` in the normalized package name.
+  endpoint`_ section. If it is not specified, a default value is
+  determined by normalizing the package name from the first dependency
+  specifier in ``requires`` and then replacing all ``-`` characters with
+  ``_`` in the normalized package name.
 
 It is invalid to specify ``requires`` or ``plugin-api`` if
 ``static-properties`` are present.
