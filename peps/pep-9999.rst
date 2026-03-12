@@ -97,11 +97,12 @@ namespace:
 
 2. A variant provider's metadata MAY include a static list of compatible
    features and their values. If that is the case, the tools MUST use
-   the static lists. Otherwise, proceed to step 3.
+   the static lists exclusively. Otherwise, proceed to step 3.
 
 3. The tools SHOULD implement a way for the user to provide a static
    list of compatible features and their values. If the user provides
-   said list, the tools MUST use it. Otherwise, proceed to step 4.
+   said list, the tools MUST use it exclusively. Otherwise, proceed to
+   step 4.
 
 4. If no static list of compatible features and their values is
    provided, the variant provider metadata MUST specify a Python package
@@ -126,8 +127,8 @@ Variant metadata
 ----------------
 
 This PEP extends the metadata introduced in :pep:`825` with an
-additional ``providers`` key. Therefore, the metadata has the following
-structure:
+additional ``providers`` key, described in the `Provider information`_
+subsection. Therefore, the metadata has the following structure:
 
 .. code:: text
 
@@ -153,9 +154,10 @@ included in the Appendix of this PEP. The schema is available in
 Provider information
 ''''''''''''''''''''
 
-``providers`` is a dictionary, the keys are namespaces, the values are
+Variant metadata must feature a ``providers`` key. It corresponds to a
+dictionary, in which the keys are namespaces, the values are
 dictionaries with provider information. It specifies how to install and
-use variant providers. Its set of keys MUST match the set of values in
+use variant providers.  Its set of keys MUST match the set of values in
 the ``default-priorities.namespace`` list of variant metadata.
 
 The use of provider information is described in the `Providers`_ and
