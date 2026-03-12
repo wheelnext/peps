@@ -189,17 +189,17 @@ could look like the following:
     # RECOMMENDED: variants that can be built
     # ---------------------------------------
 
-    # "x8664v3_openblas" label corresponds to:
+    # "x86_64_v3_openblas" label corresponds to:
     # - blas_lapack :: library :: openblas
     # - x86_64 :: level :: v3
-    [variant.variants.x8664v3_openblas]
+    [variant.variants.x86_64_v3_openblas]
     blas_lapack.library = ["openblas"]
     x86_64.level = ["v3"]
 
-    # "x8664v4_mkl" label corresponds to:
+    # "x86_64_v4_mkl" label corresponds to:
     # - blas_lapack :: library :: mkl
     # - x86_64 :: level :: v4
-    [variant.variants.x8664v4_mkl]
+    [variant.variants.x86_64_v4_mkl]
     blas_lapack.library = ["mkl"]
     x86_64.level = ["v4"]
 
