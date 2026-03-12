@@ -192,14 +192,14 @@ could look like the following:
     # "x8664v3_openblas" label corresponds to:
     # - blas_lapack :: library :: openblas
     # - x86_64 :: level :: v3
-    [variant.variants.x8664_v3_openblas]
+    [variant.variants.x8664v3_openblas]
     blas_lapack.library = ["openblas"]
     x86_64.level = ["v3"]
 
     # "x8664v4_mkl" label corresponds to:
     # - blas_lapack :: library :: mkl
     # - x86_64 :: level :: v4
-    [variant.variants.x8664_v4_mkl]
+    [variant.variants.x8664v4_mkl]
     blas_lapack.library = ["mkl"]
     x86_64.level = ["v4"]
 
@@ -214,7 +214,7 @@ specifies either ``requires`` or ``build-requires`` key, per the
 The plugin interface specified in :pep:`9999` is extended by adding the
 following REQUIRED function:
 
-- ``get_all_config() -> list[VariantFeatureConfigType]`` that returns a
+- ``get_all_configs() -> list[VariantFeatureConfigType]`` that returns a
   list of variant feature names and their values that are valid
   according to the provider plugin. The ordering of the lists is
   insignificant. A particular plugin version MUST always return the same
@@ -403,10 +403,8 @@ variant wheels by default.
 
 The introduction of a new ``variant`` table (in `pyproject.toml
 integration`_) follows from :pep:`518` specifying that such tables are
-"reserved for future use by other PEPs". Nevertheless, it is possible
-that overly strict tools will reject such ``pyproject.toml`` files as
-unsupported, even if the use of wheel variants is not relevant to their
-use.
+"reserved for future use by other PEPs". Therefore, introducing the
+``[variant]`` table is backwards compatible.
 
 
 Security Implications
