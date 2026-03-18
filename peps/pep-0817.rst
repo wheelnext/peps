@@ -23,13 +23,14 @@ Abstract
 ========
 
 Python's existing wheel packaging format uses
-:doc:`packaging:specifications/platform-compatibility-tags` to specify
-a given wheel's supported environments. These tags are unable to express
-modern hardware configurations and their features, such as the availability of
-GPU acceleration. The tags fail to provide custom package variants, such as builds
-against different dependency ABIs. These inabilities are particularly challenging for
-scientific computing, artificial intelligence (AI), machine learning
-(ML), and high-performance computing (HPC) communities.
+:doc:`packaging:specifications/platform-compatibility-tags` to specify a
+given wheel's supported environments. These tags are unable to express
+modern hardware configurations and their features, such as the
+availability of GPU acceleration. The tags fail to provide custom
+package variants, such as builds against different dependency ABIs.
+These inabilities are particularly challenging for scientific computing,
+artificial intelligence (AI), machine learning (ML), and
+high-performance computing (HPC) communities.
 
 This PEP proposes "Wheel Variants", an extension to the
 :doc:`packaging:specifications/binary-distribution-format`. This
@@ -46,8 +47,9 @@ proposes:
   dynamically detect platform attributes and select the most suitable
   wheel.
 
-The goal is for the obvious installation commands (``{tool} install <package>``)
-to select the most appropriate wheel, and provide the best user experience.
+The goal is for the obvious installation commands (``{tool} install
+<package>``) to select the most appropriate wheel, and provide the best
+user experience.
 
 
 Motivation
@@ -516,7 +518,9 @@ The potential for improvement can be summarized as:
 Out-of-scope features
 ---------------------
 
-This PEP presents the minimal scope required to meet modern heterogenous system needs. It leaves aspects beyond the minimal scope to evolve via tools or future PEPs. A non-exhaustive list of these aspects include:
+This PEP presents the minimal scope required to meet modern heterogenous
+system needs. It leaves aspects beyond the minimal scope to evolve via
+tools or future PEPs. A non-exhaustive list of these aspects include:
 
 - The format of a static file to select variants deterministically or
   include variants in a ``pylock.toml`` file,
@@ -850,9 +854,9 @@ metadata.
 
 Variant features can be declared as allowing multiple values to be
 present within a single variant wheel. If that is the case, these values
-are matched as a logical OR, i.e. only a single value needs to
-be compatible with the system for the wheel to be considered supported.
-On the other hand, features are treated as a logical AND, i.e. all of them
+are matched as a logical OR, i.e. only a single value needs to be
+compatible with the system for the wheel to be considered supported. On
+the other hand, features are treated as a logical AND, i.e. all of them
 need to be compatible. This provides some flexibility in designating
 variant compatibility while avoiding having to implement a complete
 boolean logic.
@@ -1336,8 +1340,8 @@ tool-specific options to disable use of source distributions,
 have been relying on the assumption that no code external to the system
 will be executed while resolving dependencies, installing a wheel or
 otherwise processing it. To uphold this assumption, the proposal
-explicitly requires that untrusted provider plugin packages are never installed
-without explicit user consent.
+explicitly requires that untrusted provider plugin packages are never
+installed without explicit user consent.
 
 The `Providers`_ section of the specification provides further
 suggestions that aim to improve both security and the user experience.
@@ -1401,10 +1405,11 @@ This is equivalent to the following regular expression:
 ``^[0-9a-z._]{1,16}$``.
 
 Every label MUST uniquely correspond to a specific set of variant
-properties, which MUST be the same for all wheels using the same label within a single
-package version. Variant labels SHOULD be specified at wheel build time,
-as human-readable strings. The label ``null`` is reserved for the null
-variant and MUST use an empty set of variant properties.
+properties, which MUST be the same for all wheels using the same label
+within a single package version. Variant labels SHOULD be specified at
+wheel build time, as human-readable strings. The label ``null`` is
+reserved for the null variant and MUST use an empty set of variant
+properties.
 
 Installers that do not implement this specification MUST ignore wheels
 with variant label when installing from an index, and fall back to a
@@ -2669,9 +2674,9 @@ Variants being entirely or transitionally opt-in
 In discussing the security concerns, proposals were made to make variant
 provider usage entirely opt-in, either permanently, or at least
 initially to facilitate further testing. While such approaches may
-alter who takes responsibility of vetting the provider code, and hence the maintenance
-effort or number of packages/maintainers that need to be trusted,
-they are not suitable as long-term solutions.
+alter who takes responsibility of vetting the provider code, and hence
+the maintenance effort or number of packages/maintainers that need to be
+trusted, they are not suitable as long-term solutions.
 
 Most importantly, the opt-in mechanism would lead to far worse user
 experience out-of-the-box. For variant-enabled packages, the default
@@ -2805,7 +2810,8 @@ Change history
 
 - TBD
 
-  - Added high-level outlines of suggested implementation logic per type of packaging tool, and a diagram for installer behavior.
+  - Added high-level outlines of suggested implementation logic per type
+    of packaging tool, and a diagram for installer behavior.
   - Deemphasized vendoring providers in installers. While it is still
     permitted as an implementation choice, it is not presented as the
     recommended solution to improve security anymore.
