@@ -2808,7 +2808,7 @@ and Zanie Blue.
 Change history
 ==============
 
-- TBD
+- 18-Mar-2026
 
   - Added high-level outlines of suggested implementation logic per type
     of packaging tool, and a diagram for installer behavior.
