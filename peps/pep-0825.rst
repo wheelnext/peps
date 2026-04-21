@@ -379,11 +379,8 @@ like:
 Variant ordering
 ----------------
 
-To determine which wheel to install when multiple wheels are compatible,
-variant metadata MUST be taken into consideration. This section
-describes selection based on the assumption that all wheels are sorted
-in the order of priority. Tools that select wheels using different
-algorithms MUST implement them so that they arrive at the same result.
+This specification defines an ordering between different wheels based on
+the presence of variant metadata.
 
 For the purpose of ordering, variant properties are grouped into
 features, and features into namespaces. For every namespace, the tool
