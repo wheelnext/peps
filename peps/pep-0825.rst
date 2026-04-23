@@ -300,6 +300,16 @@ Example
     }
 
 
+Scoping
+-------
+
+All the variant metadata is scoped to a single wheel. Unless noted
+otherwise (for example, in `index-level metadata`_), the tools MUST NOT
+assume that the same label used across two wheels corresponds to the
+same set of properties, or that namespaces, features or properties that
+compare equal across two wheels are equivalent.
+
+
 Index-level metadata
 --------------------
 
@@ -316,13 +326,20 @@ the index, including an (OPTIONAL) hash.
 
 This file uses the same structure as `variant metadata`_, except that
 the ``variants`` object MUST list all variants available on the package
-index for the package version in question. The tools MUST ensure that
-the variant metadata across multiple variant wheels of the same package
-version and the index-level metadata file is consistent. They MAY
-require that keys other than ``variants`` have exactly the same values,
-or they may carefully merge their values, provided that no conflicting
-information is introduced, and the result is the same irrespective of
-the order in which the wheels are processed.
+index for the package version in question.
+
+Index-level metadata is scoped to a particular package version on a
+particular index. The tools MUST NOT assume that the same label used
+across different projects, package versions or indexes corresponds to
+the same set of properties, or that namespaces, features or properties
+that compare equal are equivalent.
+
+The tools MUST ensure the metadata across the index-level metadata and
+the corresponding variant wheels is consistent. They MAY require that
+keys other than ``variants`` have exactly the same values, or they may
+carefully merge their values, provided that no conflicting information
+is introduced, and the result is the same irrespective of the order in
+which the wheels are processed.
 
 This file SHOULD NOT be considered immutable and MAY be updated in a
 backward compatible way at any point (e.g. when adding a new variant).
