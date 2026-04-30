@@ -304,13 +304,11 @@ Index-level metadata
 --------------------
 
 For every package version that includes at least one variant wheel,
-there SHOULD exist a corresponding ``{name}-{version}-variants.json``
+there MUST exist a corresponding ``{name}-{version}-variants.json``
 file. The ``{name}`` and ``{version}`` placeholders correspond to the
 package name and version, normalized according to the same rules as
 wheel files, as found in the :ref:`packaging:wheel-file-name-spec` of
-the Binary Distribution Format specification. If the file does not
-exist, the tools MUST assume that all variant wheels for the
-corresponding package version on this index are incompatible.
+the Binary Distribution Format specification.
 
 The exact URL where the file is hosted is insignificant, but it MUST
 be provided in all the responses where the variant wheels are included.
