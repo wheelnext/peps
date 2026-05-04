@@ -819,9 +819,11 @@ package, and therefore the users needs to own only one of them).
 The specification does not impose any formal limits on the number of
 properties expressed, and specifically accounts for the possibility of
 property sets being very long (for example, a long list of GPUs or CPU
-extension sets). To avoid extending wheel filename length, the property
-lists are stored inside the wheel and mapped to a short label that is
-chosen by the package maintainer and intended to be human-readable.
+extension sets). To avoid wheel filenames becoming hard to comprehend
+because of excess of information and potentially causing technical
+issues because of their length, the property lists are stored inside
+the wheel and mapped to a short label that is chosen by the package
+maintainer and intended to be human-readable.
 
 As an optimization, when installing from a remote index, the variant
 metadata is mirrored in a JSON file published on the index. This enables
