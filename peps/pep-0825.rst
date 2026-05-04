@@ -847,16 +847,16 @@ While a future PEP will define how variant properties are provided, a
 baseline assumption is made that the compatible properties will be
 provided in specific order corresponding to their preference. This makes
 it possible to use a generic sorting algorithm that, and later define
-properties as data without having to change the algorithm. Ordering can
-be both controlled on feature level and at value level.
+properties as data without having to change the algorithm.
 
-While feature and value ordering will be provided, namespaces are
-governed independently and considered on equal footing, and therefore
-there will be no standard ordering for them. Instead, the package
-maintainer will decide which namespaces have higher priority, and
-therefore which variants will be preferred. For completeness, the
-specification also permits the maintainers to override the ordering for
-features and values as well.
+A future PEP will define how the ordering for features and values is
+provided. However, namespaces are governed independently and considered
+on equal footing, and therefore there will be no standard ordering for
+them. Instead, the package maintainer will decide which namespaces have
+higher priority, and therefore which variants will be preferred. For
+completeness, the specification also permits the maintainers to override
+the ordering for features and values as well. Tools can also further
+override the variant choice, much like they can do with regular wheels.
 
 In the vast majority of real use cases, ordering based on properties
 will suffice. However, in a pathological case two different variant
