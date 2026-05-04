@@ -848,11 +848,7 @@ baseline assumption is made that the compatible properties will be
 provided in specific order corresponding to their preference. This makes
 it possible to use a generic sorting algorithm that, and later define
 properties as data without having to change the algorithm. Ordering can
-be both controlled on feature level (for example, indicating that a
-wheel built for higher CPU baseline is preferred over a wheel built for
-instruction sets being part of that baseline) and at value level (for
-example, indicating that a wheel built for x86-64-v4 CPU is preferred
-over one built for x86-64-v2, provided that both are supported).
+be both controlled on feature level and at value level.
 
 While feature and value ordering will be provided, namespaces are
 governed independently and considered on equal footing, and therefore
