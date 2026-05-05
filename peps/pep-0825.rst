@@ -1018,6 +1018,45 @@ would be incorrectly deemed compatible because of the
 ``manylinux_2_27_x86_64`` part.
 
 
+Replacing Platform compatibility tags entirely
+----------------------------------------------
+
+Technically, it would be entirely possible to convey the information
+currently passed via the Platform compatibility tags via variant
+properties, and remove these explicit tags from the filename.  However,
+we decided against it for the following reasons:
+
+1. This would result in different naming schemes across variant wheels
+   and non-variant wheels. The former would use a single custom label,
+   whereas the latter would use split Platform compatibility tags. In
+   the case of packages using a non-variant wheel as a fallback, we'd
+   see disjoint layouts such as:
+
+   .. code-block:: text
+
+       # variant wheel, using custom variant label
+       # corresponds to the same actual tags as the fallback wheel
+       torch-2.10.0-cp314_linux_x86_64_cuda13.0.whl
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+       # fallback wheel, using explicit Platform compatibility tags
+       torch-2.10.0-cp314-cp314-manylinux_2_28_x86_64.whl
+                    ^^^^^ ^^^^^ ^^^^^^^^^^^^^^^^^^^^^
+
+2. The current Platform compatibility tags are relatively well-known and
+   understood. While custom variant labels could repeat the scheme, they
+   could also be different, leading to potential confusion. For example,
+   one could name the wheel ``cp414_linux_x86_64`` for simplicity, while
+   actually referring to one of the ``manylinux`` platforms.
+
+3. As defined in this PEP, Platform compatibility tags come with certain
+   metadata overhead. This overhead is considered an acceptable
+   trade-off for the limited number of packages for which Platform
+   compatibility tags are insufficient, but aiming for a complete
+   replacement would mean that eventually all Python packages would
+   suffer from this overhead.
+
+
 Open Issues
 ===========
 
