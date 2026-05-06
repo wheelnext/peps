@@ -1049,7 +1049,7 @@ we decided against it for the following reasons:
    one could name the wheel ``cp414_linux_x86_64`` for simplicity, while
    actually referring to one of the ``manylinux`` platforms.
 
-3. As defined in this PEP, Platform compatibility tags come with certain
+3. As defined in this PEP, variant wheels come with certain
    metadata overhead. This overhead is considered an acceptable
    trade-off for the limited number of packages for which Platform
    compatibility tags are insufficient, but aiming for a complete
