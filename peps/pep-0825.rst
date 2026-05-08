@@ -1056,6 +1056,11 @@ we decided against it for the following reasons:
    replacement would mean that eventually all Python packages would
    suffer from this overhead.
 
+While these issues could eventually be mitigated, the effort required
+from all existing workflows is not justified by the benefit of replacing
+Platform compatibility tags with a more compact, slightly more
+consistent solution.
+
 
 Open Issues
 ===========
