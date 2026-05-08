@@ -847,7 +847,7 @@ The index support aims to account for three scenarios:
    account for minimalistic implementation, the specification permits
    the index to treat said file similarly to a wheel, including
    publishing attributes such as ``yanked``, as long as their values do
-   not provent clients from working.
+   not prevent clients from working.
 
 3. An index implementation that implements complete wheel variant
    support. Such an index will parse uploaded variant wheels, and
