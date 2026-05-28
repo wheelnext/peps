@@ -156,7 +156,7 @@ included in the Appendix of this PEP. The schema is available in
 Provider information
 ''''''''''''''''''''
 
-Variant metadata must feature a ``providers`` key. It corresponds to a
+Variant metadata must include a ``providers`` key. It corresponds to a
 dictionary, in which the keys are namespaces, the values are
 dictionaries with provider information. It specifies how to install and
 use variant providers.  Its set of keys MUST match the set of values in
