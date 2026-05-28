@@ -111,16 +111,18 @@ namespace:
    SHOULD obtain the list from their implementation.  Otherwise, proceed
    to step 5.
 
-5. The tools MAY provide list of trusted packages that are permitted to
-   be used by default. They SHOULD provide a way for the user to trust
-   additional packages. If the list of required provider packages
-   contains any untrusted package, the tools MUST assume that the list
-   of compatible features is empty and they MUST NOT install or use the
-   provider packages. Otherwise, proceed to step 6.
+5. The tools MAY consider some of the required provider plugin packages
+   (and their dependencies) to be trusted by default, and install them
+   automatically. They SHOULD provide a way for the user to permit
+   installing additional provider packages. They MUST NOT install or use
+   any provider packages that are not considered trusted. The tools
+   SHOULD use an isolated virtual environment while installing provider
+   plugin packages.
 
-6. The tools MUST install the specified provider packages and query them
-   via the `provider plugin API`_. The tools SHOULD use an isolated
-   virtual environment for that purpose.
+6. The tools MUST query the trusted and installed provider packages
+   via the `provider plugin API`_ to obtain the list of compatible
+   features and feature values. For providers that were not trusted,
+   the tools MUST assume that the list of compatible features is empty.
 
 
 Variant metadata
