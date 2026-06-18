@@ -1061,6 +1061,40 @@ justifies the benefit of more compact, and slightly more consistent
 naming.
 
 
+Removing ordering information from wheel files
+----------------------------------------------
+
+The specification proposes that all the data needed to order wheel
+variants is stored within the variant metadata (the `default
+priorities`_ dictionary), that is stored in every wheel file and copied
+into the `index-level metadata`_ file. It has been pointed out that this
+information is not meaningful for a single wheel and it may be a source
+of contention since multiple wheels can technically contain inconsistent
+information. Therefore, it was proposed that the dictionary is removed
+from wheel files and kept at index level only.
+
+While the premise is correct, we do not believe that storing additional
+information in the wheel is a problem, and it has a few important
+advantages:
+
+1. It ensures that the complete variant metadata needed to install
+   wheels is stored in a single location, and the index-level metadata
+   can be generated from variant wheels without additional input data.
+   Notably, this empowers indexes to generate it automatically without
+   requiring any additional client-side logic.
+
+2. It enables selecting across multiple wheels without having to
+   generate the index-level metadata file first, which can be useful
+   when installing from local directories. The index-level metadata file
+   remains a cache file rather than a first-order data source.
+
+While it is technically possible for wheels to carry inconsistent
+ordering information, we do believe that it is better to require package
+publishers to ensure its consistency, rather than make the process more
+cumbersome and brittle by requiring them to provide the ordering
+information separately from the wheels themselves.
+
+
 Out of scope
 ------------
 
