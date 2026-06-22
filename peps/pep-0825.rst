@@ -1066,33 +1066,51 @@ Removing ordering information from wheel files
 
 The specification proposes that all the data needed to order wheel
 variants is stored within the variant metadata (the `default
-priorities`_ dictionary), that is stored in every wheel file and copied
-into the `index-level metadata`_ file. It has been pointed out that this
-information is not meaningful for a single wheel and it may be a source
-of contention since multiple wheels can technically contain inconsistent
-information. Therefore, it was proposed that the dictionary is removed
-from wheel files and kept at index level only.
+priorities`_ dictionary). This data is expected to originate from a
+common source per project (a subsequent PEP will propose an integration
+within ``pyproject.toml`` file) and to be copied into every variant
+wheel at build time, and afterwards into the `index-level metadata`_
+file.
 
-While the premise is correct, we do not believe that storing additional
-information in the wheel is a problem, and it has a few important
-advantages:
+On the discussion thread concerning this PEP, `Paul Moore has made an
+extensive argument regarding the data model
+<https://discuss.python.org/t/pep-825-wheel-variants-package-format-split-from-pep-817/106196/111>`__.
+Essentially, Paul is saying that this data becomes a wheel-level
+property that, when inserted in a particular wheel, is saying something
+about "other wheels". We do not believe this is the case. Rather, the
+data is project-level metadata which, which is copied into the wheel.
+Similarly to other project metadata, there is no reference to other
+wheels. And even if, for example, variant wheels using some of the
+specified namespaces are missing from a release completely, that is
+fine, nothing depends on specific other wheels existing.
 
-1. It ensures that the complete variant metadata needed to install
-   wheels is stored in a single location, and the index-level metadata
-   can be generated from variant wheels without additional input data.
-   Notably, this empowers indexes to generate it automatically without
-   requiring any additional client-side logic.
+Furthermore, this design specifically ensures that the index-level
+metadata file is a cache rather than a first-order data source. Since
+all the data is stored in the wheels:
 
-2. It enables selecting across multiple wheels without having to
-   generate the index-level metadata file first, which can be useful
-   when installing from local directories. The index-level metadata file
-   remains a cache file rather than a first-order data source.
+1. It is possible to generate the index-level metadata file based on
+   available wheels alone, wthout any additional input data. Notably,
+   this empowers indexes to generate it automatically without requiring
+   any changes to the tools or workflows used to upload wheels.
 
-While it is technically possible for wheels to carry inconsistent
-ordering information, we do believe that it is better to require package
-publishers to ensure its consistency, rather than make the process more
-cumbersome and brittle by requiring them to provide the ordering
-information separately from the wheels themselves.
+2. It is possible to select across multiple wheels even in absence of
+   index-level metadata file, for example when installing from a local
+   directory.
+
+There is indeed a real risk that two wheels built at different times
+and with different tooling may end up having inconsistent metadata.
+However, the PEP specifically requires consistency, and expects the
+tools to verify it. Furthermore, the problem is more general; such a
+build scenario could lead to any other duplicated part of Core Metadata
+being inconsistent across wheels and causing unexpected behavior in
+tools.
+
+The post also makes a claim that detaching the ordering data from
+variant metadata makes it possible for tools to accept an override of
+the ordering data in a standard format. However, there is no relation
+between that and the presence of ordering data in variant metadata; such
+a format can be introduced either way (for example, using the subset of
+variant metadata).
 
 
 Out of scope
