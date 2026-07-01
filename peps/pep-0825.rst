@@ -799,6 +799,56 @@ To generate the ``{name}-{version}-variants.json`` file:
      ``default-priorities.namespace`` value
 
 
+Installing wheels from multiple sources (non-normative)
+-------------------------------------------------------
+
+Support for installing packages from multiple sources is not
+standardized. The :ref:`packaging:simple-repository-api` defines how a
+client queries the projects and files available from a repository, but
+does not define how an installer combines or prioritizes candidates from
+multiple repositories. This PEP therefore leaves multi-source selection
+implementation-defined. Variant wheels extend the problem because label
+mappings and default priorities are scoped to one index.
+
+Tools processing variant wheels from different sources should treat the
+metadata from each source as separate by default. Matching variant
+labels or namespaces do not establish that they have the same meaning
+across sources. A tool can decline to support multiple sources, or
+reject an installation when more than one source provides compatible
+variant wheels.
+
+A tool that searches sources in priority order can order variants from
+one source at a time using the algorithm in this PEP, and proceed to the
+next source only if the current one has no viable candidates. No
+cross-source metadata merge is needed.
+
+A tool that collates candidates from all sources before selecting among
+them must compare wheels from different sources directly. For a package
+version, if exactly one source provides compatible variant wheels, those
+variants can be selected ahead of non-variant wheels. If multiple
+sources provide compatible variants, their metadata can be combined
+unambiguously only when the parsed JSON documents are equal, or when one
+is a backward-compatible extension of the others. Such an extension
+preserves every existing label-to-property mapping and priority
+relationship, and the result does not depend on source processing order.
+
+When metadata cannot be combined unambiguously, there is no uniquely
+correct global ordering. Valid tool-specific choices include:
+
+- rejecting the installation with an error
+- warning and ignoring variant wheels, then selecting among non-variant
+  wheels
+- using a documented deterministic criterion, such as configured source
+  order, while preserving each source's internal priorities and
+  interpreting each label using its source's metadata
+- requesting additional input from the user
+
+These choices can produce a valid installation without guaranteeing a
+globally optimal selection. Silently fabricating a combined order or
+resolving conflicting label mappings is technically possible but highly
+discouraged: it invents semantics no source declared.
+
+
 Rationale
 =========
 
@@ -1071,13 +1121,6 @@ The following problems are deferred to subsequent PEPs in the series:
 - overriding the compatibility detection using static data
 - building variant wheels
 
-In addition to that, the following matters are left
-implementation-defined:
-
-- Selecting variant wheels from multiple sources. Currently, there is no
-  standard defined behavior for regular wheels, nor consensus across
-  different packaging tools on how to handle that.
-
 
 Acknowledgements
 ================
@@ -1096,6 +1139,11 @@ and Zanie Blue.
 
 Change History
 ==============
+
+- 01-Jul-2026
+
+  - Added non-normative guidance for selecting variant wheels from
+    multiple indexes.
 
 - 06-Apr-2026
 
