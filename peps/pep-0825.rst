@@ -819,29 +819,28 @@ not providing support for using multiple sources at all, or by rejecting
 to proceed if more than one of the sources includes variant wheels.
 
 When processing variant wheels from different sources, it is recommended
-to consider their variant metadata in isolation. In particular, tools
-should not assume that matching variant labels or namespaces across
-different sources are equal.
+to consider their variant metadata in isolation. Matching variant labels
+or namespaces do not establish that they have the same meaning across
+sources.
 
-If index priorities are supported and considered above platform
-compatibility tag level (as in the "index priority" variant described in
-:pep:`766`, for example), the tools need to be only concerned about
-ordering variant wheels from a single source at a time, and the
-algorithm specified in this PEP works without changes.
+A tool that searches sources in priority order (for example, the "index
+priority" in :pep:`766`) can order variants from one source at a time
+using the `variant ordering`_ algorithm, and proceed to the next source
+only if the current one has no viable candidates. No cross-source
+metadata merge is necessary.
 
-If tools need to directly compare wheels from different sources (as in
-the "version priority" variant described in :pep:`766`), and only one of
-the sources features at least one compatible variant wheel, only wheels
-from this source need to be considered, as variants are preferred over
-non-variant wheels.
+A tool that collates candidates from all sources before selecting among
+them (for example, "version priority" in :pep:`766`) must compare wheels
+from different sources directly. For a package version, if exactly one
+source provides compatible variant wheels, those variants can be
+selected ahead of non-variant wheels, as generally variant wheels are
+preferred over non-variant wheels. If multiple sources provide
+compatible variants, their metadata can be combined unambiguously only
+when the metadata is consistent as specified in the `index-level
+metadata`_ section.
 
-If tools need to compare variant wheels from different sources and the
-variant metadata between them is consistent as specified in
-`index-level metadata`_ section, then the method of merging specified
-there can be used.
-
-If the variant metadata is not consistent, there are multiple valid
-choices, including but not limited to:
+When metadata cannot be combined unambiguously, there is no uniquely
+correct global ordering. Valid tool-specific choices include:
 
 - refusing to install with an error
 - printing a warning and ignoring variant wheels, falling back to
@@ -849,7 +848,12 @@ choices, including but not limited to:
 - using a deterministic criterion for selecting among multiple
   compatible variant wheels, for example by preferring the wheel from
   the index that came earlier in the option arguments
-- requested additional input from the user
+- requesting additional input from the user
+
+These choices can produce a valid installation without guaranteeing a
+globally optimal selection. Silently fabricating a combined order or
+resolving conflicting label mappings is technically possible, but
+discouraged: it fabricates semantics that no source declared.
 
 
 Rationale
@@ -1142,6 +1146,11 @@ and Zanie Blue.
 
 Change History
 ==============
+
+- 03-Jul-2026
+
+  - Added a non-normative guidance for installing variant wheels from
+    multiple sources.
 
 - 06-Apr-2026
 
