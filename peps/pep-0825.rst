@@ -809,7 +809,7 @@ behavior. This problem is described in more detail in the informational
 :pep:`766`. Variant wheels expand the problem scope, as the variant
 metadata that influences the selection among multiple wheels is scoped
 at index level, and therefore the metadata acquired from different
-indexed cannot be compared or combined in a meaningful way. For these
+indexes cannot be compared or combined in a meaningful way. For these
 reasons, the specification does not attempt to standardize a behavior,
 but instead considers it implementation-defined and provides a few
 non-normative suggestions on the possible solutions.
