@@ -1072,24 +1072,24 @@ within ``pyproject.toml`` file) and to be copied into every variant
 wheel at build time, and afterwards into the `index-level metadata`_
 file.
 
-On the discussion thread concerning this PEP, `Paul Moore has made an
-extensive argument regarding the data model
+On the discussion thread concerning this PEP, `an extensive argument
+regarding the data model was made
 <https://discuss.python.org/t/pep-825-wheel-variants-package-format-split-from-pep-817/106196/111>`__.
-Essentially, Paul is saying that this data becomes a wheel-level
+Essentially, the argument was that this data becomes a wheel-level
 property that, when inserted in a particular wheel, is saying something
 about "other wheels". We do not believe this is the case. Rather, the
-data is project-level metadata which, which is copied into the wheel.
+data is project-level metadata which is copied into the wheel.
 Similarly to other project metadata, there is no reference to other
-wheels. And even if, for example, variant wheels using some of the
-specified namespaces are missing from a release completely, that is
-fine, nothing depends on specific other wheels existing.
+wheels. For example, the ordering data can specify namespaces for which
+no variant wheels exist in a particular release; nothing in the format
+depends on the presence of specific other wheels.
 
 Furthermore, this design specifically ensures that the index-level
 metadata file is a cache rather than a first-order data source. Since
 all the data is stored in the wheels:
 
 1. It is possible to generate the index-level metadata file based on
-   available wheels alone, wthout any additional input data. Notably,
+   available wheels alone, without any additional input data. Notably,
    this empowers indexes to generate it automatically without requiring
    any changes to the tools or workflows used to upload wheels.
 
