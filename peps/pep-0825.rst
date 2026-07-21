@@ -73,7 +73,7 @@ document are to be interpreted as described in :rfc:`2119`.
 Implementation requirements
 ---------------------------
 
-This specification is written from the perspective of file format.
+This specification is written from the perspective of file format producers.
 In the context of format definitions, the word "MUST" specifically
 indicates that the requirement must be satisfied for the data to be
 considered valid according to this specifications.
