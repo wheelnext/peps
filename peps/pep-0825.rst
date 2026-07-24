@@ -381,7 +381,7 @@ algorithm:
 2. For every namespace, take the ordered list of compatible feature
    names obtained previously. This is ``feature_order`` in the example.
 
-3. For every feature, take the order list of compatible values obtained
+3. For every feature, take the ordered list of compatible values obtained
    previously. This is ``value_order`` in the example.
 
 4. For every group, determine the most preferred value corresponding to
