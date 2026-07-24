@@ -214,8 +214,9 @@ include updated versions of the schema. The schema is available in
 Default priorities
 ''''''''''''''''''
 
-The ``default-priorities`` dictionary defines the ordering of variants.
-The exact algorithm is described in the `Variant ordering`_ section.
+The ``default-priorities`` dictionary defines the ordering of
+namespaces which is used in variant ordering. The exact algorithm is
+described in the `Variant ordering`_ section.
 
 The following key is REQUIRED:
 
