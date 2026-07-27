@@ -1174,6 +1174,8 @@ Change History
     multiple sources.
   - Removed ``default-priorities.feature``
     and ``default-priorities.value``.
+  - Made schema versioning use semantic versioning, with its backwards
+    compatibility impliciations.
 
 - 06-Apr-2026
 
