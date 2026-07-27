@@ -199,13 +199,23 @@ PEP defines the following structure:
             +- {feature}   : list[str]  = []
 
 This structure corresponds to the version ``0.1.1`` of the format. The
-version number is stored as part of the schema_ URL. Whenever the format
-changes, the version number must be incremented. Tools MUST assume that
-all variant wheels using an unknown format version are unsupported.
+version number is stored as part of the schema_ URL. The version numbers
+follow semantic versioning.
 
-The version numbers starting with zero are reserved for drafts and MUST
-NOT be used in production. Once the proposal is complete, the latest
-draft will be promoted to version ``1.0.0``.
+The numbers starting with zero are reserved for drafts and MUST NOT be
+used in production. Tools MUST NOT make any compatibility assumptions
+over these versions. Once the proposal is complete, the latest draft
+will be promoted to version ``1.0.0``.
+
+If a backwards incompatible change is done to the specification,
+the major version number MUST be incremented, and the remaining version
+components MUST be zeroed.  Tools MUST reject metadata with a major
+version number that they do not support.
+
+If a backwards compatible change is done to the specification, the minor
+version number MUST be incremented, and the patch number MUST be zeroed.
+Tools SHOULD accept metadata with a minor version number newer than the
+latest supported, provided that the major version is supported.
 
 The top-level keys are described in the subsequent sections.
 
