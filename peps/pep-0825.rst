@@ -866,7 +866,7 @@ Variant metadata is stored in an additional JSON format file rather than
 being added to the :doc:`packaging:specifications/core-metadata`. It is
 versioned independently, and tools that are not specifically concerned
 about variant metadata can ignore its compatibility rules. It follows
-the compatibility rules are the same as for Core Metadata. JSON provides
+the same compatibility rules as those for Core Metadata. JSON provides
 a more convenient format for structured data, as well as more natural
 conversion from TOML (so that the data can be sourced from
 ``pyproject.toml``).
