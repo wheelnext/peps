@@ -35,7 +35,7 @@ high-performance computing (HPC) communities.
 This PEP proposes "Wheel Variants", an extension to the
 :doc:`packaging:specifications/binary-distribution-format`. This
 extension introduces a mechanism for package maintainers to declare
-multiple build variants for the same package version, while allowing
+multiple variant builds for the same package version, while allowing
 installers to automatically select the most appropriate variant based on
 system hardware and software characteristics. More specifically, it
 proposes:
@@ -742,7 +742,7 @@ described in `modified wheel filename`_, and are characterizing using
 hierarchical structure of namespaces, features and feature values. When
 evaluating wheels to install, the installer determines whether variant
 properties of a given wheel are compatible with the system, and perform
-`variant ordering`_ based on the priority of the compatible variant
+variant ordering based on the priority of the compatible variant
 properties. This is done in addition to determining the compatibility.
 The ordering by variant properties takes precedence over ordering by
 tags.
@@ -756,9 +756,9 @@ embedded in the wheel; it can be either provided directly by the
 wheel maintainer or queried at wheel build time from an AoT plugin.
 
 Both kinds of plugins are usually implemented as Python packages which
-implement the `provider plugin API`_, but they may also be vendored or
+implement the provider plugin API, but they may also be vendored or
 reimplemented by installers to improve user experience, as outlined in
-`Providers`_. Plugin packages may be installed in isolated or
+Providers. Plugin packages may be installed in isolated or
 non-isolated environments. In particular, all plugins may be returned by
 the ``get_requires_for_build_wheel()`` hook of a :pep:`517` backend, and
 therefore installed along with other build dependencies. For this
@@ -1458,7 +1458,7 @@ otherwise processing it. To uphold this assumption, the proposal
 explicitly requires that untrusted provider plugin packages are never
 installed without explicit user consent.
 
-The `Providers`_ section of the specification provides further
+The Providers section of the specification provides further
 suggestions that aim to improve both security and the user experience.
 Particularly, it is expected that the most popular provider plugins will
 be available out of the box, and a dedicated team of maintainers
@@ -1556,7 +1556,7 @@ installers.
 
 Aside from this explicit incompatibility, the specification makes
 minimal and non-intrusive changes to the binary package format. The
-`variant metadata`_ is placed in a separate file in the ``.dist-info``
+variant metadata is placed in a separate file in the ``.dist-info``
 directory, which should be preserved by tools that are not concerned
 with variants, limiting the necessary changes to updating the filename
 validation algorithm (if there is one).
