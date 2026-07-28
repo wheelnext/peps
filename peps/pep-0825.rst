@@ -862,6 +862,15 @@ issues because of their length, the property lists are stored inside
 the wheel and mapped to a short label that is chosen by the package
 maintainer and intended to be human-readable.
 
+Variant metadata is stored in an additional JSON format file rather than
+being added to the :doc:`packaging:specifications/core-metadata`. It is
+versioned independently, and tools that are not specifically concerned
+about variant metadata can ignore its compatibility rules. It follows
+the compatibility rules are the same as for Core Metadata. JSON provides
+a more convenient format for structured data, as well as more natural
+conversion from TOML (so that the data can be sourced from
+``pyproject.toml``).
+
 Wheel filenames alone do not provide sufficient metadata to drive
 variant wheel selection. To avoid tools having to fetch the variant
 metadata straight from multiple wheel files, the metadata from wheels
