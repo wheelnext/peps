@@ -13,7 +13,7 @@ Author: Jonathan Dekhtiar <jonathan@dekhtiar.com>,
         Andy R. Terrel <andy.terrel@gmail.com>
 Discussions-To: https://discuss.python.org/t/pep-817-wheel-variants-beyond-platform-tags/105860
 Status: Draft
-Type: Standards Track
+Type: Informational
 Topic: Packaging
 Created: 10-Dec-2025
 Post-History: `24-Jan-2026 <https://discuss.python.org/t/pep-817-wheel-variants-beyond-platform-tags/105860>`__
