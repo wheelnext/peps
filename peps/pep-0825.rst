@@ -227,10 +227,6 @@ Appendix of this PEP. Subsequent PEPs changing the metadata format will
 include updated versions of the schema. The schema is available in
 :ref:`pep825-variant-json-schema`.
 
-The schema is specified per metadata file. Different wheels MAY use
-different schema versions. Tools outputting variant metadata MAY convert
-it to a different schema version.
-
 
 Default priorities
 ''''''''''''''''''
