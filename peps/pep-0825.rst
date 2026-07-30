@@ -724,10 +724,14 @@ behavior would be to:
 9. If multiple wheels for a given version share the same variant label,
    order them by Platform compatibility tags and build number, and
    select the best wheel.
+10. Process the `environment markers`_ in wheel dependencies using
+    the label of the selected variant wheels and the full set of variant
+    properties corresponding to it in the wheel metadata.
 
 Note that steps 4. through 8. are introduced specifically for variant
 wheels. The remaining steps correspond to the current installer
-behavior.
+behavior.  Step 10. is modified through the presence of new environment
+markers.
 
 When installing from a source that does not provide an `index-level
 metadata`_, the same algorithm can be used, except that the variant
