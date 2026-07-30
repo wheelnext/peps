@@ -581,49 +581,45 @@ Environment markers
 
 Four new :ref:`environment markers
 <dependency-specifiers-environment-markers>` are introduced in
-dependency specifications:
+dependency specifications. They all refer to the build-time properties
+of the wheel being processed, and they MUST be evaluated against the
+`variant metadata`_ rather than the environment. These are:
 
-1. ``variant_namespaces`` corresponding to the set of namespaces of all
-   the variant properties that the wheel variant was built for.
-2. ``variant_features`` corresponding to the set of
-   ``namespace :: feature`` pairs of all the variant properties that the
-   wheel variant was built for.
-3. ``variant_properties`` corresponding to the set of
-   ``namespace :: feature :: value`` tuples of all the variant
-   properties that the wheel variant was built for.
-4. ``variant_label`` corresponding to the exact variant label that the
-   wheel was built with. For the non-variant wheel, it is an empty
+1. ``variant_label``: a string, expressing the exact variant label of
+   the wheel being processed. For non-variant wheels, it is an empty
    string.
+2. ``variant_properties``: a set of all
+   ``namespace :: feature :: value`` tuples of the properties
+   corresponding to the variant label, as found by querying the
+   ``variants`` dictionary of variant metadata. For non-variant wheels,
+   it is an empty set.
+3. ``variant_features``: a set of all ``namespace :: feature`` pairs
+   corresponding to the properties in ``variant_properties``.
+4. ``variant_namespaces``: a set of all namespaces of all the properties
+   in ``variant_properties``.
 
-The markers evaluating to sets of strings MUST be matched via the ``in``
-or ``not in`` operator, e.g.:
-
-.. code::
-
-    # satisfied by any "foo :: * :: *" property
-    dep1; "foo" in variant_namespaces
-    # satisfied by any "foo :: bar :: *" property
-    dep2; "foo :: bar" in variant_features
-    # satisfied only by "foo :: bar :: baz" property
-    dep3; "foo :: bar :: baz" in variant_properties
-
-The ``variant_label`` marker is a plain string:
+String markers MUST be matched using string comparison operators.
+Set markers MUST be matched via the ``in`` and ``not in`` operators.
+Implementations MUST ignore differences in whitespace around the ``::``
+separators when matching features and properties.
 
 .. code::
 
     # satisfied by the variant "foobar"
-    dep4; variant_label == "foobar"
+    dep1; variant_label == "foobar"
     # satisfied by any wheel other than the null variant
     # (including the non-variant wheel)
-    dep5; variant_label != "null"
+    dep2; variant_label != "null"
     # satisfied by the non-variant wheel
-    dep6; variant_label == ""
-
-Implementations MUST ignore differences in whitespace while matching the
-features and properties.
-
-Variant marker expressions MUST be evaluated against the variant
-properties stored in the wheel being installed.
+    dep3; variant_label == ""
+    # satisfied by any "foo :: * :: *" property
+    dep4; "foo" in variant_namespaces
+    # satisfied by any "foo :: bar :: *" property
+    dep5; "foo :: bar" in variant_features
+    # satisfied only by "foo :: bar :: baz" property
+    dep6; "foo :: bar :: baz" in variant_properties
+    # equivalent
+    dep6; "foo::bar::baz" in variant_properties
 
 
 Integration with pylock.toml
