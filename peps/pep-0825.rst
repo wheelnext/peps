@@ -777,6 +777,94 @@ To generate the ``{name}-{version}-variants.json`` file:
      value starts with the old value
 
 
+Installation example (non-normative)
+------------------------------------
+
+Let's say that PyTorch publishes a number of variant wheels:
+
+.. code-block:: text
+
+    torch-2.13.0-{py}-{abi}-{platform}-cuda12.6.whl
+                                       ^^^^^^^^
+    torch-2.13.0-{py}-{abi}-{platform}-cuda13.0.whl
+                                       ^^^^^^^^
+    torch-2.13.0-{py}-{abi}-{platform}-cuda13.2.whl
+                                       ^^^^^^^^
+    torch-2.13.0-{py}-{abi}-{platform}-rocm7.2.whl
+                                       ^^^^^^^
+    torch-2.13.0-{py}-{abi}-{platform}-null.whl      # CPU-only
+                                       ^^^^
+
+The highlighted filename parts are the variant label.
+
+Each of these wheels carries a variant metadata file that contains:
+
+.. code:: json5
+
+    {
+      "$schema": "https://variants-schema.wheelnext.dev/peps/825/v0.1.1.json",
+      "default-priorities": {
+        "namespace": ["nvidia", "amd", "priority"]
+      },
+      "variants": {
+        // ...
+      }
+    }
+
+In every wheel, the ``variants`` dictionary contains a single key that
+is the variant label and whose value lists all properties corresponding
+to that label. For example, the ``cuda*`` variant wheels contain
+properties expressing the compatibility with NVidia GPUs, whereas
+``rocm*`` variant wheels the compatibility with AMD GPUs. The ``null``
+variant has no properties and is therefore always compatible.
+
+In addition to these variant wheels, a ``torch-2.13.0-variants.json``
+file is published with the merged variant metadata files. It has the
+same contents as the example, except that the ``variants`` dictionary
+includes all variant labels and their properties.
+
+When requested to install ``torch``, the installer does, in order:
+
+1. The remote index is queried to determine available wheels. It is
+   established that 2.13.0 is the newest version and it is selected.
+
+2. The available 2.13.0 wheels are filtered by Platform compatibility
+   tags. Only wheels that are compatible with the current system remain.
+
+3. The ``torch-2.13.0-variants.json`` is found in the response and it is
+   downloaded. Its contents are read to determine the meaning of variant
+   labels, as well as the namespace preference order.
+
+4. The lists of compatible features and feature values is obtained for
+   all namespaces that are used in the ``variants`` dictionary. Wheels
+   with variant labels corresponding to properties that aren't on these
+   lists are incompatible and are filtered out.
+
+   For example, if the user has a compatible NVidia GPU, then the
+   appropriate ``cuda*`` and ``null`` wheels remain on the list, while
+   ``rocm*`` wheels are removed.
+
+5. If variant wheels with multiple different labels remain on the list,
+   the results are sorted per the algorithm in `variant ordering`_.
+   The most preferred label is selected.
+
+   For example, in this case the ``cuda*`` wheels are ordered by their
+   properties, and the compatible wheel corresponding to the highest
+   CUDA version is selected. The ``null`` wheel always sorts last, so
+   it is selected only if no compatible GPU is available.
+
+6. If at this point multiple wheels with the same label remain on the
+   list, the final selection is performed based on Platform
+   compatibility tags.
+
+7. The metadata for selected wheel is processed. The variant properties
+   corresponding to the wheel (as stored in the ``variants`` dictionary)
+   are used to process `environment markers`_. This results in
+   additional CUDA-related dependencies being selected.
+
+8. The wheel is downloaded and installed.
+
+
 Installing wheels from multiple sources (non-normative)
 -------------------------------------------------------
 
