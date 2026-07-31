@@ -840,27 +840,56 @@ When requested to install ``torch``, the installer does, in order:
    with variant labels corresponding to properties that aren't on these
    lists are incompatible and are filtered out.
 
-   For example, if the user has a compatible NVIDIA GPU, then the
-   appropriate ``cuda*`` and ``null`` wheels remain on the list, while
-   ``rocm*`` wheels are removed.
+   For example:
+
+   - The ``cuda*`` wheels contain a
+     ``nvidia :: cuda_version_lower_bound`` property whose value
+     specifies the minimum CUDA driver version, and
+     ``nvidia :: sm_arch`` properties whose values list supported GPUs.
+     The installer queries the driver (if available) to determine
+     whether to determine whether a compatible runtime and one of the
+     compatible GPUs are available.  They also contain a
+     ``priority :: order`` feature that is always compatible. If either
+     the driver, a compatible runtime or a compatible GPU are not
+     available, the wheels are removed from the list.
+
+   - Similarly, the ``rocm*`` wheels contain a ``amd :: rocm_version``
+     property that specifies the supported ROCm version and
+     ``amd :: gfx_arch`` properties that list supported GPUs. The
+     installer queries the appropriate driver in a similar manner as
+     before. The If either the driver, a compatible runtime or a
+     compatible GPU are not available, the wheels are removed from the
+     list.
+
+   - The ``null`` wheel has no properties, and it is therefore always
+     compatible.
+
+   On a system with a compatible NVIDIA GPU and a CUDA runtime, at least
+   one of the ``cuda*`` wheels and the ``null`` variant will remain on
+   the list.
 
 5. If variant wheels with multiple different labels remain on the list,
    the results are sorted per the algorithm in `variant ordering`_.
    The most preferred label is selected.
 
    For example, in this case the ``cuda*`` wheels are ordered by their
-   properties, and the compatible wheel corresponding to the highest
-   CUDA version is selected. The ``null`` wheel always sorts last, so
-   it is selected only if no compatible GPU is available.
+   properties. In this case, the ``nvidia`` properties do not provide
+   a total ordering, so the ``priority :: order`` property is used to
+   order these wheels. The ``null`` wheel always sorts last, so it is
+   selected only if no compatible GPU is available.
 
 6. If at this point multiple wheels with the same label remain on the
    list, the final selection is performed based on Platform
-   compatibility tags.
+   compatibility tags. This is a rare occurrence and it does not apply
+   here. It could happen, for example, if the same wheel variant was
+   provided both in ``abi3`` and ``cp315``, when installing for Python
+   3.15, the installer would choose between these two based on the
+   Python tag.
 
-7. The metadata for the selected wheel is processed. The variant properties
-   corresponding to the wheel (as stored in the ``variants`` dictionary)
-   are used to process `environment markers`_. This results in
-   additional CUDA-related dependencies being selected.
+7. The metadata for the selected wheel is processed. The variant
+   properties corresponding to the wheel (as stored in the ``variants``
+   dictionary) are used to process `environment markers`_. This results
+   in additional CUDA-related dependencies being selected.
 
 8. The wheel is downloaded and installed.
 
