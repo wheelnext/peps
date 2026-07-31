@@ -752,6 +752,9 @@ to:
 4. Obtain the ordered lists of compatible variant properties. The
    mechanism for this will be specified in a subsequent PEP.
 5. Verify the wheel compatibility via compatible properties.
+6. Process the `environment markers`_ in wheel dependencies using
+   the label of the selected variant wheels and the full set of variant
+   properties corresponding to it in the wheel metadata.
 
 
 Publishing variant wheels on an index
