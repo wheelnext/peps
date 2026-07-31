@@ -814,7 +814,7 @@ Each of these wheels carries a variant metadata file that contains:
 In every wheel, the ``variants`` dictionary contains a single key that
 is the variant label and whose value lists all properties corresponding
 to that label. For example, the ``cuda*`` variant wheels contain
-properties expressing the compatibility with NVidia GPUs, whereas
+properties expressing the compatibility with NVIDIA GPUs, whereas
 ``rocm*`` variant wheels the compatibility with AMD GPUs. The ``null``
 variant has no properties and is therefore always compatible.
 
@@ -825,7 +825,7 @@ includes all variant labels and their properties.
 
 When requested to install ``torch``, the installer does, in order:
 
-1. The remote index is queried to determine available wheels. It is
+1. The index is queried to determine available wheels. It is
    established that 2.13.0 is the newest version and it is selected.
 
 2. The available 2.13.0 wheels are filtered by Platform compatibility
@@ -840,7 +840,7 @@ When requested to install ``torch``, the installer does, in order:
    with variant labels corresponding to properties that aren't on these
    lists are incompatible and are filtered out.
 
-   For example, if the user has a compatible NVidia GPU, then the
+   For example, if the user has a compatible NVIDIA GPU, then the
    appropriate ``cuda*`` and ``null`` wheels remain on the list, while
    ``rocm*`` wheels are removed.
 
