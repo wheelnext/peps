@@ -857,7 +857,7 @@ When requested to install ``torch``, the installer does, in order:
    list, the final selection is performed based on Platform
    compatibility tags.
 
-7. The metadata for selected wheel is processed. The variant properties
+7. The metadata for the selected wheel is processed. The variant properties
    corresponding to the wheel (as stored in the ``variants`` dictionary)
    are used to process `environment markers`_. This results in
    additional CUDA-related dependencies being selected.
