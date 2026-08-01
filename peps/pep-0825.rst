@@ -847,7 +847,7 @@ When requested to install ``torch``, the installer does, in order:
      specifies the minimum CUDA driver version, and
      ``nvidia :: sm_arch`` properties whose values list supported GPUs.
      The installer queries the driver (if available) to determine
-     whether to determine whether a compatible runtime and one of the
+     whether a compatible runtime and one of the
      compatible GPUs are available.  They also contain a
      ``priority :: order`` feature that is always compatible. If either
      the driver, a compatible runtime or a compatible GPU are not
