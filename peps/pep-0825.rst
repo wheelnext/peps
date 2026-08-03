@@ -1290,6 +1290,14 @@ The following problems are deferred to subsequent PEPs in the series:
 - building variant wheels
 
 
+Open Issues
+===========
+
+- There is an open discussion whether using `environment markers`_ are
+  the right mechanism to express dependencies that are present in a
+  subset of variant wheels.
+
+
 Acknowledgements
 ================
 
