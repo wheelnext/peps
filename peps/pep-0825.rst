@@ -412,8 +412,8 @@ defining the respective keys, the requirements are:
   or the longer MUST start with the elements of the shorter one, in the
   same order. Combining them MUST yield the longer list.
 
-- ``variants``: a variant label occurring in more than one of them MUST
-  map to the same properties in each. Combining them MUST yield the
+- ``variants``: the same variant label MUST always map to the same set
+  of properties. Combining them MUST yield the
   union of the dictionaries.
 
 Both rules are symmetric, so combining metadata that satisfies them
