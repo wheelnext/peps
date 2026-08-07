@@ -592,8 +592,8 @@ described in `evaluating variant markers`_. These are:
    string.
 2. ``variant_properties``: a set of all
    ``namespace :: feature :: value`` tuples of the properties
-   corresponding to the variant label that are compatible with the target
-   system. For non-variant wheels, it is an empty set.
+   corresponding to the variant label that are compatible with the
+   target system. For non-variant wheels, it is an empty set.
 3. ``variant_features``: a set of all ``namespace :: feature`` pairs
    corresponding to the properties in ``variant_properties``.
 4. ``variant_namespaces``: a set of all namespaces of all the properties
