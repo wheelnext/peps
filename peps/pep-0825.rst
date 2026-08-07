@@ -1458,6 +1458,9 @@ Change History
     and ``default-priorities.property``.
   - Made schema versioning use semantic versioning, with its backwards
     compatibility implications.
+  - Made ``variant_properties`` environment marker use variant
+    properties compatible with the system rather than all the properties
+    specified in the metadata.
 
 - 11-May-2026
 
