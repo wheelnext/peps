@@ -92,8 +92,7 @@ ecosystem, such as a package index accepting an upload, SHOULD do so.
 Tools that encounter it later, such as an installer resolving a
 dependency, SHOULD prefer to degrade gracefully rather than fail
 outright, for example by ignoring the variant wheels and selecting among
-the remaining ones. A single malformed wheel should not render an entire
-package version uninstallable.
+the remaining ones.
 
 
 Variant wheel
@@ -822,8 +821,8 @@ The same algorithm applies to sources other than an index, such as a
 local directory of wheels.
 
 
-Installing a local wheel
-''''''''''''''''''''''''
+Installing a specific local wheel
+'''''''''''''''''''''''''''''''''
 
 When asked to install a local wheel file, the proposed behavior would be
 to:
