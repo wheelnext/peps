@@ -592,20 +592,18 @@ described in `evaluating variant markers`_. These are:
    string.
 2. ``variant_properties``: a set of all
    ``namespace :: feature :: value`` tuples of the properties
-   corresponding to the variant label that are supported by the target
+   corresponding to the variant label that are compatible with the target
    system. For non-variant wheels, it is an empty set.
 3. ``variant_features``: a set of all ``namespace :: feature`` pairs
    corresponding to the properties in ``variant_properties``.
 4. ``variant_namespaces``: a set of all namespaces of all the properties
    in ``variant_properties``.
 
-The ``variant_label`` marker MUST be matched using the ``==`` and
-``!=`` operators only. In particular, ``in`` and ``not in`` MUST NOT be
-used with it, as they would perform substring matching.
-
-The ``variant_properties``, ``variant_features`` and
-``variant_namespaces`` markers MUST be matched using the ``in`` and
-``not in`` operators only.
+``variant_label`` is a ``String`` field, while ``variant_properties``,
+``variant_features`` and ``variant_namespaces`` are ``Set of String``
+fields. The operators available for each, and their semantics, are those
+defined for the respective field types in
+:ref:`packaging:dependency-specifiers`.
 
 Implementations MUST ignore differences in whitespace around the ``::``
 separators when matching features and properties.
