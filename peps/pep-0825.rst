@@ -413,8 +413,7 @@ defining the respective keys, the requirements are:
   same order. Combining them MUST yield the longer list.
 
 - ``variants``: the same variant label MUST always map to the same set
-  of properties. Combining them MUST yield the
-  union of the dictionaries.
+  of properties. Combining them MUST yield the union of the dictionaries.
 
 Both rules are symmetric, so combining metadata that satisfies them
 gives the same result regardless of the order in which the inputs are
