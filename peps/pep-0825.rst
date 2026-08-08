@@ -1041,7 +1041,7 @@ When a package manager is requested to install ``torch``, in order:
    selected.
 
    Suppose the wheel also depends on a library that supports only one
-   of the architectures it runs on:
+   of the architectures the wheel supports:
 
    .. code:: text
 
