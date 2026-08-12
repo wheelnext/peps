@@ -207,6 +207,10 @@ contain the following key:
 It is invalid to specify ``requires`` or ``plugin-api`` if
 ``static-properties`` are present.
 
+For the metadata to be consistent, the same keys MUST always correspond
+to the same values. When combining metadata, the resulting ``providers``
+dictionary MUST be a union of all the input dictionaries.
+
 
 Example
 '''''''
