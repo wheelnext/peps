@@ -286,11 +286,10 @@ particular, packages published to PyPI MUST NOT rely on plugins that
 need to be installed from other indexes.
 
 Except for namespaces reserved as part of this PEP and variant providers
-that include static lists of compatible features and their values as
-part of their metadata, installable Python packages MUST be provided for
-plugins. The entire dependency tree of such packages MUST be installable
-using non-variant wheels, and variant wheels MUST NOT be used while
-installing them.
+using the ``static-properties`` key, installable Python packages MUST be
+provided for plugins. The entire dependency tree of such packages MUST
+be installable using non-variant wheels, and variant wheels MUST NOT be
+used while installing them.
 
 As noted in the `Providers`_ section, these plugins can also be
 reimplemented by tools needing them. If that is the case, the API
