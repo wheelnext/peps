@@ -581,11 +581,10 @@ advantages:
   multiple tools, and released to the public after proving the concept.
 
 At the same time, it is understood that installing additional Python
-packages and running the code from them at install time introduces
-additional attack vector (as discussed in `security implications`_).
-For this reason, plugin packages are entirely opt-in, and a few
-mechanisms are provided to improve the user experience without
-compromising security:
+packages and running the code from them introduces additional attack
+vector (as discussed in `security implications`_). For this reason,
+plugin packages are entirely opt-in, and a few mechanisms are provided
+to improve the user experience without compromising security:
 
 - Users can provide static compatibility lists to avoid querying the
   providers. This also permits deploying packages for different systems
@@ -593,10 +592,10 @@ compromising security:
 
 - Tools can maintain their own lists of trusted provider plugins that
   are enabled by default, or they can vendor or reimplement some
-  providers. This is entirely voluntary, as not to impose maintenance
-  effort on tool maintainers. At the same time, the ability to
-  reimplement providers avoids introducing a performance bottleneck on
-  tools that aren't written in Python.
+  providers. This is entirely voluntary, to avoid imposing an additional
+  maintenance burden on tool maintainers. At the same time, the ability
+  to reimplement providers avoids introducing a performance bottleneck
+  on tools that aren't written in Python.
 
 - Variant wheels can include static lists of compatible properties, to
   facilitate variants that do not need querying platform capabilities,
@@ -608,15 +607,14 @@ for example debug or experimental builds of packages.
 
 Installing provider plugins in isolated environments is recommended, as
 that permits tools to automatically deploy them without affecting the
-system packages. However, this is not a requirement to permit other
-options. For example, build frontends may prefer reusing the isolated
-build environment for this.
+system packages. However, this is not a requirement. For example, build
+frontends may prefer reusing the isolated build environment for this.
 
 The ``requires`` and ``plugin-api`` keys follow the precedent of
 ``build-system.requires`` and ``build-system.build-backend`` keys of
-:pep:`517`. However, following the criticism of that design,
-``plugin-api`` has been made optional and defaults to being inferred
-from the package name.
+:pep:`517`. However, the ``plugin-api`` key has been made optional and
+defaults to being inferred from the package name, addressing a criticism
+of the original design.
 
 The `ABI Dependency Variant Provider
 <#abi-dependency-variant-provider-optional>`_ is defined separately, as
