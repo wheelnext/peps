@@ -334,15 +334,35 @@ pseudocode:
 
 API endpoints are used in two contexts:
 
-a. in the ``plugin-api`` key of variant metadata, either explicitly or
-   inferred from the package name in the ``requires`` key. This is the
-   primary method of using the plugin when building and installing
-   wheels.
+a. in the ``plugin-api`` key of `provider information`_ in variant
+   metadata, either explicitly or inferred from the package name in the
+   ``requires`` key. This is the primary method of using the plugin when
+   building and installing wheels.
 
-b. as the value of an installed entry point in the ``variant_plugins``
-   group. The name of said entry point is insignificant. This is
-   OPTIONAL but RECOMMENDED, as it permits variant-related utilities to
-   discover variant plugins installed to the user's environment.
+b. as the value of an installed entry point, as described in
+   `variant plugin discovery`_.
+
+
+Variant plugin discovery
+------------------------
+
+The Python packages providing variant provider plugins SHOULD install
+an entry point to facilitate discovery by variant-related utilities.
+The entry point MUST be placed in the ``variant_plugins`` group, its
+name is insignificant and its value MUST be the plugin's `API
+endpoint`_. For example, a plugin can declare the following entry
+point:
+
+.. code:: toml
+
+    [project.entry-points.variant_plugins]
+    provider_variant_x86_64 = "provider_variant_x86_64"
+
+A tool that facilitates such discovery mechanism MUST collect all entry
+points in the ``variant_plugins`` group and use their respective values
+to determine the API endpoints to call. They MAY use the associated
+package distribution metadata to determine which package provides a
+given plugin.
 
 
 Variant feature config class
