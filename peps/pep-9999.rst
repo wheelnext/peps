@@ -223,10 +223,6 @@ in the following way:
       "default-priorities": {
         // MUST list all namespaces used.
         "namespace": ["x86_64", "aarch64", "blas_lapack"],
-
-        // other fields same as in PEP 825
-        "feature": {},
-        "property": {}
       },
 
       "providers": {
