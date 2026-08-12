@@ -371,7 +371,21 @@ Variant feature config class
 The variant feature config class is used as a return value in plugin API
 functions. It defines a single variant feature, along with a list of
 possible values. Depending on the context, the order of values MAY be
-significant. It is defined using the following protocol:
+significant. Its instance MUST provide the following properties or
+attributes:
+
+- ``name: str`` specifying the feature name.
+
+- ``multi_value: bool`` specifying whether the feature is allowed to
+  have multiple corresponding values within a single variant wheel. If
+  it is ``False``, then it is an error to specify multiple values for
+  the feature.
+
+- ``values: list[str]`` specifying feature values. In contexts where the
+  order is significant, the values MUST be ordered from the most
+  preferred to the least preferred.
+
+Equivalently, it can be described using the following protocol:
 
 .. code:: python
 
@@ -398,24 +412,20 @@ significant. It is defined using the following protocol:
             """List of values, possibly ordered from most preferred to least"""
             raise NotImplementedError
 
-The instance MUST provide the following properties or attributes:
-
-- ``name: str`` specifying the feature name.
-
-- ``multi_value: bool`` specifying whether the feature is allowed to
-  have multiple corresponding values within a single variant wheel. If
-  it is ``False``, then it is an error to specify multiple values for
-  the feature.
-
-- ``values: list[str]`` specifying feature values. In contexts where the
-  order is significant, the values MUST be ordered from the most
-  preferred to the least preferred.
-
 
 Plugin interface
 ''''''''''''''''
 
-The plugin interface MUST follow the following protocol:
+The plugin interface, as referenced by the `API endpoint`_, MUST provide
+the following function:
+
+- ``get_supported_configs() -> list[VariantFeatureConfigType]`` that
+  returns a list of feature names and their values that are compatible
+  with the system the plugin is running on. The variant feature and
+  value lists MUST be ordered from the most preferred to the least
+  preferred.
+
+Equivalently, it can be described using the following protocol:
 
 .. code:: python
 
@@ -429,14 +439,6 @@ The plugin interface MUST follow the following protocol:
         def get_supported_configs(cls) -> list[VariantFeatureConfigType]:
             """Get ordered lists of compatible features and their values"""
             raise NotImplementedError
-
-The plugin interface MUST provide the following function:
-
-- ``get_supported_configs() -> list[VariantFeatureConfigType]`` that
-  returns a list of feature names and their values that are compatible
-  with the system the plugin is running on. The variant feature and
-  value lists MUST be ordered from the most preferred to the least
-  preferred.
 
 
 Example implementation
