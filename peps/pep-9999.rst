@@ -273,13 +273,6 @@ Provider plugin API
 High level design
 '''''''''''''''''
 
-All variants published on a single index for a specific package version
-MUST use the same provider for a given namespace. While multiple plugins
-for the same namespace MAY exist across different packages, release
-versions or indexes (such as when a plugin is forked due to being
-unmaintained), they are mutually exclusive within any single release
-version on an index.
-
 To make it easier to discover and install plugins, they SHOULD be
 published in the same indexes as the packages using them. In
 particular, packages published to PyPI MUST NOT rely on plugins that
@@ -609,6 +602,14 @@ Installing provider plugins in isolated environments is recommended, as
 that permits tools to automatically deploy them without affecting the
 system packages. However, this is not a requirement. For example, build
 frontends may prefer reusing the isolated build environment for this.
+
+Providers are defined as part of the variant metadata. From the metadata
+consistency requirements, it follows that multiple variant wheels for a
+single package version published on a single index must always use the
+same provider for a given namespace. This requirement does not hold
+across different packages, package versions or indexes. This permits
+both adjusting dependency bounds and switching to different provider
+plugins with a new package version.
 
 The ``requires`` and ``plugin-api`` keys follow the precedent of
 ``build-system.requires`` and ``build-system.build-backend`` keys of
