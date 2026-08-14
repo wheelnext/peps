@@ -941,13 +941,27 @@ providers, but not the other way around.
 Variant Discovery
 -----------------
 
-<TODO> TL;DR; The system needs to expose system information for
-variant decision / resolution to be taken.
+The wheel variant proposal introduces the ability to take package resolution decisions
+based on the user system. This ability is non-specific and flexible, allowing
+any current or future system properties to be used as part of the variant discovery process.
+Platform tags are essentially a subset of what this work is proposing. PEP 817 is focused on
+providing a flexible and extensible mechanism for variant discovery.
+
 
 Metadata in source tree and wheels
 -----------------------------------
 
-<TODO> FLIP it on its head => information hardcoded in the pyproject.toml
+Variants introduce a few new portions of metadata that are stored in the
+source tree and in wheels. In the source tree, it is stored in the
+``pyproject.toml`` file along with other project properties, benefiting
+from the TOML format's readability and strictness.
+
+The metadata in ``pyproject.toml`` includes:
+
+- information about variant providers that could be used by the wheels,
+- optionally, lists overriding the default property ordering,
+- static property lists for Ahead-of-Time providers that do not use
+  plugins.
 
 .. code:: toml
 
@@ -979,39 +993,29 @@ Metadata in source tree and wheels
     plugin-api = "provider_variant_x86_64.plugin:X8664Plugin"
 
 
-Variants introduce a few new portions of metadata that are stored in the
-source tree and in wheels. In the source tree, it is stored in the
-``pyproject.toml`` file along with other project properties, benefiting
-from the TOML format's readability and strictness. Afterwards, it is
-converted into an equivalent JSON structure, and stored as a separate
+Afterwards, it is converted into an equivalent JSON structure, and stored as a separate
 file in the ``.dist-info`` directory. The existing metadata files are
 unchanged to avoid unnecessary incompatibility, and to avoid serializing
 into the inconvenient :doc:`Core Metadata
 <packaging:specifications/core-metadata>` format.
 
-The metadata in ``pyproject.toml`` includes:
-
-- information about variant providers that could be used by the wheels,
-- optionally, lists overriding the default property ordering,
-- static property lists for Ahead-of-Time providers that do not use
-  plugins.
-
 
 ABI dependency variant provider
 -------------------------------
 
-<TODO> It would beneficial if the variant system was able to encode and resolve
-ABI compatibility information.
+Scientific and machine-learning packages often link against native
+dependencies such as BLAS/LAPACK implementations, MPI runtimes, or
+scientific computing libraries such as PyTorch. Their Application Binary
+Interfaces (ABIs) may vary by implementation, build configuration, or version;
+incompatible combinations can fail to import, crash, or behave incorrectly.
+Downstream wheels therefore commonly use narrow dependency pins, which can make
+an environment containing multiple such packages impossible to resolve.
 
-Some packages provide extension modules exposing an Application Binary
-Interface (ABI) that is not compatible across wide ranges of versions.
-The packages using this interface need to pin their wheels to the
-version used at build time. If ABI changes frequently, the pins are very
-narrow and users face problems if they need to install two packages that
-may happen to pin to different versions of the same dependency.
-Providing variants built against different dependency versions can
-increase the chance of a resolver being able to find a dependency version
-that is compatible with all the packages being installed.
+Variants allow a single release to provide wheels built against several
+supported dependency ABIs. An installer that considers these variants
+during dependency resolution can select mutually compatible wheels and
+dependency versions, reducing overly narrow pins and avoiding unnecessary
+source builds.
 
 Unfortunately, such a variant provider cannot be implemented within the
 plugin API defined by the specification. Given that a robust
@@ -1019,7 +1023,7 @@ implementation would need to interface with the dependency resolver,
 rather than attempt to extend the API to cover this use case and add
 significant complexity as a result, the specification reserves
 ``abi_dependency`` as a special variant namespace that can be
-implemented by installers wishing the provide this feature.
+implemented by installers wishing to provide this feature.
 
 Given the complexity of the problem, this extension is made entirely
 optional. This implies that any packages using it need to provide
@@ -1153,36 +1157,37 @@ backend would be to:
 Publishing variant wheels on an index
 '''''''''''''''''''''''''''''''''''''
 
-<TODO> Lots of massage
+Variant wheels are uploaded to an index in the same way as regular
+wheels. However, installers need aggregated metadata to discover and
+evaluate the available variants without downloading every wheel in a
+release. For each package version, the index therefore serves a
+``{name}-{version}-variants.json`` file containing the combined variant
+metadata for that release.
 
-Variant wheels are uploaded to an index just like regular wheels.
-There are two possible approaches to publishing the index-level
-``{name}-{version}-variants.json`` file for every package version:
-it can either be prepared and uploaded by the user, or it can be
-generated automatically by the index.
+The file can either be prepared and uploaded by the publisher or
+generated by the index from the metadata embedded in the uploaded
+wheels. Once published, it SHOULD not change, because clients MAY have
+cached it or recorded its hash in a lock file. An index that generates
+the file should therefore wait until the release is fully uploaded
+before publishing it, for example by using a :pep:`694` upload session.
 
-The file should not be changed once it is published, as clients may have
-already cached it or locked to the existing hash. For this reason, if
-the index is responsible for generating the file, it should use some
-mechanism to defer publishing it until the release is fully uploaded
-(for example, :pep:`694`).
+An index generates the ``{name}-{version}-variants.json`` file as
+follows:
 
-To generate the ``{name}-{version}-variants.json`` file:
+1. Copy the data from the first variant wheel's
+   ``*.dist-info/variant.json`` file.
+2. Merge the data from each subsequent variant wheel into the existing
+   data according to these rules:
 
-1. For the first variant wheel for a given package version, copy the
-   data from its ``*.dist-info/variant.json`` file.
-2. For subsequent wheels, merge the data from their
-   ``*.dist-info/variant.json`` files into the existing data:
-
-   - disjoint keys of ``providers``, ``static-properties`` and
-     ``variants`` dictionaries are merge together
-   - common keys of these dictionaries must have exactly the same value
-   - ``default-priorities.namespace`` list can be replaced if the new
-     value starts with the old value
-   - ``default-priorities.feature`` and ``default-priorities.value``
-     keys can be added if they were not present in the previous
-     ``default-priorities.namespace`` value
-   - other keys must have exactly the same value
+   - entries with distinct keys in ``providers``, ``static-properties``,
+     and ``variants`` are added;
+   - entries with the same key must have exactly the same value;
+   - ``default-priorities.namespace`` may be extended by appending new
+     values, but existing values must not be changed or reordered;
+   - entries may be added to ``default-priorities.feature`` and
+     ``default-priorities.value`` for namespaces newly appended to
+     ``default-priorities.namespace``; and
+   - all other values must match exactly.
 
 
 Example use cases
@@ -1297,10 +1302,12 @@ The optional ``abi_dependency`` extension can be used to build multiple
 Integration with ``pylock.toml``
 --------------------------------
 
-<TODO> Integration inside the pylock.toml specification shall be considered
-:doc:`packaging:specifications/pylock-toml`:
+The :doc:`packaging:specifications/pylock-toml` format does not currently
+represent wheel variants. A future revision could include variant
+metadata so that installers can preserve variant information when
+resolving and installing from a lock file.
 
-It could work as follow:
+One possible representation follows:
 
 .. code:: rst
 
@@ -1345,44 +1352,41 @@ resolve variants to select the best wheel file.
 Build backends
 --------------
 
-<TODO> Rephrase
+The :pep:`517` and :pep:`660` build hooks do not indicate whether the
+calling frontend supports variant wheels. To remain compatible with
+existing frontends, build backends MUST therefore produce non-variant
+wheels by default. They MAY provide an opt-in mechanism for requesting a
+variant build, however this PEP does not standardize that mechanism.
 
-As a build backend can't determine whether the frontend supports variant
-wheels or not, :pep:`517` and :pep:`660` hooks MUST build non-variant
-wheels by default. Build backends MAY provide ways to request variant
-builds. This specification does not define any specific configuration.
-
-When building variant wheels, build backends MUST verify variant
-metadata for correctness, and they MUST NOT emit wheels with
-nonconformant ``variant.json`` files. They SHOULD also query providers
-to determine whether variant properties requested by the user are valid,
-though they MAY permit skipping this verification and therefore emitting
-variant wheels with potentially unknown properties.
+When producing a variant wheel, a build backend MUST validate its
+variant metadata and MUST NOT emit a wheel whose ``variant.json`` file
+does not conform to this specification. It SHOULD also query the
+relevant providers to verify that the requested variant properties are
+recognized. A backend MAY allow this provider-based verification to be
+skipped, in which case the resulting wheel may contain unknown
+properties.
 
 
 Variant environment markers
 ---------------------------
 
-<TODO> Rephrase
+Variant wheels may require different dependencies depending on the
+properties they were built for. Four new :ref:`environment marker
+variables <dependency-specifiers-environment-markers>` allow dependency
+specifications to express these conditions:
 
-Four new :ref:`environment markers
-<dependency-specifiers-environment-markers>` are introduced in
-dependency specifications:
+1. ``variant_namespaces`` is the set of namespaces used by the wheel's
+   variant properties.
+2. ``variant_features`` is the set of ``namespace :: feature`` pairs
+   used by the wheel's variant properties.
+3. ``variant_properties`` is the set of
+   ``namespace :: feature :: value`` tuples used by the wheel's variant
+   properties.
+4. ``variant_label`` is the exact label of the wheel variant. Its value
+   is an empty string for a non-variant wheel.
 
-1. ``variant_namespaces`` corresponding to the set of namespaces of all
-   the variant properties that the wheel variant was built for.
-2. ``variant_features`` corresponding to the set of
-   ``namespace :: feature`` pairs of all the variant properties that the
-   wheel variant was built for.
-3. ``variant_properties`` corresponding to the set of
-   ``namespace :: feature :: value`` tuples of all the variant
-   properties that the wheel variant was built for.
-4. ``variant_label`` corresponding to the exact variant label that the
-   wheel was built with. For the non-variant wheel, it is an empty
-   string.
-
-The markers evaluating to sets of strings MUST be matched via the ``in``
-or ``not in`` operator, e.g.:
+The first three markers have sets of strings as their values and MUST be
+tested using the ``in`` or ``not in`` operator. For example:
 
 .. code::
 
@@ -1393,90 +1397,63 @@ or ``not in`` operator, e.g.:
     # satisfied only by "foo :: bar :: baz" property
     dep3; "foo :: bar :: baz" in variant_properties
 
-The ``variant_label`` marker is a plain string:
+The ``variant_label`` marker is a string and is compared using the usual
+string operators:
 
 .. code::
 
     # satisfied by the variant "foobar"
     dep4; variant_label == "foobar"
-    # satisfied by any wheel other other than the null variant
+    # satisfied by any wheel other than the null variant
     # (including the non-variant wheel)
     dep5; variant_label != "null"
     # satisfied by the non-variant wheel
     dep6; variant_label == ""
 
-Implementations MUST ignore differences in whitespace while matching the
-features and properties.
+When matching features and properties, implementations MUST ignore
+differences in whitespace around the ``::`` separators.
 
-Variant marker expressions MUST be evaluated against the variant
-properties stored in the wheel being installed, not against the current
-output of the provider plugins. If a non-variant wheel was selected or
-built, all variant markers evaluate to ``False``.
-
-
+Variant marker expressions MUST be evaluated from the variant metadata
+stored in the wheel being installed, not from the current output of the
+provider plugins. For a non-variant wheel, the three set-valued markers
+are empty and ``variant_label`` is an empty string.
 
 
 Security implications
 =====================
 
-<TODO> Re-phrase & focus on "handled in a different place"
+Variant resolution may require executing code before a wheel is
+selected. Package index metadata can identify Python packages that
+provide plugins for querying system capabilities, and an installer may
+need to install and run those plugins while resolving dependencies. This
+introduces two additional supply-chain attack vectors:
 
-The proposal introduces a plugin system for querying the system
-capabilities in order to determine variant wheel capability. The system
-permits specifying additional Python packages providing the plugins
-in the package index metadata. Installers and other tools that need
-to determine whether a particular wheel is installable, or select
-the most preferred variant among multiple variant wheels, may need
-to install these packages and execute the code within them while
-resolving dependencies or processing wheels.
-
-This elevates the supply-chain attack potential by introducing two new
-points for malicious actors to inject arbitrary code payload:
-
-1. Publishing a version of a variant provider plugin or one of its
-   dependencies with malicious code.
+1. A provider plugin, or one of its dependencies, could publish a
+   malicious release.
 
 2. Introducing a malicious variant provider plugin in an existing
    package metadata.
 
-While such attacks are already possible at the package dependency level,
-it needs to be emphasized that in some scenarios the affected tools are
-executed with elevated privileges, e.g. when installing packages for
-multi-user systems, while the installed packages are only used with
-regular user privileges afterwards. Therefore, variant provider plugins
-could introduce a Remote Code Execution vulnerability with elevated
-privileges.
+Executing third-party code during installation is not a new risk: build
+backends and build dependencies are already executed when installing
+from source distributions. Provider plugins nevertheless extend that
+risk to wheel-only workflows, which may otherwise assume that dependency
+resolution and wheel installation do not execute code from additional
+packages.
 
-A similar issue already exists in the packaging ecosystem when packages
-are installed from source distributions, whereas build backends
-and other build dependencies are installed and executed. However,
-various tools operating purely on wheels, as well as users using
-tool-specific options to disable use of source distributions,
-have been relying on the assumption that no code external to the system
-will be executed while resolving dependencies, installing a wheel or
-otherwise processing it. To uphold this assumption, the proposal
-explicitly requires that untrusted provider plugin packages are never
-installed without explicit user consent.
+Trust in provider plugins is handled separately from variant metadata.
+As described in the Providers section, installers MUST NOT install or
+execute an untrusted provider package without explicit user consent.
+Installers MAY establish trust by using vetted allowlists, vendoring
+specific versions, reimplementing providers, or shipping commonly used
+providers directly. The specification also permits static provider
+configuration, which avoids executing a plugin altogether.
 
-The Providers section of the specification provides further
-suggestions that aim to improve both security and the user experience.
-Particularly, it is expected that the most popular provider plugins will
-be available out of the box, and a dedicated team of maintainers
-(initially including a subset of the PEP authors) will be responsible
-for inspecting them for security risks and vetting the plugins as safe
-to use. Installers will be able to either use a published allowlist,
-vendor specific provider plugin versions, reimplement them or use them
-as a Python library at their leisure.
-
-This will lead to the majority of packages focusing on these specific
-plugins, rather than implementing competing solutions. Plugins requiring
-explicit opt-in should be rare, and primarily affect expert users. This
-is important to make variant usage secure-by-default. Furthermore, the
-frequent disruption of workflows incentivises users to blanket-allow all
-plugins (security fatigue).
-
-Furthermore, the specification permits using static configuration as
-input to skip running plugins altogether.
+Making common providers available through trusted mechanisms allows most
+variant resolution to work without additional prompts, while uncommon
+providers remain subject to explicit opt-in. Keeping such prompts rare
+also reduces the risk of users granting blanket approval out of consent
+fatigue.
 
 How to teach this
 =================
@@ -1701,8 +1678,10 @@ and Zanie Blue.
 Change history
 ==============
 
-- 18-Jul-2026
-  - <TODO>
+- 14-Aug-2026
+
+ - Change to informational PEP
+
 
 - 18-Mar-2026
 
