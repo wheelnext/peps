@@ -706,8 +706,7 @@ Variant Property
     multiple values, each is represented by a separate property.
 
 Variant Label
-    A string (up to 16 characters) added to the wheel filename to
-    uniquely identify variants.
+    A string added to the wheel filename to uniquely identify variants.
 
 Null Variant
     A special variant with zero variant properties and the reserved
@@ -716,62 +715,47 @@ Null Variant
     non-variant wheels.
 
 Variant Provider
-    A provider of supported and valid variant properties for a specific
-    namespace, usually in the form of a Python package that implements
-    system detection.
-
-Install-time Provider
-    A provider implemented as a plugin that can be queried during wheel
-    installation.
-
-Ahead-of-Time Provider
-    A provider that features a static list of supported properties which
-    is then embedded in the wheel metadata. Such a list can either be
-    embedded in ``pyproject.toml`` or provided by a plugin queried at
-    build time.
+    A provider of valid variant properties for a specific namespace.
+    Can either be a static list of ordered properties, or a Python
+    package that dynamically determines the properties that are
+    compatible with the system.
 
 
-Overview
---------
+High-level overview
+-------------------
 
 Wheel variants introduce a more fine-grained specification of built
-wheel characteristics beyond what existing wheel tags provide.
-Individual wheels carry a human-readable label defined at build time, as
-described in `modified wheel filename`_, and are characterizing using
-`variant property system`_. The properties are organized into a
-hierarchical structure of namespaces, features and feature values. When
-evaluating wheels to install, the installer determines whether variant
-properties of a given wheel are compatible with the system, and perform
-variant ordering based on the priority of the compatible variant
-properties. This is done in addition to determining the compatibility.
-The ordering by variant properties takes precedence over ordering by
-tags.
+wheel characteristics beyond what existing wheel tags provide. Every
+variant wheel carries zero or more variant properties. Much like
+:doc:`packaging:specifications/platform-compatibility-tags`, variant
+properties are used both to determine whether the wheel is compatible
+with the system in question and to select the most suitable wheel to
+install from multiple compatible wheels.
 
-Every variant namespace is governed by a variant provider. There are two
-kinds of variant providers: install-time providers and ahead-of-time
-(AoT) providers. Install-time providers require plugins that are queried
-while installing wheels to determine the set of supported properties and
-their preference order. For AoT providers, this data is static and
-embedded in the wheel; it can be either provided directly by the
-wheel maintainer or queried at wheel build time from an AoT plugin.
+Unlike tags, variant properties are not stored in the wheel filename,
+but in a dedicated metadata file inside the wheel. To distinguish
+between different wheel variants and provide a human-readable
+identification, variant wheels carry an additional variant label
+component in the filename. This label is specified along with the rest
+of variant metadata in the project's source tree (normally in
+``pyproject.toml``), and it is processed by the build backend that
+afterwards embeds it into the built wheel.
 
-Both kinds of plugins are usually implemented as Python packages which
-implement the provider plugin API, but they may also be vendored or
-reimplemented by installers to improve user experience, as outlined in
-Providers. Plugin packages may be installed in isolated or
-non-isolated environments. In particular, all plugins may be returned by
-the ``get_requires_for_build_wheel()`` hook of a :pep:`517` backend, and
-therefore installed along with other build dependencies. For this
-reason, it is important that plugin packages do not narrowly pin
-dependencies, as that could prevent different packages from being
-installed simultaneously in the same environment.
+The properties are organized into a hierarchical structure of
+namespaces, features and feature values. Every namespace is governed by
+a variant provider that is also defined as part of the variant metadata.
+The provider may be either entirely static, in which case all its
+compatible properties are embedded in the metadata, or it may need to
+dynamically establish which properties are compatible with the system.
 
-Metadata governing variant support is defined in ``pyproject.toml``
-file, and it is copied into ``variant.json`` file in wheels, as explored
-in `metadata in source tree and wheels`_. Additionally, `variant
-environment markers`_ can be used to define dependencies specific to a
-subset of variants.
+Providers that need to establish property compatibility are normally
+provisioned as installable Python packages implementing a plugin API.
+They may also be vendored or reimplemented by installers to improve user
+experience.
 
+
+Old stuff (to be reused / removed)
+==================================
 
 Modified wheel filename
 -----------------------
@@ -853,101 +837,6 @@ GPUs, and the provider indicates which GPUs are actually installed
 two lists.
 
 
-Null variant
-------------
-
-A null variant is a variant wheel with no properties, but distinct
-from non-variant wheels in having the ``null`` variant label and variant
-metadata. During the transition period, it provides the possibility of
-providing a distinct fallback for systems that do not support any of
-the variants provided, and for systems that do support variant wheels at
-all.
-
-For example, a package with optional GPU support could publish three
-kinds of wheels:
-
-- Multiple GPU-enabled wheels, each built for a single CUDA version with
-  a matching set of supported GPUs, and used only when the provider
-  plugin indicates that the system is compatible.
-
-- A CPU-only null variant, much smaller than the GPU variants, installed
-  when the provider plugin indicates that no compatible GPU is
-  installed.
-
-- A GPU+CPU non-variant wheel, that will be installed on systems without
-  an installer supporting variants.
-
-Publishing a null variant is optional, and makes sense only if distinct
-fallbacks provide advantages to the user. If one is published, a wheel
-variant-enabled installer will prefer it over the non-variant wheel. If
-it is not, it will fall back to the non-variant wheel instead. The
-non-variant wheel is also used if variant support is explicitly disabled
-by an installer flag.
-
-The null variant uses a reserved ``null`` label to make it clearly
-distinguishable from regular variants.
-
-
-Install-time and Ahead-of-Time providers
-----------------------------------------
-
-The variant wheel metadata specifies what providers are used for its
-properties. Providers serve a twofold purpose:
-
-a. at install time: determining which variant wheels are compatible with
-   the user's system, and which of them constitutes the best choice, and
-
-b. at build time: determining which variant properties are valid for
-   building a wheel.
-
-The specification proposes two kinds of providers: install-time
-providers and Ahead-of-Time providers.
-
-Install-time providers are implemented either as Python packages that
-need to be installed and run to query them, or vendored or reimplemented
-in the tools. They are used when user systems need to be queried to
-determine wheel compatibility, for example for variants utilizing GPUs
-or requiring CPU instruction sets beyond what platform tags provide.
-Installing third-party packages involves security risks highlighted in
-the `security implications`_ section, and the proposed mitigations incur
-a cost on installer implementations.
-
-Ahead-of-Time providers are implemented as static metadata embedded in
-the wheel. They are used when particular variant properties are always
-compatible with the user's system (provided that a wheel using them has
-been built successfully). However, the metadata indicates which
-properties are preferred. For example, AoT providers can be used to
-provide choice between builds against different BLAS / LAPACK providers,
-or to provide debug builds of packages. Since they do not require
-running code external to the installer, they do not pose the problems
-faced by install-time providers, and can be used more liberally.
-
-AoT providers are permitted to feature plugin packages. If that is the
-case, these packages are only used when building wheels, and their
-output is used to fill in the static metadata used at install time.
-This way, it is easier to use consistent property names and values
-across multiple packages. Otherwise, the package maintainer needs to
-include the supported properties directly in the ``pyproject.toml``
-file.
-
-When implemented as Python packages, both kinds of provider plugins
-expose roughly the same API. However, an AoT provider must always
-consider all valid variant properties supported, and it must always
-return the same ordered list of supported properties irrespective of the
-user system. All AoT providers can technically be used as install-time
-providers, but not the other way around.
-
-
-Variant Discovery
------------------
-
-The wheel variant proposal introduces the ability to take package resolution decisions
-based on the user system. This ability is non-specific and flexible, allowing
-any current or future system properties to be used as part of the variant discovery process.
-Platform tags are essentially a subset of what this work is proposing. PEP 817 is focused on
-providing a flexible and extensible mechanism for variant discovery.
-
-
 Metadata in source tree and wheels
 -----------------------------------
 
@@ -998,36 +887,6 @@ file in the ``.dist-info`` directory. The existing metadata files are
 unchanged to avoid unnecessary incompatibility, and to avoid serializing
 into the inconvenient :doc:`Core Metadata
 <packaging:specifications/core-metadata>` format.
-
-
-ABI dependency variant provider
--------------------------------
-
-Scientific and machine-learning packages often link against native
-dependencies such as BLAS/LAPACK implementations, MPI runtimes, or
-scientific computing libraries such as PyTorch. Their Application Binary
-Interfaces (ABIs) may vary by implementation, build configuration, or version;
-incompatible combinations can fail to import, crash, or behave incorrectly.
-Downstream wheels therefore commonly use narrow dependency pins, which can make
-an environment containing multiple such packages impossible to resolve.
-
-Variants allow a single release to provide wheels built against several
-supported dependency ABIs. An installer that considers these variants
-during dependency resolution can select mutually compatible wheels and
-dependency versions, reducing overly narrow pins and avoiding unnecessary
-source builds.
-
-Unfortunately, such a variant provider cannot be implemented within the
-plugin API defined by the specification. Given that a robust
-implementation would need to interface with the dependency resolver,
-rather than attempt to extend the API to cover this use case and add
-significant complexity as a result, the specification reserves
-``abi_dependency`` as a special variant namespace that can be
-implemented by installers wishing to provide this feature.
-
-Given the complexity of the problem, this extension is made entirely
-optional. This implies that any packages using it need to provide
-non-variant wheels as well.
 
 
 Suggested implementation logic for a packaging tool
