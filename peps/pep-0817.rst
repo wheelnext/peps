@@ -739,7 +739,10 @@ identification, variant wheels carry an additional variant label
 component in the filename. This label is specified along with the rest
 of variant metadata in the project's source tree (normally in
 ``pyproject.toml``), and it is processed by the build backend that
-afterwards embeds it into the built wheel.
+afterwards embeds it into the built wheel. Additionally, this
+information is copied into a dedicated
+``{project}-{version}-variants.json`` file on the index, so that clients
+can obtain it without having to fetch the wheels.
 
 The properties are organized into a hierarchical structure of
 namespaces, features and feature values. Every namespace is governed by
