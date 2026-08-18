@@ -757,6 +757,52 @@ They may also be vendored or reimplemented by installers to improve user
 experience.
 
 
+Variant properties
+------------------
+
+Variant properties can be thought of a correspondence to and an
+extension of
+:doc:`packaging:specifications/platform-compatibility-tags`. In this
+simile, variant features are equivalent of tag types, while their values
+are the equivalent of the tags themselves. However, variant features are
+not fixed and the wheel can have any number of them. Furthermore, they
+are organized into namespaces that are governed independently.
+
+A variant property encodes a single feature value that the wheel is
+compatible with. Conversely, if the wheel is compatible with multiple
+values of a given feature, they are represented by multiple feature
+entries.
+
+For example, let's say that a package defined a ``nvidia`` namespace
+that permitted the following three features:
+
+1. ``nvidia :: cuda_version_lower_bound`` specifying the minimum
+   supported CUDA runtime version.
+2. ``nvidia :: cuda_version_upper_bound`` specifying the maximum
+   supported CUDA runtime version.
+3. ``nvidia :: sm_arch`` specifying a single supported GPU architecture.
+
+This package produced a wheel with the following variant properties:
+
+.. code:: text
+
+    nvidia :: cuda_version_lower_bound :: 12.8
+    nvidia :: sm_arch :: 120_real
+    nvidia :: sm_arch :: 110_real
+
+This would imply the following:
+
+- The wheel can only be installed on a system compatible with the
+  ``nvidia :: cuda_version_lower_bound :: 12.8`` property, that is
+  featuring installed CUDA runtime version 12.8 or newer.
+- Since there is no ``nvidia :: cuda_version_upper_bound``, that feature
+  is not taken into consideration and there is no upper bound on CUDA
+  runtime version.
+- The wheel can only be installed on a system compatible with at least
+  one of the ``nvidia :: sm_arch`` values listed, that is having a GPU
+  with ``120_real`` or ``110_real`` architecture.
+
+
 Old stuff (to be reused / removed)
 ==================================
 
