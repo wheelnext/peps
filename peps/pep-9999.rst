@@ -156,12 +156,12 @@ included in the Appendix of this PEP. The schema is available in
 Provider information
 ''''''''''''''''''''
 
-Variant metadata must include a ``providers`` key. It corresponds to a
-dictionary, in which the keys are namespaces, the values are
-dictionaries with provider information. It specifies how to install and
-use variant providers.  All the namespaces found in
-``default-priorities.namespace`` MUST be listed in this dictionary,
-and other keys MUST NOT be present.
+Variant metadata in a variant wheel must include a ``providers`` key. It
+corresponds to a dictionary, in which the keys are namespaces, the
+values are dictionaries with provider information. It specifies how to
+install and use variant providers. All the namespaces found in
+``default-priorities.namespace`` MUST be listed in this dictionary, and
+other keys MUST NOT be present.
 
 The use of provider information is described in the `Providers`_ and
 `Provider plugin API`_ sections.
@@ -208,16 +208,17 @@ contain the following key:
 It is invalid to specify ``requires`` or ``plugin-api`` if
 ``static-properties`` are present.
 
-For the metadata to be consistent, the same keys MUST always correspond
-to the same values. When combining metadata, the resulting ``providers``
+The ``providers`` dictionary is copied into index-level metadata. For
+the metadata to be consistent, the same keys MUST always correspond to
+the same values. When combining metadata, the resulting ``providers``
 dictionary MUST be a union of all the input dictionaries.
 
 
 Example
 '''''''
 
-The ``foo-1.2.3-variants.json`` example from :pep:`825` can be extended
-in the following way:
+Both the variant metadata example and the index-level metadata example
+from :pep:`825` can be extended in the following way:
 
 .. code:: json5
 
