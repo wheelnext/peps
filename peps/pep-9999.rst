@@ -337,7 +337,7 @@ b. as the value of an installed entry point, as described in
 
 
 Variant plugin discovery
-------------------------
+''''''''''''''''''''''''
 
 The Python packages providing variant provider plugins SHOULD install
 an entry point to facilitate discovery by variant-related utilities.
