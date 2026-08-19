@@ -721,6 +721,43 @@ Variant Provider
     compatible with the system.
 
 
+Specifications
+--------------
+
+This PEP aims to provide a concise high-level overview of wheel
+variants. It does not cover the complete functionality proposed as part
+of the standard, nor does it provide a normative guidance on
+implementing it. These are provided in subsequent PEPs.
+
+Currently, the following PEPs are published:
+
+- :pep:`PEP 825: Package Format <825>`: covering changes to the wheel
+  format, initial definition of variant metadata, index-level metadata
+  file, variant wheel ordering rules, environment markers and
+  ``pylock.toml`` integration.
+
+The following subsequent PEPs are currently planned:
+
+- Providers: covering the governance of variant namespaces; extending
+  variant metadata with provider information; introducing providers that
+  supply compatible properties statically via variant metadata or
+  dynamically via opt-in Python packages, along with the security
+  considerations for their use; defining the relevant plugin API;
+  introducing a special provider concerned with ABI compatibility.
+
+- Building: covering integration with build backends and
+  ``pyproject.toml`` file; extending variant metadata and plugin API to
+  support verifying the validity of variant properties and embedding
+  static properties via plugins at build time.
+
+- TBD: covering UX, maintainability, security, governance and
+  introduction strategy; introducing a community maintained repository
+  of trusted variant providers that can be integrated with installers
+  for opt-out behavior.
+
+The scope and details of these PEPs may be subject to change.
+
+
 High-level overview
 -------------------
 
