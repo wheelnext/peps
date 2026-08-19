@@ -840,6 +840,99 @@ This would imply the following:
   with ``120_real`` or ``110_real`` architecture.
 
 
+Building variant wheels
+-----------------------
+
+The recommended way of integrating variant wheel support in a build
+backend is to store variant metadata in the ``pyproject.toml`` file, and
+to select the variant being built via a ``config_settings`` parameter.
+
+Consider the following example:
+
+.. code-block:: toml
+
+    [variant]
+    "$schema" = "..."
+
+    [variant.default-priorities]
+    # specifies preference ordering: nvidia support is more important
+    # than x86_64 optimizations
+    namespace = ["nvidia", "x86_64"]
+
+    # == provider definitions ==
+
+    [variant.providers.nvidia]
+    requires = ["nvidia-variant-provider"]
+
+    [variant.providers.x86_64]
+    requires = ["x86-64-variant-provider"]
+
+    # == buildable variant definitions ==
+
+    [variant.variants.cu130]
+    nvidia.cuda_version_lower_bound = ["13.0"]
+    nvidia.sm_arch = ["120_virtual", "120_real", "100_real", "90_real"]
+
+    [variant.variants.x86_64_v4]
+    x86_64.level = ["v4"]
+
+This example defines two providers: ``nvidia`` responsible for NVIDIA
+CUDA support, and ``x86_64`` responsible for x86_64 CPU optimizations.
+These two providers are used to specify two buildable variants:
+
+- ``cu130`` that corresponds to a package using CUDA 13.0 support
+- ``x86_64_v4`` that corresponds to a package using code optimized for
+  x86-64-v4 CPU
+
+Per the precedence rules specified in
+``variant.default-priorities.namespace``, the ``cu130`` variant
+featuring GPU support will be preferred if CUDA runtime and a compatible
+GPU is available. Otherwise, the ``x86_64_v4`` variant will be the next
+best choice, provided a compatible CPU is available.
+
+A specific variant would then be built via an invocation such as::
+
+    python -m build -w -Cvariant-label=cu130
+
+This would combine the standardized configuration specified above with
+build-backend specific configuration that controls the actual build
+configuration. Once the build is finished, the build backend would copy
+the metadata into the wheel, creating a ``*.dist-info/variant.json``
+similar to the following example:
+
+.. code-block:: json5
+
+    {
+      // == copied verbatim from pyproject.toml ==
+
+      "$schema": "...",
+
+      "default-priorities": {
+        "namespace": ["nvidia", "x86_64"]
+      },
+
+      "providers": {
+        "nvidia": {
+          "requires": ["nvidia-variant-provider"]
+        },
+        "x86_64": {
+          "requires": ["x86-64-variant-provider"]
+        }
+      },
+
+      // == actual properties of the built variant wheel ==
+
+      "variants": {
+        "cu130": {
+          "nvidia": {
+            "cuda_version_lower_bound": ["13.0"],
+            "sm_arch": ["120_virtual", "120_real", "100_real", "90_real"]
+          }
+        }
+      }
+    }
+
+
 Old stuff (to be reused / removed)
 ==================================
 
