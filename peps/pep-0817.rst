@@ -721,8 +721,8 @@ Variant Provider
     compatible with the system.
 
 
-Specifications
---------------
+Standards Track PEPs for wheel variants
+---------------------------------------
 
 This PEP aims to provide a concise high-level overview of wheel
 variants. It does not cover the complete functionality proposed as part
