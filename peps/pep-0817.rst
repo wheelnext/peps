@@ -1207,125 +1207,6 @@ The optional ``abi_dependency`` extension can be used to build multiple
 - ``vllm-0.11.0-...-torch27.wheel`` with
   ``abi_dependency :: torch :: 2.7``
 
-Integration with ``pylock.toml``
---------------------------------
-
-The :doc:`packaging:specifications/pylock-toml` format does not currently
-represent wheel variants. A future revision could include variant
-metadata so that installers can preserve variant information when
-resolving and installing from a lock file.
-
-One possible representation follows:
-
-.. code:: rst
-
-    .. _pylock-packages-variants-json:
-
-    ``[packages.variants-json]``
-    ----------------------------
-
-    - **Type**: table
-    - **Required?**: no; requires that :ref:`pylock-packages-wheels` is used,
-     mutually-exclusive with :ref:`pylock-packages-vcs`,
-     :ref:`pylock-packages-directory`, and :ref:`pylock-packages-archive`.
-    - **Inspiration**: uv_
-    - The URL or path to the ``variants.json`` file.
-    - Only used if the project uses :ref:`wheel variants <wheel-variants>`.
-
-    .. _pylock-packages-variants-json-url:
-
-    ``packages.variants-json.url``
-    ''''''''''''''''''''''''''''''
-
-    See :ref:`pylock-packages-archive-url`.
-
-    .. _pylock-packages-variants-json-path:
-
-    ``packages.variants-json.path``
-    '''''''''''''''''''''''''''''''
-
-    See :ref:`pylock-packages-archive-path`.
-
-    .. _pylock-packages-variants-json-hashes:
-
-    ``packages.variants-json.hashes``
-    '''''''''''''''''''''''''''''''''
-
-    See :ref:`pylock-packages-archive-hashes`.
-
-If there is a ``[packages.variants-json]`` section, the installer SHOULD
-resolve variants to select the best wheel file.
-
-
-Build backends
---------------
-
-The :pep:`517` and :pep:`660` build hooks do not indicate whether the
-calling frontend supports variant wheels. To remain compatible with
-existing frontends, build backends MUST therefore produce non-variant
-wheels by default. They MAY provide an opt-in mechanism for requesting a
-variant build, however this PEP does not standardize that mechanism.
-
-When producing a variant wheel, a build backend MUST validate its
-variant metadata and MUST NOT emit a wheel whose ``variant.json`` file
-does not conform to this specification. It SHOULD also query the
-relevant providers to verify that the requested variant properties are
-recognized. A backend MAY allow this provider-based verification to be
-skipped, in which case the resulting wheel may contain unknown
-properties.
-
-
-Variant environment markers
----------------------------
-
-Variant wheels may require different dependencies depending on the
-properties they were built for. Four new :ref:`environment marker
-variables <dependency-specifiers-environment-markers>` allow dependency
-specifications to express these conditions:
-
-1. ``variant_namespaces`` is the set of namespaces used by the wheel's
-   variant properties.
-2. ``variant_features`` is the set of ``namespace :: feature`` pairs
-   used by the wheel's variant properties.
-3. ``variant_properties`` is the set of
-   ``namespace :: feature :: value`` tuples used by the wheel's variant
-   properties.
-4. ``variant_label`` is the exact label of the wheel variant. Its value
-   is an empty string for a non-variant wheel.
-
-The first three markers have sets of strings as their values and MUST be
-tested using the ``in`` or ``not in`` operator. For example:
-
-.. code::
-
-    # satisfied by any "foo :: * :: *" property
-    dep1; "foo" in variant_namespaces
-    # satisfied by any "foo :: bar :: *" property
-    dep2; "foo :: bar" in variant_features
-    # satisfied only by "foo :: bar :: baz" property
-    dep3; "foo :: bar :: baz" in variant_properties
-
-The ``variant_label`` marker is a string and is compared using the usual
-string operators:
-
-.. code::
-
-    # satisfied by the variant "foobar"
-    dep4; variant_label == "foobar"
-    # satisfied by any wheel other than the null variant
-    # (including the non-variant wheel)
-    dep5; variant_label != "null"
-    # satisfied by the non-variant wheel
-    dep6; variant_label == ""
-
-When matching features and properties, implementations MUST ignore
-differences in whitespace around the ``::`` separators.
-
-Variant marker expressions MUST be evaluated from the variant metadata
-stored in the wheel being installed, not from the current output of the
-provider plugins. For a non-variant wheel, the three set-valued markers
-are empty and ``variant_label`` is an empty string.
-
 
 Security implications
 =====================
@@ -1363,75 +1244,14 @@ providers remain subject to explicit opt-in. Keeping such prompts rare
 also reduces the risk of users granting blanket approval out of consent
 fatigue.
 
-How to teach this
-=================
-
-Python package users
---------------------
-
-The primary source of information for Python package users should be
-installer documentation, supplemented by helpful informational messages
-from command-line interface, and tutorials. Users without special needs
-should not require any special variant awareness. Advanced users would
-specifically need documentation on (provided the installer in question
-implements these features):
-
-- enabling untrusted provider plugins and the security implications of
-  that
-
-- controlling provider usage, in particular enabling optional providers,
-  disabling undesirable plugins or disabling variant usage in general
-
-- explicitly selecting variants, as well as controlling variant
-  selection process
-
-- configuring variant selection for remote deployment targets, for
-  example using a static file generated on the target
-
-The installer documentation may also be supplemented by documentation
-specific to Python projects, in particular their installation
-instructions.
-
-For the transition period, during which some package managers do and
-some do not support variant wheels, users need to be aware that certain
-features may only be available with certain tools.
-
-
-Python package maintainers
---------------------------
-
-The primary source of information for maintainers of Python packages
-should be build backend documentation, supplemented by tutorials. The
-documentation needs to indicate:
-
-- how to declare variant support in ``pyproject.toml``
-
-- how to use variant environment markers to specify dependencies
-
-- how to build variant wheels
-
-- how to publish them and generate the ``*-variants.json`` file on local
-  indexes
-
-The maintainers will also need to peruse provider plugin documentation.
-They should also be aware which provider plugins are considered trusted
-by commonly used installers, and know the implications of using
-untrusted plugins. These materials may also be supplemented by generic
-documents explaining publishing variant wheels, along with specific
-example use cases.
-
-For the transition period, package maintainers need to be aware that
-they should still publish non-variant wheels for backwards
-compatibility.
-
 
 Backwards compatibility
 =======================
 
 Existing installers MUST NOT accidentally install variant wheels, as
 they require additional logic to determine whether a wheel is compatible
-with the user's system. This is achieved by `extending wheel filename
-<#extended-wheel-filename>`__ through adding a ``-{variant label}``
+with the user's system. This is achieved by extending wheel filename
+through adding a ``-{variant label}``
 component to the end of the filename, effectively causing variant wheels
 to be rejected by common installer implementations. For backwards
 compatibility, a non-variant wheel can be published in addition to the
@@ -1446,7 +1266,7 @@ directory, which should be preserved by tools that are not concerned
 with variants, limiting the necessary changes to updating the filename
 validation algorithm (if there is one).
 
-If the new `variant environment markers`_ are used in wheel
+If the new variant environment markers are used in wheel
 dependencies, these wheels will be incompatible with existing tools.
 This is a general problem with the design of environment markers, and
 not specific to wheel variants. It is possible to work around this
@@ -1454,12 +1274,11 @@ problem by partially evaluating environment markers at build time, and
 removing the markers or dependencies specific to variant wheels from the
 non-variant wheel.
 
-`Build backends`_ produce non-variant wheels to preserve backwards
+Build backends produce non-variant wheels to preserve backwards
 compatibility with existing frontends. Variant wheels can only be output
 on explicit user request.
 
-By using a separate ``*-variants.json`` `file for shared metadata
-<#name-version-variants-json-the-index-level-variant-metadata-file>`__,
+By using a separate ``*-variants.json`` file for shared metadata,
 it is
 possible to use variant wheels on an index that does not specifically
 support variant metadata. However, the index MUST permit distributing
