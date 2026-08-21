@@ -894,11 +894,33 @@ A specific variant would then be built via an invocation such as::
 
     python -m build -w -Cvariant-label=cu130
 
-This would combine the standardized configuration specified above with
-build-backend specific configuration that controls the actual build
-configuration. Once the build is finished, the build backend would copy
-the metadata into the wheel, creating a ``*.dist-info/variant.json``
-similar to the following example:
+A build backend could behave in the following way:
+
+1. Detect ``variant-label`` in ``config_settings``, and enable variant
+   wheel builds.
+
+2. Validate the ``variant`` table against the schema.
+
+3. Find the ``cu130`` label in the ``variant.variants`` table, and
+   determine the corresponding properties.
+
+4. In ``get_requires_for_build_wheel()`` hook, return the plugin
+   packages needed for the namespaces found in the properties. This will
+   cause the build frontend to install them in the build environment.
+
+5. Query the installed plugins to verify that the variant properties are
+   valid.
+
+6. Construct the ``*.dist-info/variant.json`` file from the ``variant``
+   table. The ``variants`` subtable is filtered to the entry for the
+   variant being built, the remaining subtables are copied verbatim.
+
+7. Build the wheel. This could involve processing tool-specific
+   configuration to apply variant-specific modifications to the build
+   process.
+
+The resulting ``*.dist-info/variant.json`` file would be similar to the
+following example:
 
 .. code-block:: json5
 
