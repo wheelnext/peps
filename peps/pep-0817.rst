@@ -1019,14 +1019,14 @@ The index-level metadata file for the two ``*-cu130.whl`` and
       }
     }
 
-Old stuff (to be reused / removed)
-==================================
-
-Suggested implementation logic for a packaging tool
----------------------------------------------------------
 
 Installing a package from an index
-''''''''''''''''''''''''''''''''''
+----------------------------------
+
+.. Note::
+
+   The diagram still refers to AoT. We should probably remove this
+   branch.
 
 .. figure:: pep-0817/conceptual_diagram_installers.png
     :target: _images/conceptual_diagram_installers.png
@@ -1057,129 +1057,45 @@ Installing a package from an index
 
     A conceptual diagram of installing a wheel.
 
-When asked to install a version of a package from an index, the proposed
-tool behavior would be to:
+When asked to install a package from an index, the installer would:
 
-1. Query the remote index for the desired package.
-2. Select an initial match for a package version meeting the version constraints,
-   as usual (this does not need to take variant metadata into account).
-3. Filter available wheels based on Platform Compatibility Tags.
-4. Determine if any of the remaining wheels are variant wheels.
-   If not, proceed as with non-variant wheels.
-5. If any wheels feature variant labels, download the index-level
-   variant metadata file, ``{name}-{version}-variants.json``. If this
-   file is missing, assume all variant wheels are incompatible and
-   proceed as with non-variant wheels.
-6. Map the variant labels into sets of variant properties using the
-   index-level variant metadata file. If any of the labels present in
-   wheel filenames are missing in the file, assume that the respective
-   wheels are incompatible.
-7. Obtain the ordered lists of supported variant properties using
-   providers specified in the index-level variant metadata file:
+1. Query the remote index and select a version. Obtain the list of files
+   (distributions) for the selected version.
+2. Initially filter wheels based on Platform Compatibility Tags.
+3. Determine if any of the remaining wheels are variant wheels (have a
+   variant label in the filename). Let's say that in this case we found
+   ``*-cu130.whl`` and ``*-x86_64_v4.whl`` variants.
+4. Find the ``{package}-{version}-variants.json`` file corresponding to
+   the selected version. Fetch the file and parse the variant metadata
+   in it.
+5. Obtain property lists corresponding to the labels in the installable
+   variant wheels from the metadata file. Construct a set of all
+   namespaces used in them.
+6. Obtain the provider information corresponding to these namespaces
+   from the metadata file. In this case the set is
+   ``{"nvidia", "x86_64"}``.
+7. For each of the providers:
 
-   - for the enabled AoT providers, obtain them from static property
-     data in the index-level variant metadata file.
-   - for the enabled install-time providers:
+   - If the provider is vendored in the installer, the subsequent
+     queries will be directed to the vendored provider.
+   - If it is not vendored but the user opted in to a given provider,
+     install the provider package in an isolated environment. The
+     subsequent queries will be directed to the provider plugin in this
+     environment.
+   - Otherwise, the provider package is not used and the properties are
+     considered to be incompatible.
 
-     - if the user provided static compatibility information, use that.
-     - otherwise, if the provider is vendored or reimplemented, query it
-       in implementation-specific manner.
-     - otherwise, if the Python provider package is considered secure
-       (either by the installer or via explicit user opt-in), install it
-       in an isolated environment, and query it via the plugin API.
-     - if none of the above applies, do not run the provider and either
-       consider the variant properties incompatible, or fail the
-       installation.
-
-   - for the disabled providers (e.g. opt-in providers that were not
-     enabled by the user, providers excluded via environment markers),
-     assume that all variant properties in the namespace are
-     incompatible.
-
-8. Filter and order variants based on the lists of supported properties,
-   and select the most preferred variant. If no variant wheel matched,
-   use the non-variant wheels by their rules.
-9. If multiple wheels for a given version share the same variant label,
-   order them by Platform compatibility tags and build number, and
-   select the best wheel.
-
-
-Installing a local wheel
-''''''''''''''''''''''''
-
-When asked to install a local wheel file, the tool's proposed behavior would be
-to:
-
-1. If no variant label is present in the filename, proceed as with
-   non-variant wheels.
-2. Verify the wheel compatibility via Platform compatibility tags.
-3. Read variant metadata from ``*.dist-info/variant.json`` inside the
-   wheel file.
-4. Obtain the ordered lists of supported variant properties, as when
-   `installing a package from an index`_.
-5. Verify the wheel compatibility via supported properties.
-
-
-Building a variant wheel
-''''''''''''''''''''''''
-
-In order to build a variant wheel, the build backend needs to receive a
-list of variant properties and a variant label. The recommended way to
-do that is to use backend-defined keys in the ``config_settings``
-dictionary passed to the build backend hooks.
-
-When building a variant wheel, the proposed behavior for the build
-backend would be to:
-
-1. Read variant provider metadata from ``pyproject.toml``.
-2. Verify that all namespaces specified in the user-defined variant
-   properties have a corresponding provider in the metadata.
-3. In the ``get_requires_for_build_wheel()`` hook, return variant
-   provider plugin packages along with other build dependencies.
-4. In the ``build_wheel()`` hook, query the provider plugins
-   ``get_all_configs()`` function to obtain all valid property keys and
-   values. Use it to verify that the specified properties are correct.
-5. Convert the variant metadata from ``pyproject.toml`` to JSON, append
-   the mapping from variant label to variant properties and write the
-   result into the wheel's ``*.dist-info/variant.json`` file.
-6. Build the wheel as usual, except for including the
-   ``*.dist-info/variant.json`` and the variant label in the filename.
-
-
-Publishing variant wheels on an index
-'''''''''''''''''''''''''''''''''''''
-
-Variant wheels are uploaded to an index in the same way as regular
-wheels. However, installers need aggregated metadata to discover and
-evaluate the available variants without downloading every wheel in a
-release. For each package version, the index therefore serves a
-``{name}-{version}-variants.json`` file containing the combined variant
-metadata for that release.
-
-The file can either be prepared and uploaded by the publisher or
-generated by the index from the metadata embedded in the uploaded
-wheels. Once published, it SHOULD not change, because clients MAY have
-cached it or recorded its hash in a lock file. An index that generates
-the file should therefore wait until the release is fully uploaded
-before publishing it, for example by using a :pep:`694` upload session.
-
-An index generates the ``{name}-{version}-variants.json`` file as
-follows:
-
-1. Copy the data from the first variant wheel's
-   ``*.dist-info/variant.json`` file.
-2. Merge the data from each subsequent variant wheel into the existing
-   data according to these rules:
-
-   - entries with distinct keys in ``providers``, ``static-properties``,
-     and ``variants`` are added;
-   - entries with the same key must have exactly the same value;
-   - ``default-priorities.namespace`` may be extended by appending new
-     values, but existing values must not be changed or reordered;
-   - entries may be added to ``default-priorities.feature`` and
-     ``default-priorities.value`` for namespaces newly appended to
-     ``default-priorities.namespace``; and
-   - all other values must match exactly.
+8. Query the provider to determine whether the properties of the variant
+   wheels on the list are compatible. Discard the variant wheels that
+   are incompatible. Let's say that both ``*-cu130.whl`` and
+   ``*-x86_64_v4.whl`` are compatible.
+9. If any variant wheels remained, order them primarily based on
+   ``default-priorities.namespace`` and secondarily based on the data
+   obtained from the providers, and select the most appropriate variant.
+   In this case, the ``*-cu130.whl`` variant is selected.
+10. If there are multiple wheels with the selected label but different
+    Platform Compatibility Tags, select the most appropriate of them
+    based on Platform Compatibility Tags.
 
 
 Example use cases
