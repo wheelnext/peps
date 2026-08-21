@@ -1023,11 +1023,6 @@ The index-level metadata file for the two ``*-cu130.whl`` and
 Installing a package from an index
 ----------------------------------
 
-.. Note::
-
-   The diagram still refers to AoT. We should probably remove this
-   branch.
-
 .. figure:: pep-0817/conceptual_diagram_installers.png
     :target: _images/conceptual_diagram_installers.png
     :class: invert-in-dark-mode
