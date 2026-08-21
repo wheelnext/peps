@@ -926,6 +926,70 @@ example:
 .. code-block:: json5
 
     {
+      // == copied verbatim from *-variant.json ==
+
+      "$schema": "...",
+
+      "default-priorities": {
+        "namespace": ["nvidia", "x86_64"]
+      },
+
+      "providers": {
+        "nvidia": {
+          "requires": ["nvidia-variant-provider"]
+        },
+        "x86_64": {
+          "requires": ["x86-64-variant-provider"]
+        }
+      },
+
+      // == merged from different variant wheels ==
+
+      "variants": {
+        "cu130": {
+          "nvidia": {
+            "cuda_version_lower_bound": ["13.0"],
+            "sm_arch": ["120_virtual", "120_real", "100_real", "90_real"]
+          }
+        },
+        "x86_64_v4": {
+          "x86_64": {
+            "level": ["v4"]
+          }
+        }
+      }
+    }
+
+
+Publishing variant wheels on an index
+-------------------------------------
+
+To enable resolvers to select between different variant wheels without
+having to fetch the variant metadata straight from wheel files, an
+index-level metadata file ``{project}-{version}-variants.json`` needs to
+be published alongside these wheels.
+
+Initially this could be done via running a dedicated tool on all built
+variant wheels, for example by invoking::
+
+    variantlib generate-index-json -d dist/
+
+The tool collects the variant metadata from all wheels, ensures that it
+is consistent and merges it to create the index-level metadata file.
+This file can be then uploaded to the index alongside variant wheels.
+
+Eventually, this manual step will no longer be necessary when uploading
+variant wheels to PyPI: PyPI will automatically detect that a variant
+wheel is uploaded, read its variant metadata and merge it into its
+database. The combined metadata from the database will be published at
+the URL corresponding to the index-level metadata file.
+
+The index-level metadata file for the two ``*-cu130.whl`` and
+``*-x86_64_v4.whl`` files could look like:
+
+.. code-block:: json5
+
+    {
       // == copied verbatim from pyproject.toml ==
 
       "$schema": "...",
@@ -954,7 +1018,6 @@ example:
         }
       }
     }
-
 
 Old stuff (to be reused / removed)
 ==================================
