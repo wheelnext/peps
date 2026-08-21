@@ -680,8 +680,8 @@ are used in conjunction with USE flags. For example,
 build against.
 
 
-Design Space and rationale
-==========================
+Design Space
+============
 
 Wheel variant glossary
 ----------------------
@@ -1208,90 +1208,45 @@ The optional ``abi_dependency`` extension can be used to build multiple
   ``abi_dependency :: torch :: 2.7``
 
 
-Security implications
+Security Implications
 =====================
 
-Variant resolution may require executing code before a wheel is
-selected. Package index metadata can identify Python packages that
-provide plugins for querying system capabilities, and an installer may
-need to install and run those plugins while resolving dependencies. This
-introduces two additional supply-chain attack vectors:
+The full security considerations will be provided in the individual
+`Standards Track PEPs for wheel variants`_.
 
-1. A provider plugin, or one of its dependencies, could publish a
-   malicious release.
+The most important concern is that wheel variants introduces a plugin
+system for querying the platform capabilities. Tools may install these
+packages and execute the code within them during dependency resolution
+or wheel processing, risking Remote Code Execution vulnerabilities. In
+some cases the affected tools are executed with elevated privileges
+(such as when installing packages for multi-user systems).
 
-2. Introducing a malicious variant provider plugin in an existing
-   package metadata.
-
-Executing third-party code during installation is not a new risk: build
-backends and build dependencies are already executed when installing
-from source distributions. Provider plugins nevertheless extend that
-risk to wheel-only workflows, which may otherwise assume that dependency
-resolution and wheel installation do not execute code from additional
-packages.
-
-Trust in provider plugins is handled separately from variant metadata.
-As described in the Providers section, installers MUST NOT install or
-execute an untrusted provider package without explicit user consent.
-Installers MAY establish trust by using vetted allowlists, vendoring
-specific versions, reimplementing providers, or shipping commonly used
-providers directly. The specification also permits static provider
-configuration, which avoids executing a plugin altogether.
-
-Making common providers available through trusted mechanisms allows most
-variant resolution to work without additional prompts, while uncommon
-providers remain subject to explicit opt-in. Keeping such prompts rare
-also reduces the risk of users granting blanket approval out of consent
-fatigue.
+To prevent this, the specification will make plugin packages opt-in.
+However, to improve user experience and avoid the risk of security
+fatigue causing users to blanket enable all plugins, tool maintainers
+will be allowed to vendor, reimplement or otherwise trust specific
+plugins. A governance model to maintain a repository of trustwhile
+plugins will be proposed as well.
 
 
-Backwards compatibility
+Backwards Compatibility
 =======================
 
-Existing installers MUST NOT accidentally install variant wheels, as
-they require additional logic to determine whether a wheel is compatible
-with the user's system. This is achieved by extending wheel filename
-through adding a ``-{variant label}``
-component to the end of the filename, effectively causing variant wheels
-to be rejected by common installer implementations. For backwards
-compatibility, a non-variant wheel can be published in addition to the
-variant wheels. It will be the only wheel supported by incompatible
-installers, and the least preferred wheel for variant-compatible
-installers.
-
-Aside from this explicit incompatibility, the specification makes
-minimal and non-intrusive changes to the binary package format. The
-variant metadata is placed in a separate file in the ``.dist-info``
-directory, which should be preserved by tools that are not concerned
-with variants, limiting the necessary changes to updating the filename
-validation algorithm (if there is one).
-
-If the new variant environment markers are used in wheel
-dependencies, these wheels will be incompatible with existing tools.
-This is a general problem with the design of environment markers, and
-not specific to wheel variants. It is possible to work around this
-problem by partially evaluating environment markers at build time, and
-removing the markers or dependencies specific to variant wheels from the
-non-variant wheel.
-
-Build backends produce non-variant wheels to preserve backwards
-compatibility with existing frontends. Variant wheels can only be output
-on explicit user request.
-
-By using a separate ``*-variants.json`` file for shared metadata,
-it is
-possible to use variant wheels on an index that does not specifically
-support variant metadata. However, the index MUST permit distributing
-wheels that use the extended filename syntax and the JSON file.
+Full backwards compatibility considerations are provided in :pep:`825`.
+The key point is that variant wheels add an additional variant label
+component to the wheel filename. Tools commonly used to install wheels
+at the time of writing reject (ignore) wheels containing that component,
+making it possible to publish variant wheels on an index alongside
+non-variant wheels without risk of them being installed accidentally.
 
 
-Reference implementation
+Reference Implementation
 ========================
 
 The `variantlib <https://github.com/wheelnext/variantlib>`__ project
-contains a reference implementation of all the protocols and algorithms
-introduced in this PEP, as well as a command-line tool to convert
-wheels, generate the ``*-variants.json`` index and query plugins.
+contains a reference implementation of the current state of wheel
+variants specificaiton, as well as a command-line tool to convert
+wheels, generate the ``*-variants.json`` file and query plugins.
 
 A client for installing variant wheels is implemented in a
 `uv branch <https://github.com/astral-sh/uv/pull/12203>`__.
@@ -1334,12 +1289,12 @@ Paul Ganssle, Philip Hyunsu Cho, Robert Maynard, Vyas Ramasubramani,
 and Zanie Blue.
 
 
-Change history
+Change History
 ==============
 
 - 14-Aug-2026
 
- - Change to informational PEP
+  - Change to informational PEP
 
 
 - 18-Mar-2026
