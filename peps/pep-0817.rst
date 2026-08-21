@@ -919,8 +919,9 @@ A build backend could behave in the following way:
    configuration to apply variant-specific modifications to the build
    process.
 
-The resulting ``*.dist-info/variant.json`` file would be similar to the
-following example:
+The wheel would be named ``*-cu130.whl``. In it, the variant metadata
+file ``*.dist-info/variant.json`` would be similar to the following
+example:
 
 .. code-block:: json5
 
