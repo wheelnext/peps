@@ -1093,6 +1093,73 @@ When asked to install a package from an index, the installer would:
     based on Platform Compatibility Tags.
 
 
+Using static compatibility info
+-------------------------------
+
+While installing wheels natively and determining property compatibility
+at install time is the primary use case for variant wheels, it is
+considered equally important for users to be able to provide
+compatibility information in a static format. This serves the twofold
+goal of being able to avoid plugin invocations and being able to install
+the package for another configuration than reported for the system where
+the installer is being run.
+
+While the installers have the final choice of how to implement this, we
+are planning to propose a standardized format based on TOML, to make it
+suitable both for machine processing and human editing. For example, a
+standard tool could query the system using installed variant provider
+plugins and output a file resembling the following:
+
+.. code-block:: toml
+
+    [variant]
+    "$schema" = "..."
+
+    [[variant.providers]]
+    # specifies the exact package version used to generate the data
+    requires = ["nvidia-variant-provider==1.0.0"]
+    # properties queried from the plugin, in order of preference
+    # TODO: feature ordering?
+    [variant.providers.static-properties]
+    # CUDA 13.0 is installed, so all minimum versions lower than that
+    # are acceptable; the wheel built for the newest minimum version
+    # is preferred
+    cuda_version_lower_bound = [
+      "13.0", "12.20", "12.19", "12.18", # ...
+    ]
+    # conversely, maximum versions higher than 13.0 are acceptable
+    # (the plugin generates a "safe" range); the wheel built for the
+    # highest maximum version is preferred
+    cuda_version_upper_bound = [
+      "15.20", "15.19", "15.18", # ...
+      "13.0"
+    ]
+    # sm120 compatible GPU is installed; "real" is preferred over
+    # "virtual"
+    sm_arch = [
+      "120_real", "120_virtual"
+    ]
+
+    [[variant.providers]]
+    requires = ["x86-64-variant-provider==1.0.0"]
+    [variant.providers.static-properties]
+    # x86-64-v4 CPU is compatible with all older versions; higher
+    # (more optimized) levels are preferred
+    level = ["v4", "v3", "v2", "v1"]
+    # explicit instruction sets that are supported by the CPU
+    avx512vl = ["on"]
+    avx512dq = ["on"]
+    avx512cd = ["on"]
+    # ...
+
+Such a file could then be passed to an installer to use in place of
+properties obtained from plugins. The installer would match the provider
+entries based on the ``required`` key. Depending on the configuration, a
+provider not covered by the static file could either result in querying
+the plugin, throwing an explicit error or treating the wheel as
+incompatible.
+
+
 Example use cases
 -----------------
 
