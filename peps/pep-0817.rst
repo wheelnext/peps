@@ -1160,6 +1160,83 @@ the plugin, throwing an explicit error or treating the wheel as
 incompatible.
 
 
+Static properties in wheels
+---------------------------
+
+A secondary use case for variant wheels is providing an explicit user
+choice between multiple variants that are always supported. Examples
+include numerical packages built against different BLAS / LAPACK
+implementations, OpenMP implementations, etc. The key difference is that
+every variant wheel that was built for a given platform is always
+compatible with it, therefore there is no need for querying a provider
+at install time. The design proposes using providers with static
+properties for that purpose.
+
+For example, a package supporting multiple BLAS / LAPACK variants could
+declare them in the following way in its ``pyproject.toml``:
+
+.. code-block:: toml
+
+    [variant]
+    "$schema" = "..."
+
+    [variant.default-priorities]
+    namespace = ["blas_lapack"]
+
+    [variant.providers.blas_lapack.static-properties]
+    # in preference order
+    library = ["openblas", "mkl", "netlib"]
+
+    [variant.variants.openblas]
+    blas_lapack.library = ["openblas"]
+
+    [variant.variants.mkl]
+    blas_lapack.library = ["mkl"]
+
+    [variant.variants.netlib]
+    blas_lapack.library = ["netlib"]
+
+In this case there is no provider plugin defined, and properties are
+declared statically in the file instead. They are copied into the built
+wheel. The installer considers all three ``blas_lapack :: provider``
+values supported, with ``openblas`` being most preferred and ``netlib``
+being least preferred.
+
+For example, if wheels for a given platform feature all three variants,
+``openblas`` will be selected by default, and the user will be able to
+explicitly override the choice to use another variants. If there is no
+``openblas`` variant, ``mkl`` will be chosen instead.  ``netlib`` will
+only be used by default only if both other variants are missing.
+
+Alternatively, a plugin can be used to provide a static list of values
+that is consistent across different packages:
+
+.. code-block:: toml
+
+    [variant]
+    "$schema" = "..."
+
+    [variant.default-priorities]
+    namespace = ["blas_lapack"]
+
+    [variant.providers.blas_lapack]
+    build-requires = ["blas-lapack-provider-plugin"]
+
+    [variant.variants.openblas]
+    blas_lapack.library = ["openblas"]
+
+    [variant.variants.mkl]
+    blas_lapack.library = ["mkl"]
+
+    [variant.variants.netlib]
+    blas_lapack.library = ["netlib"]
+
+This will cause the build backend to query
+``blas-lapack-provider-plugin`` for all valid features and their values.
+The obtained list will be embedded as ``static-properties`` in the built
+wheel, so the installer does not have to query the plugin anymore.
+
+
 Example use cases
 -----------------
 
