@@ -1237,6 +1237,35 @@ The obtained list will be embedded as ``static-properties`` in the built
 wheel, so the installer does not have to query the plugin anymore.
 
 
+Package ABI matching
+--------------------
+
+Yet another use case for variant wheels is providing multiple variants
+of a package built against different dependency versions, in order to
+resolve binary compatibility issues.
+
+For example, vLLM needs to be installed with the same PyTorch version
+that it was built against. While this may not be a major issue for
+isolated setups, a more complex may end up depending on multiple
+packages requiring PyTorch, each of them requiring a specific PyTorch
+version. This may require installers to navigate through a complex maze
+of interdependencies to find package versions that can all be installed
+simultaneously.
+
+Variant wheels mean to introduce a special ``abi_dependency`` provider
+that provides variants per dependency version. For example, vLLM could
+publish the following variants:
+
+- ``vllm-0.27.1-...-torch213.whl`` for PyTorch 2.13.x
+- ``vllm-0.27.1-...-torch212.whl`` for PyTorch 2.12.x
+- ``vllm-0.27.1-...-torch211.whl`` for PyTorch 2.11.x
+
+The installer would then default to installing the ``torch213`` variant,
+with options to use ``torch212`` or ``torch211`` if necessary to satisfy
+other dependencies, rather than being forced to install an older vLLM
+version.
+
+
 Example use cases
 -----------------
 
