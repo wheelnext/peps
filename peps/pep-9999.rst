@@ -174,7 +174,7 @@ information dictionary:
   while the values are the ordered list of compatible feature values.
   Since the dictionaries in JSON are unsorted, if more than one key is
   specified, then the order for all features MUST be specified in
-  ``default-priorities.feature.{namespace}``.
+  the ``feature-order`` key.
 
 - ``requires: list[str]``: A list of one or more package
   :ref:`dependency specifiers <dependency-specifiers>`, that are used to
@@ -207,6 +207,14 @@ contain the following key:
 
 It is invalid to specify ``requires`` or ``plugin-api`` if
 ``static-properties`` are present.
+
+If the ``static-properties`` key is present, the dictionary MAY
+additionally contain the following key:
+
+- ``feature-order: list[str]``: The list controlling the order of
+  compatible features. When present, all keys found in
+  ``static-properties`` MUST be listed here. Entries not found in the
+  ``static-properties`` dictionary MUST NOT appear in this list.
 
 The ``providers`` dictionary is copied into index-level metadata. For
 the metadata to be consistent, the same keys MUST always correspond to
