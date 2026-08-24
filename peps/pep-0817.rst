@@ -1277,6 +1277,41 @@ other dependencies, rather than being forced to install an older vLLM
 version.
 
 
+Key points
+----------
+
+The key points in the design we arrived at are:
+
+1. Package compatibility characteristics are expressed as variant
+   properties and embedded inside the wheel file, rather than in the
+   filename. This means that any number of characteristics can be
+   expressed without increasing the filename length.
+2. Variant properties are namespaced and governed by independent
+   providers. New compatibility axes can be created and the existing
+   providers can be updated as necessary by the interested parties
+   without the necessity of undergoing through a PEP process.
+3. Providers are ultimately selected by the packages needing them, and
+   so variant-enabled packages have the final say over which variant
+   wheels are available and how they are selected.
+4. The design provides both for dynamic providers that need to be able
+   to determine system compatibility at runtime, and for static
+   providers that embed all the necessary information in the wheel
+   itself. It also permits defining special cases, such as the
+   ``abi_dependency`` provider that solve specific problems without
+   adding significant complexity to the specification.
+5. The reference method of implementing dynamic providers is through
+   installable Python packages, which provides the flexibility needed
+   for package maintainers to extend variant wheel support as necessary,
+   as well to facilitate convenient testing. However, we do realize that
+   we cannot allow arbitrary code execution at install time, so these
+   plugins are opt-in.
+6. At the same time, we recognize the need for good user experience
+   and the risk of security fatigue from an opt-in design. For this
+   reason, we propose that commonly used providers are vendored,
+   reimplemented or otherwise vetted as opt-in in installers, bridging
+   the gap between security and usability.
+
+
 Security Implications
 =====================
 
