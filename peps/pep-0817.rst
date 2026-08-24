@@ -1118,8 +1118,13 @@ plugins and output a file resembling the following:
     [[variant.providers]]
     # specifies the exact package version used to generate the data
     requires = ["nvidia-variant-provider==1.0.0"]
+    # ordering for the features listed below
+    feature-order = [
+      "cuda_version_lower_bound",
+      "cuda_version_upper_bound",
+      "sm_arch",
+    ]
     # properties queried from the plugin, in order of preference
-    # TODO: feature ordering?
     [variant.providers.static-properties]
     # CUDA 13.0 is installed, so all minimum versions lower than that
     # are acceptable; the wheel built for the newest minimum version
@@ -1142,6 +1147,12 @@ plugins and output a file resembling the following:
 
     [[variant.providers]]
     requires = ["x86-64-variant-provider==1.0.0"]
+    feature-order = [
+      "level",
+      "avx512vl",
+      "avx512dq",
+      "avx512cd",
+    ]
     [variant.providers.static-properties]
     # x86-64-v4 CPU is compatible with all older versions; higher
     # (more optimized) levels are preferred
