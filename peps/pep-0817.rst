@@ -533,8 +533,8 @@ The potential for improvement can be summarized as:
     Architect at OpenTeams
 
 
-Prior art
----------
+Prior Art
+=========
 
 This problem is not unique to the Python ecosystem, different groups and
 ecosystems have come up with various answers to that very problem. This
@@ -543,7 +543,7 @@ different approaches taken by various communities.
 
 
 Conda - conda-forge
-'''''''''''''''''''
+-------------------
 
 `Conda <https://docs.conda.io>`__ is a binary-only package ecosystem
 that uses aggregated metadata indexes for resolution rather than
@@ -609,7 +609,7 @@ libraries, and CUDA driver version. Detection logic is tool-specific
 
 
 Spack / Archspec
-''''''''''''''''
+----------------
 
 `archspec <https://github.com/archspec/archspec>`__ is a library for
 detecting, labeling, and reasoning about CPU microarchitecture variants,
@@ -645,7 +645,7 @@ when no exact match exists.
 
 
 Gentoo Linux
-''''''''''''
+------------
 
 `Gentoo Linux <https://www.gentoo.org>`__ is a source-first distribution
 with support for extensive package customization. This is primarily
