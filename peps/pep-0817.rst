@@ -55,9 +55,10 @@ user experience.
 Informational PEP
 -----------------
 
-This PEP presents the minimal scope required to meet modern heterogenous
-system needs. It leaves aspects beyond the minimal scope to evolve via
-tools or future PEPs. A non-exhaustive list of these aspects include:
+This PEP presents the minimal scope required to meet modern
+heterogeneous system needs. It leaves aspects beyond the minimal scope
+to evolve via tools or future PEPs. A non-exhaustive list of these
+aspects include:
 
 - The format of a static file to select variants deterministically or
   include variants in a ``pylock.toml`` file,
@@ -114,7 +115,7 @@ tags:
    architecture and core system libraries (e.g., ``any`` for any
    platform, ``manylinux_2_34_x86_64`` for x86-64 Linux system with
    glibc 2.34 or newer, ``macosx_14_0_arm64`` for arm64 macOS 14.0
-   or newer system.
+   or newer system).
 
 These tags are limited to expressing the most fundamental properties
 of the Python interpreter, operating system and the broad CPU
@@ -195,7 +196,7 @@ on users also apply to other packages.
 
 PyTorch uses a combination of index URLs per accelerator type and local
 version segments as accelerator tag (such as ``+cu130``, ``+rocm6.4`` or
-``+cpu``) . Users need to first determine the correct index URL for
+``+cpu``). Users need to first determine the correct index URL for
 their system, and add an index specifically for PyTorch.
 
 .. code:: bash
@@ -206,7 +207,7 @@ Tools need to implement special handling for the way PyTorch uses local
 version segments. These requirements break the pattern that packages
 are usually installed with. Problems with installing PyTorch
 are a very common point of user confusion. To quantify this, on
-2025-12-05, 552 out of 8136 (6.8%), of issues on `uv's issue tracker
+2025-12-05, 552 out of 8136 (6.8%) of issues on `uv's issue tracker
 <https://github.com/astral-sh/uv/issues/>`__ contained the term "torch".
 
 **Security Risk:** This approach has unfortunately led to supply
@@ -256,7 +257,7 @@ not a goal.
 **Security Risk:** proliferation of suffixed variant packages
 leads users to expect these suffixes in other packages, making name
 squatting much easier. For example, one could create a malicious
-``numpy-cuda`` package that users will be lead to believe it's a CUDA
+``numpy-cuda`` package that users will be led to believe it's a CUDA
 variant of NumPy.
 
 As of the time of writing, CuPy_ has already registered a total of 55
@@ -294,8 +295,8 @@ plugin-based approach. The central ``jax`` package provides a number of
 extras that can be used to install additional plugins,
 e.g. ``jax[cuda12]`` or ``jax[tpu]``. This is far from ideal as
 ``pip install jax`` (with no extra) leads to a nonfunctional
-installation, and consequently dependency chains, a fundamental expected
-behavior in the Python ecosystem, are dysfunctional.
+installation, and consequently breaks dependency chains, a fundamental
+expected behavior in the Python ecosystem.
 
 JAX includes 12 extras to cover all use cases - many of which
 overlap and could be misleading to users if they don't read the
@@ -365,7 +366,7 @@ and ABI requirements has led to ecosystem fragmentation:
   systems struggle to handle non-standard installation requirements.
 
 * **Fragility**: The established workarounds are often error-prone,
-  and in the past they have lead to issues such as downloading incorrect
+  and in the past they have led to issues such as downloading incorrect
   artifacts.
 
 
@@ -619,7 +620,7 @@ developed for the `Spack <https://spack.io/>`__ package manager.
 ``skylake``, ``zen2``, ``armv8.1a``) form a `Directed Acyclic Graph
 (DAG) encoding binary compatibility
 <https://tgamblin.github.io/pubs/archspec-canopie-hpc-2020.pdf>`__,
-which helps at resolve to express that ``packageB`` depends on
+which helps the resolver express that ``packageB`` depends on
 ``packageA``. The ordering is partial because (1) separate ISA families
 are incomparable, and (2) contemporary designs may have incompatible
 feature sets—cascadelake and cannonlake are incomparable despite both
@@ -726,7 +727,7 @@ Standards Track PEPs for wheel variants
 
 This PEP aims to provide a concise high-level overview of wheel
 variants. It does not cover the complete functionality proposed as part
-of the standard, nor does it provide a normative guidance on
+of the standard, nor does it provide normative guidance on
 implementing it. These are provided in subsequent PEPs.
 
 Currently, the following PEPs are published:
@@ -778,7 +779,7 @@ of variant metadata in the project's source tree (normally in
 ``pyproject.toml``), and it is processed by the build backend that
 afterwards embeds it into the built wheel. Additionally, this
 information is copied into a dedicated
-``{project}-{version}-variants.json`` file on the index, so that clients
+``{name}-{version}-variants.json`` file on the index, so that clients
 can obtain it without having to fetch the wheels.
 
 The properties are organized into a hierarchical structure of
@@ -802,18 +803,18 @@ experience.
 Variant properties
 ------------------
 
-Variant properties can be thought of a correspondence to and an
+Variant properties can be thought of as a correspondence to and an
 extension of
 :doc:`packaging:specifications/platform-compatibility-tags`. In this
-simile, variant features are equivalent of tag types, while their values
-are the equivalent of the tags themselves. However, variant features are
-not fixed and the wheel can have any number of them. Furthermore, they
-are organized into namespaces that are governed independently.
+analogy, variant features are the equivalent of tag types, while their
+values are the equivalent of the tags themselves. However, variant
+features are not fixed and the wheel can have any number of them.
+Furthermore, they are organized into namespaces that are governed
+independently.
 
 A variant property encodes a single feature value that the wheel is
 compatible with. Conversely, if the wheel is compatible with multiple
-values of a given feature, they are represented by multiple feature
-entries.
+values of a given feature, they are represented by multiple properties.
 
 For example, let's say that a package defined a ``nvidia`` namespace
 that permitted the following three features:
@@ -902,7 +903,7 @@ These two providers are used to specify two buildable variants:
 Per the precedence rules specified in
 ``variant.default-priorities.namespace``, the ``cu130`` variant
 featuring GPU support will be preferred if CUDA runtime and a compatible
-GPU is available. Otherwise, the ``x86_64_v4`` variant will be the next
+GPU are available. Otherwise, the ``x86_64_v4`` variant will be the next
 best choice, provided a compatible CPU is available.
 
 A specific variant would then be built via an invocation such as::
@@ -970,7 +971,7 @@ Publishing variant wheels on an index
 
 To enable resolvers to select between different variant wheels without
 having to fetch the variant metadata straight from wheel files, an
-index-level metadata file ``{project}-{version}-variants.json`` needs to
+index-level metadata file ``{name}-{version}-variants.json`` needs to
 be published alongside these wheels.
 
 Initially this could be done via running a dedicated tool on all built
@@ -994,7 +995,7 @@ The index-level metadata file for the two ``*-cu130.whl`` and
 .. code-block:: json5
 
     {
-      // == copied verbatim from *-variant.json ==
+      // == copied verbatim from variant.json ==
 
       "$schema": "...",
 
@@ -1131,7 +1132,7 @@ plugins and output a file resembling the following:
 
 Such a file could then be passed to an installer to use in place of
 properties obtained from plugins. The installer would match the provider
-entries based on the ``required`` key. Depending on the configuration, a
+entries based on the ``requires`` key. Depending on the configuration, a
 provider not covered by the static file could either result in querying
 the plugin, throwing an explicit error or treating the wheel as
 incompatible.
@@ -1144,8 +1145,8 @@ Installing a package from an index
     :target: _images/conceptual_diagram_installers.png
     :class: invert-in-dark-mode
     :alt: A diagram showing installing a package including variant wheel
-          building. It is split into three columns: Developer, Installer
-          and Install-time providers. The diagram starts with Develop
+          handling. It is split into three columns: Developer, Installer
+          and Install-time providers. The diagram starts with Developer
           initiating package install. The subsequent steps involve
           installer, in order: resolver selects package version;
           determine if release has variant wheels. If there are no
@@ -1177,7 +1178,7 @@ When asked to install a package from an index, the installer would:
 3. Determine if any of the remaining wheels are variant wheels (have a
    variant label in the filename). Let's say that in this case we found
    ``*-cu130.whl`` and ``*-x86_64_v4.whl`` variants.
-4. Find the ``{package}-{version}-variants.json`` file corresponding to
+4. Find the ``{name}-{version}-variants.json`` file corresponding to
    the selected version. Fetch the file and parse the variant metadata
    in it.
 5. Obtain property lists corresponding to the labels in the installable
@@ -1237,15 +1238,15 @@ declare them in the following way in its ``pyproject.toml``:
 
 In this case there is no provider plugin defined, and properties are
 declared statically in the file instead. They are copied into the built
-wheel. The installer considers all three ``blas_lapack :: provider``
+wheel. The installer considers all three ``blas_lapack :: library``
 values supported, with ``openblas`` being most preferred and ``netlib``
 being least preferred.
 
 For example, if wheels for a given platform feature all three variants,
 ``openblas`` will be selected by default, and the user will be able to
-explicitly override the choice to use another variants. If there is no
-``openblas`` variant, ``mkl`` will be chosen instead.  ``netlib`` will
-only be used by default only if both other variants are missing.
+explicitly override the choice to use another variant. If there is no
+``openblas`` variant, ``mkl`` will be chosen instead. ``netlib`` will
+only be used by default if both other variants are missing.
 
 Alternatively, a plugin can be used to provide a static list of values
 that is consistent across different packages:
@@ -1285,14 +1286,14 @@ resolve binary compatibility issues.
 
 For example, vLLM needs to be installed with the same PyTorch version
 that it was built against. While this may not be a major issue for
-isolated setups, a more complex may end up depending on multiple
-packages requiring PyTorch, each of them requiring a specific PyTorch
-version. This may require navigating through a complex maze of
+isolated setups, a more complex environment may end up depending on
+multiple packages requiring PyTorch, each of them requiring a specific
+PyTorch version. This may require navigating through a complex maze of
 interdependencies to find package versions that can all be installed
 simultaneously.
 
-Variant wheels mean to introduce a special ``abi_dependency`` provider
-that provides variants per dependency version. For example, vLLM could
+The design introduces a special ``abi_dependency`` provider that
+provides variants per dependency version. For example, vLLM could
 publish the following variants:
 
 - ``vllm-0.27.1-...-torch213.whl`` for PyTorch 2.13.x
@@ -1321,22 +1322,22 @@ The key points in the design we arrived at are:
 2. Variant properties are namespaced and governed by independent
    providers. New compatibility axes can be created and the existing
    providers can be updated as necessary by the interested parties
-   without the necessity of undergoing through a PEP process.
+   without the necessity of going through a PEP process.
 3. Providers are ultimately selected by the packages needing them, and
    so variant-enabled packages have the final say over which variant
    wheels are available and how they are selected.
 4. The design provides both for providers that need to determine system
    compatibility at runtime, and providers that embed all the necessary
    information statically in the wheel itself. It also permits defining
-   special cases, such as the ``abi_dependency`` provider that solve
-   specific problems without
-   adding significant complexity to the specification.
+   special cases, such as the ``abi_dependency`` provider, that solve
+   specific problems without adding significant complexity to the
+   specification.
 5. The reference method of implementing providers is through installable
    Python packages, which provides the flexibility needed for package
-   maintainers to extend variant wheel support as necessary, as well to
-   facilitate convenient testing. However, we do realize that we cannot
-   allow arbitrary code execution at install time, so these plugins are
-   opt-in.
+   maintainers to extend variant wheel support as necessary, as well as
+   to facilitate convenient testing. However, we do realize that we
+   cannot allow arbitrary code execution at install time, so these
+   plugins are opt-in.
 6. At the same time, we recognize the need for good user experience
    and the risk of security fatigue from an opt-in design. For this
    reason, we propose that commonly used providers are vendored,
@@ -1350,7 +1351,7 @@ Security Implications
 The full security considerations will be provided in the individual
 `Standards Track PEPs for wheel variants`_.
 
-The most important concern is that wheel variants introduces a plugin
+The most important concern is that wheel variants introduce a plugin
 system for querying the platform capabilities. Tools may install these
 packages and execute the code within them during dependency resolution
 or wheel processing, risking Remote Code Execution vulnerabilities. In
