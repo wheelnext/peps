@@ -1361,7 +1361,7 @@ To prevent this, the specification will make plugin packages opt-in.
 However, to improve user experience and avoid the risk of security
 fatigue causing users to blanket enable all plugins, tool maintainers
 will be allowed to vendor, reimplement or otherwise trust specific
-plugins. A governance model to maintain a repository of trustwhile
+plugins. A governance model to maintain a repository of trustworthy
 plugins will be proposed as well.
 
 
@@ -1381,7 +1381,7 @@ Reference Implementation
 
 The `variantlib <https://github.com/wheelnext/variantlib>`__ project
 contains a reference implementation of the current state of wheel
-variants specificaiton, as well as a command-line tool to convert
+variants specification, as well as a command-line tool to convert
 wheels, generate the ``*-variants.json`` file and query plugins.
 
 A client for installing variant wheels is implemented in a
