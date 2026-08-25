@@ -680,8 +680,8 @@ are used in conjunction with USE flags. For example,
 build against.
 
 
-Design Space
-============
+The wheel variants design
+=========================
 
 Wheel variant glossary
 ----------------------
