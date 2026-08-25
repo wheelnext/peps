@@ -686,35 +686,35 @@ The wheel variants design
 Wheel variant glossary
 ----------------------
 
-Variant Wheels
+Variant wheels
     Wheels that share the same distribution name, version, build number,
     and platform compatibility tags, but are distinctly identified by an
     arbitrary set of variant properties.
 
-Variant Namespace
+Variant namespace
     An identifier used to group related features provided by a single
     provider (e.g., ``nvidia``, ``x86_64``, ``arm``, etc.).
 
-Variant Feature
+Variant feature
     A specific characteristic (key) within a namespace (e.g.,
-    ``version``, ``avx512_bf16``, etc.) that can have one or more
+    ``sm_arch``, ``avx512_bf16``, etc.) that can have one or more
     values.
 
-Variant Property
+Variant property
     A 3-tuple (``namespace :: feature-name :: feature-value``)
     describing a single specific feature and its value. If a feature has
     multiple values, each is represented by a separate property.
 
-Variant Label
+Variant label
     A string added to the wheel filename to uniquely identify variants.
 
-Null Variant
+Null variant
     A special variant with zero variant properties and the reserved
     label ``null``. Always considered supported but has the lowest
     priority among wheel variants, while being preferably chosen over
     non-variant wheels.
 
-Variant Provider
+Variant provider
     A provider of valid variant properties for a specific namespace.
     Can either be a static list of ordered properties, or a Python
     package that dynamically determines the properties that are
