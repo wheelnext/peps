@@ -845,8 +845,18 @@ This would imply the following:
   with ``120_real`` or ``110_real`` architecture.
 
 
+An end-to-end example
+---------------------
+
+The following subsections present a complete example of building a
+variant wheel, publishing it on an index and installing it on a system.
+It covers the baseline scenario where wheel compatibility needs to be
+determined at install time, by inspecting the target system. Other cases
+will be discussed in subsequent sections.
+
+
 Building variant wheels
------------------------
+'''''''''''''''''''''''
 
 The recommended way of integrating variant wheel support in a build
 backend is to store variant metadata in the ``pyproject.toml`` file, and
@@ -903,23 +913,17 @@ A build backend could behave in the following way:
 
 1. Detect ``variant-label`` in ``config_settings``, and enable variant
    wheel builds.
-
 2. Validate the ``variant`` table against the schema.
-
 3. Find the ``cu130`` label in the ``variant.variants`` table, and
    determine the corresponding properties.
-
 4. In ``get_requires_for_build_wheel()`` hook, return the plugin
    packages needed for the namespaces found in the properties. This will
    cause the build frontend to install them in the build environment.
-
 5. Query the installed plugins to verify that the variant properties are
    valid.
-
 6. Construct the ``*.dist-info/variant.json`` file from the ``variant``
    table. The ``variants`` subtable is filtered to the entry for the
    variant being built, the remaining subtables are copied verbatim.
-
 7. Build the wheel. This could involve processing tool-specific
    configuration to apply variant-specific modifications to the build
    process.
@@ -962,7 +966,7 @@ example:
 
 
 Publishing variant wheels on an index
--------------------------------------
+'''''''''''''''''''''''''''''''''''''
 
 To enable resolvers to select between different variant wheels without
 having to fetch the variant metadata straight from wheel files, an
@@ -1025,81 +1029,38 @@ The index-level metadata file for the two ``*-cu130.whl`` and
     }
 
 
-Installing a package from an index
-----------------------------------
+Querying a provider
+'''''''''''''''''''
 
-.. figure:: pep-0817/conceptual_diagram_installers.png
-    :target: _images/conceptual_diagram_installers.png
-    :class: invert-in-dark-mode
-    :alt: A diagram showing installing a package including variant wheel
-          building. It is split into three columns: Developer, Installer
-          and Install-time providers. The diagram starts with Develop
-          initiating package install. The subsequent steps involve
-          installer, in order: resolver selects package version;
-          determine if release has variant wheels. If there are no
-          variant wheels, jump to installing package and report success.
-          If the version has variant wheels, check user's variant
-          preferences. In parallel, download JSON from index, then
-          extract variant provider configuration. If it uses AoT
-          providers only, converge to determine optimal variant
-          immediately. If it requires install-time providers, the
-          further path depends on whether non-vendored providers are
-          included. If they are not, query install-time providers
-          immediately and converge to determine optimal variant. If
-          non-vendored providers are included, they are installed if not
-          present in env and then queried. Querying providers involves
-          an exchange of data with different providers (in the diagram,
-          "provider 1" and "provider 2" are given as examples), each
-          filtering and ordering supported configurations for the
-          current environment. All the variant paths converge on
-          determining optimal variant, which is following by installing
-          package and reporting success.
+The primary function of a provider is to determine which of the variant
+properties are compatible with the user's system, and to order them from
+the most preferable to the least preferable. For example, the purpose of
+the ``nvidia`` provider used in the example is to determine whether the
+user's system features a compatible NVIDIA CUDA runtime and a GPU, while
+the purpose of the ``x86_64`` provider is to determine what CPU is used
+and whether the instruction sets used in the wheel are supported by it.
 
-    A conceptual diagram of installing a wheel.
+Both these providers rely on install-time checks. It is also possible to
+define providers that do not require these checks, and these are
+explained in `static properties in wheels`_.
 
-When asked to install a package from an index, the installer would:
+The most common providers, such as the ``nvidia`` provider in the
+example, will likely be vendored or reimplemented by installers, and
+they will work in an opt-out manner.
 
-1. Query the remote index and select a version. Obtain the list of files
-   (distributions) for the selected version.
-2. Initially filter wheels based on Platform Compatibility Tags.
-3. Determine if any of the remaining wheels are variant wheels (have a
-   variant label in the filename). Let's say that in this case we found
-   ``*-cu130.whl`` and ``*-x86_64_v4.whl`` variants.
-4. Find the ``{package}-{version}-variants.json`` file corresponding to
-   the selected version. Fetch the file and parse the variant metadata
-   in it.
-5. Obtain property lists corresponding to the labels in the installable
-   variant wheels from the metadata file. Construct a set of all
-   namespaces used in them.
-6. Obtain the provider information corresponding to these namespaces
-   from the metadata file. In this case the set is
-   ``{"nvidia", "x86_64"}``.
-7. For each of the providers:
+For providers that are not provided by the installers themselves, the
+Python packages listed in the ``requires`` list will be needed to
+determine the compatibility and preference order. These packages are
+opt-in by default. If the user opts in to using them, they are installed
+into an isolated environment and queried via a dedicated API. Otherwise,
+they are not used and the properties are assumed to be incompatible.
 
-   - If the provider is vendored in the installer, the subsequent
-     queries will be directed to the vendored provider.
-   - If it is not vendored but the user opted in to a given provider,
-     install the provider package in an isolated environment. The
-     subsequent queries will be directed to the provider plugin in this
-     environment.
-   - Otherwise, the provider package is not used and the properties are
-     considered to be incompatible.
-
-8. Query the provider to determine whether the properties of the variant
-   wheels on the list are compatible. Discard the variant wheels that
-   are incompatible. Let's say that both ``*-cu130.whl`` and
-   ``*-x86_64_v4.whl`` are compatible.
-9. If any variant wheels remained, order them primarily based on
-   ``default-priorities.namespace`` and secondarily based on the data
-   obtained from the providers, and select the most appropriate variant.
-   In this case, the ``*-cu130.whl`` variant is selected.
-10. If there are multiple wheels with the selected label but different
-    Platform Compatibility Tags, select the most appropriate of them
-    based on Platform Compatibility Tags.
+Furthermore, it is possible to override the provider queries by `using
+static compatibility information`_.
 
 
-Using static compatibility info
--------------------------------
+Using static compatibility information
+''''''''''''''''''''''''''''''''''''''
 
 While installing wheels natively and determining property compatibility
 at install time is the primary use case for variant wheels, it is
@@ -1174,6 +1135,68 @@ entries based on the ``required`` key. Depending on the configuration, a
 provider not covered by the static file could either result in querying
 the plugin, throwing an explicit error or treating the wheel as
 incompatible.
+
+
+Installing a package from an index
+''''''''''''''''''''''''''''''''''
+
+.. figure:: pep-0817/conceptual_diagram_installers.png
+    :target: _images/conceptual_diagram_installers.png
+    :class: invert-in-dark-mode
+    :alt: A diagram showing installing a package including variant wheel
+          building. It is split into three columns: Developer, Installer
+          and Install-time providers. The diagram starts with Develop
+          initiating package install. The subsequent steps involve
+          installer, in order: resolver selects package version;
+          determine if release has variant wheels. If there are no
+          variant wheels, jump to installing package and report success.
+          If the version has variant wheels, check user's variant
+          preferences. In parallel, download JSON from index, then
+          extract variant provider configuration. If it uses AoT
+          providers only, converge to determine optimal variant
+          immediately. If it requires install-time providers, the
+          further path depends on whether non-vendored providers are
+          included. If they are not, query install-time providers
+          immediately and converge to determine optimal variant. If
+          non-vendored providers are included, they are installed if not
+          present in env and then queried. Querying providers involves
+          an exchange of data with different providers (in the diagram,
+          "provider 1" and "provider 2" are given as examples), each
+          filtering and ordering supported configurations for the
+          current environment. All the variant paths converge on
+          determining optimal variant, which is following by installing
+          package and reporting success.
+
+    A conceptual diagram of installing a wheel.
+
+When asked to install a package from an index, the installer would:
+
+1. Query the remote index and select a version. Obtain the list of files
+   (distributions) for the selected version.
+2. Initially filter wheels based on Platform Compatibility Tags.
+3. Determine if any of the remaining wheels are variant wheels (have a
+   variant label in the filename). Let's say that in this case we found
+   ``*-cu130.whl`` and ``*-x86_64_v4.whl`` variants.
+4. Find the ``{package}-{version}-variants.json`` file corresponding to
+   the selected version. Fetch the file and parse the variant metadata
+   in it.
+5. Obtain property lists corresponding to the labels in the installable
+   variant wheels from the metadata file. Construct a set of all
+   namespaces used in them.
+6. Obtain the provider information corresponding to these namespaces
+   from the metadata file. In this case the set is
+   ``{"nvidia", "x86_64"}``.
+7. Query the providers to determine whether the properties of the
+   variant wheels on the list are compatible. Discard the variant wheels
+   that are incompatible. Let's say that both ``*-cu130.whl`` and
+   ``*-x86_64_v4.whl`` are compatible.
+8. If any variant wheels remained, order them primarily based on
+   ``default-priorities.namespace`` and secondarily based on the data
+   obtained from the providers, and select the most appropriate variant.
+   In this case, the ``*-cu130.whl`` variant is selected.
+9. If there are multiple wheels with the selected label but different
+   Platform Compatibility Tags, select the most appropriate of them
+   based on Platform Compatibility Tags.
 
 
 Static properties in wheels
