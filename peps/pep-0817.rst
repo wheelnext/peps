@@ -1259,8 +1259,8 @@ For example, vLLM needs to be installed with the same PyTorch version
 that it was built against. While this may not be a major issue for
 isolated setups, a more complex may end up depending on multiple
 packages requiring PyTorch, each of them requiring a specific PyTorch
-version. This may require installers to navigate through a complex maze
-of interdependencies to find package versions that can all be installed
+version. This may require navigating through a complex maze of
+interdependencies to find package versions that can all be installed
 simultaneously.
 
 Variant wheels mean to introduce a special ``abi_dependency`` provider
@@ -1275,6 +1275,10 @@ The installer would then default to installing the ``torch213`` variant,
 with options to use ``torch212`` or ``torch211`` if necessary to satisfy
 other dependencies, rather than being forced to install an older vLLM
 version.
+
+``abi_dependency`` is meant to be the only piece of metadata introduced
+by the specification that affects dependency resolution rather than only
+wheel selection within a version.
 
 
 Key points
