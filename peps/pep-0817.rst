@@ -926,7 +926,7 @@ example:
 .. code-block:: json5
 
     {
-      // == copied verbatim from *-variant.json ==
+      // == copied verbatim from pyproject.toml ==
 
       "$schema": "...",
 
@@ -943,18 +943,13 @@ example:
         }
       },
 
-      // == merged from different variant wheels ==
+      // == actual properties of the built variant wheel ==
 
       "variants": {
         "cu130": {
           "nvidia": {
             "cuda_version_lower_bound": ["13.0"],
             "sm_arch": ["120_virtual", "120_real", "100_real", "90_real"]
-          }
-        },
-        "x86_64_v4": {
-          "x86_64": {
-            "level": ["v4"]
           }
         }
       }
@@ -990,7 +985,7 @@ The index-level metadata file for the two ``*-cu130.whl`` and
 .. code-block:: json5
 
     {
-      // == copied verbatim from pyproject.toml ==
+      // == copied verbatim from *-variant.json ==
 
       "$schema": "...",
 
@@ -1007,13 +1002,18 @@ The index-level metadata file for the two ``*-cu130.whl`` and
         }
       },
 
-      // == actual properties of the built variant wheel ==
+      // == merged from different variant wheels ==
 
       "variants": {
         "cu130": {
           "nvidia": {
             "cuda_version_lower_bound": ["13.0"],
             "sm_arch": ["120_virtual", "120_real", "100_real", "90_real"]
+          }
+        },
+        "x86_64_v4": {
+          "x86_64": {
+            "level": ["v4"]
           }
         }
       }
