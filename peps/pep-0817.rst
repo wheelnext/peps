@@ -784,9 +784,14 @@ can obtain it without having to fetch the wheels.
 The properties are organized into a hierarchical structure of
 namespaces, features and feature values. Every namespace is governed by
 a variant provider that is also defined as part of the variant metadata.
-The provider may be either entirely static, in which case all its
-compatible properties are embedded in the metadata, or it may need to
-dynamically establish which properties are compatible with the system.
+The provider serves as the data source used to determine which variant
+properties are compatible with the user's system, and to order them from
+the most desirable to the least desirable. This information is
+afterwards used to filter the available variant wheels into install
+candidates, and select the one that is most preferred among them. The
+data can either be provided in a static manner, in which case all the
+compatible properties are embedded in the metadata, or it can be
+dynamically established from a running system.
 
 Providers that need to establish property compatibility are normally
 provisioned as installable Python packages implementing a plugin API.
