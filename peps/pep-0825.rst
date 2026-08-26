@@ -256,7 +256,7 @@ Default priorities
 
 The ``default-priorities`` dictionary defines the ordering of
 namespaces which is used in variant ordering. The exact algorithm is
-described in the `Variant ordering`_ section.
+described in the `Variant ordering and selection`_ section.
 
 The following key is REQUIRED:
 
@@ -462,11 +462,46 @@ consistency`_ and set out in full in
 :ref:`pep825-metadata-consistency`.
 
 
-Variant ordering
-----------------
+Variant ordering and selection
+------------------------------
+
+High-level overview
+'''''''''''''''''''
 
 This specification defines an ordering between different wheels based on
-the presence of variant metadata.
+the presence of variant metadata. It is applied to a list of wheels to
+order them from the most preferable to the least preferable.
+
+The goal of the process is to order the candidate wheels for a given
+project version, so that the most preferable variant is installed.
+Variant wheels MUST be preferred over non-variant wheels, and among them
+wheels featuring more desirable properties MUST be preferred over these
+not featuring them. If multiple variant wheels feature the same
+properties, they MUST be subsequently ordered lexicographically by their
+label as a tie-breaker. If multiple candidate variant wheels with the
+same label or non-variant wheels are present, the ultimate ordering step
+MUST be based on their platform compatibility tags and build numbers.
+
+The desirability of variant properties is determined from the
+combination of `variant metadata`_ and compatibility information
+obtained for the system, with the process of obtaining it being defined
+in a subsequent PEP. The ``default-priorities.namespace`` key MUST be
+used to order variant namespaces from the most preferable to the least
+preferable, and the compatibility information provides the ordering for
+variant features within the namespaces, and for feature values within
+these features.
+
+For each feature found in variant wheel's properties, only the most
+preferable among its values MUST be counted. The rank of these
+properties MUST then be used to determine the rank of the variant wheel.
+The variant wheel having the most desirable property of all MUST be
+preferred over one not having said property. If multiple wheels have
+that property, then the next most desirable property MUST be used to
+rank them, and so on, until all properties are exhausted.
+
+
+The algorithm
+'''''''''''''
 
 For the purpose of ordering, the combined variant metadata for all
 candidate variant wheels MUST be obtained. It can be sourced either from
@@ -481,28 +516,30 @@ features, and features into namespaces. For every namespace, the tool
 MUST obtain a list of compatible features, and for every feature, a list
 of compatible values. The method of obtaining these lists will be
 defined in a subsequent PEP. The items in these lists will be provided
-in specific order that will impact variant wheel ordering.
+ordered from the most preferable to the least preferable.
 
 The compatible wheels corresponding to a particular combination of
-package name, version and build number MUST be grouped by their variant
-label, and a separate group of non-variant wheels MUST be formed. The
-groups of variant wheels MUST then be ordered according to the following
+package name and version MUST be grouped by their variant label, and a
+separate group of non-variant wheels MUST be formed. The groups of
+variant wheels MUST then be ordered according to the following
 algorithm:
 
 1. Construct the ordered list of namespaces by copying the value of the
    ``default-priorities.namespace`` key from the combined variant
    metadata. This is ``namespace_order`` in the example.
 
-2. For every namespace, take the ordered list of compatible feature
-   names obtained previously. This is ``feature_order`` in the example.
+2. For every namespace, take the list of compatible feature names
+   obtained previously, ordered from the most preferable to the least
+   preferable. This is ``feature_order`` in the example.
 
-3. For every feature, take the ordered list of compatible values
-   obtained previously. This is ``value_order`` in the example.
+3. For every feature, take the list of compatible values obtained
+   previously, ordered from the most preferable to the least preferable.
+   This is ``value_order`` in the example.
 
 4. For every group, determine the most preferred value corresponding to
    every variant feature present in the variant properties corresponding
    to the group. This is done by finding among the values the one that
-   has the lowest position in the ordered property value list. After
+   has the lowest index in the ordered property value list. After
    this step, a list of features along with their best values is
    available for every variant. This is done in the
    ``VariantWheel.best_value_properties()`` method in the example.
@@ -514,7 +551,9 @@ algorithm:
    function in the example.
 
 6. For every group, sort the list constructed in step 4 using the sort
-   keys constructed in step 5, in ascending order. This is done by the
+   keys constructed in step 5, in ascending order. The resulting list
+   will be ordered from the most preferable feature to the least
+   preferable feature. This is done by the
    ``VariantWheel.sorted_properties()`` method in the example.
 
 7. To order groups, compare their sorted lists from step 6. If the
@@ -524,17 +563,20 @@ algorithm:
    found or the list in one of the groups is exhausted. In the latter
    case, the group with more keys is sorted earlier. As a fallback,
    if both groups have the same number of keys, they are ordered
-   lexically by the variant label, ascending. This is done by the
-   ultimate step of the example algorithm, with the comparison function
-   being implemented as ``VariantWheel.__lt__()``.
+   lexically by the variant label, ascending. The resulting list of
+   groups will be sorted from the most preferable to the least
+   preferable. This is done by the ultimate step of the example
+   algorithm, with the comparison function being implemented as
+   ``VariantWheel.__lt__()``.
 
 The algorithm sorts the group of null variant wheels last, as they
 feature no variant properties. The group of non-variant wheels MUST be
 placed after all the other groups.
 
 Within every group, the wheels MUST then be ordered according to their
-platform compatibility tags. After this process, the variant wheels are
-sorted from the most preferred to the least preferred.
+platform compatibility tags and build numbers. After this process, the
+variant wheels are sorted from the most preferred to the least
+preferred.
 
 The tools MAY provide options to override the default ordering, for
 example by specifying a preference for specific namespaces, features
@@ -696,7 +738,7 @@ The variant markers MUST only be used in dependency specifiers and MUST
 NOT take part in selecting a wheel. These markers gate the individual
 dependency specifiers of a wheel that has already been selected. They
 MUST be evaluated only once variant wheel selection, as described in
-`variant ordering`_, has taken place.
+`variant ordering and selection`_, has taken place.
 
 Their values MUST be determined as follows:
 
@@ -883,9 +925,9 @@ behavior would be to:
 7. Obtain the ordered lists of compatible variant properties. The
    mechanism for this will be specified in a subsequent PEP.
 8. Filter and order variants based on the lists of compatible
-   properties, per `variant ordering`_, and select the most preferred
-   variant. If no variant wheel matched, use the non-variant wheels by
-   their rules.
+   properties and select the most preferred variant, per `variant
+   ordering and selection`_,. If no variant wheel matched, use the
+   non-variant wheels by their rules.
 9. If multiple wheels for a given version share the same variant label,
    order them by Platform compatibility tags and build number, and
    select the best wheel.
@@ -1034,8 +1076,8 @@ When a package manager is requested to install ``torch``, in order:
    the list.
 
 5. If variant wheels with multiple different labels remain on the list,
-   the results are sorted per the algorithm in `variant ordering`_.
-   The most preferred label is selected.
+   the results are sorted per the algorithm in `variant ordering and
+   selection`_.  The most preferred label is selected.
 
    For example, in this case the ``cuda*`` wheels are ordered by their
    properties, using the lists obtained in step 4. The wheels for CUDA
@@ -1103,9 +1145,9 @@ sources.
 
 A tool that searches sources in priority order (for example, the "index
 priority" in :pep:`766`) can order variants from one source at a time
-using the `variant ordering`_ algorithm, and proceed to the next source
-only if the current one has no viable candidates. No cross-source
-metadata merge is necessary.
+using the `variant ordering and selection`_ algorithm, and proceed to
+the next source only if the current one has no viable candidates. No
+cross-source metadata merge is necessary.
 
 A tool that collates candidates from all sources before selecting among
 them (for example, "version priority" in :pep:`766`) must compare wheels
@@ -1319,7 +1361,7 @@ only ``120_real``, much as a dependency that supports a single CPU
 architecture is gated on ``platform_machine``. Where a dependency does
 exist for every value of a feature, it can instead be published as a
 variant package and depended upon unconditionally, leaving the choice to
-`variant ordering`_.
+`variant ordering and selection`_.
 
 Because of this filtering, the variant markers do not depart from the
 established meaning of an environment marker. Every property in
@@ -1342,10 +1384,10 @@ Three consequences of this design are worth noting:
   for every feature it declares (see `variant properties`_).
   ``variant_features`` and ``variant_namespaces`` therefore always list
   every feature and namespace the wheel was built for. This is why the
-  overrides permitted in `variant ordering`_ may not reach past the
-  compatibility filter: a wheel selected in spite of being unsupported
-  could have its properties filtered away, and the dependencies gated on
-  them would silently disappear.
+  overrides permitted in `variant ordering and selection`_ may not reach
+  past the compatibility filter: a wheel selected in spite of being
+  unsupported could have its properties filtered away, and the
+  dependencies gated on them would silently disappear.
 
 - For the null variant, ``variant_label`` is ``"null"`` and the three
   set-valued markers are empty sets, as the null variant has zero
