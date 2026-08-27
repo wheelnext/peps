@@ -472,36 +472,56 @@ This specification defines an ordering between different wheels based on
 the presence of variant metadata. It is applied to a list of wheels to
 order them from the most preferable to the least preferable.
 
-The goal of the process is to order the candidate wheels for a given
-project version, so that the most preferable variant is installed.
-Variant wheels MUST be preferred over non-variant wheels, and among them
-wheels featuring more desirable properties MUST be preferred over these
-not featuring them. If multiple variant wheels feature the same
-properties, they MUST be subsequently ordered lexicographically by their
-label as a tie-breaker. If multiple candidate variant wheels with the
-same label or non-variant wheels are present, the ultimate ordering step
-MUST be based on their platform compatibility tags and build numbers.
+The ordering of wheels by platform compatibility tags is not currently
+defined by the specification, beyond a guideline that more specific
+wheels should be preferred. This has not been a big problem, as usually
+there is only one wheel that is compatible with the system, and where
+there are more, the ordering is either clear or insignificant.
 
-The desirability of variant properties is determined from the
-combination of `variant metadata`_ and compatibility information
-obtained for the system, with the process of obtaining it being defined
-in a subsequent PEP. The ``default-priorities.namespace`` key MUST be
-used to order variant namespaces from the most preferable to the least
-preferable, and the compatibility information provides the ordering for
-variant features within the namespaces, and for feature values within
-these features.
+With wheel variants, there can be several compatible wheels per project.
+We define a total ordering to give package authors and users control
+over wheel preference and to ensure that all tools pick the same wheel
+without ambiguity.
 
-For each feature found in variant wheel's properties, only the most
-preferable among its values MUST be counted. The rank of these
-properties MUST then be used to determine the rank of the variant wheel.
-The variant wheel having the most desirable property of all MUST be
-preferred over one not having said property. If multiple wheels have
-that property, then the next most desirable property MUST be used to
-rank them, and so on, until all properties are exhausted.
+Intuitively, we want to choose the wheel that has the best platform
+support property, with tie breaker fallbacks to remove ambiguity. To do
+so, we define a three-level hierarchical ordering between properties. We
+first order by the highest-ranked namespace. If that doesn't suffice, we
+order inside the namespace by its highest-ranked feature, and then
+inside the feature by its highest-ranked value. We then compare
+wheels by their best property. If one wheel's best property is better
+than the best property of another wheel, it wins. As a tie-breaker, for
+two wheels that both have the same highest-ranked
+namespace-feature-value property tuple in the set, we look at
+lower-ranked tuples too.
+
+The ranking for namespaces comes from the package's variant metadata.
+The method for obtaining the ranking for their features and feature
+values will be defined in a subsequent PEP. User overrides are possible
+through tool-specific configuration.
+
+The ordering for non-variant is unchanged. Hence, if there are no
+candidate variant wheels, the behavior remains the same as prior to this
+specification.
+
+A complete algorithm sorting all wheels of a release is provided in the
+subsequent section.
+
+As an example, if there is a GPU-enabled wheel with ``nvidia`` namespace
+properties, and an optimized CPU wheel with ``x86_64`` namespace
+properties, and the package defined that the ``nvidia`` namespace is
+preferable over the ``x86_64`` namespace, the GPU wheel wins. If there
+are two wheels, one with ``nvidia :: cuda_version_lower_bound :: 13.0``
+and another with ``nvidia :: cuda_version_lower_bound :: 12.0``, and the
+ordering defines that ``13.0`` is preferred over ``12.0``, the
+respective wheel wins. If two wheels have the same CUDA properties, but
+one has ``x86_64 :: level :: v4`` property while the other has
+``x86_64 :: level :: v2`` property, and ``v4`` is preferred over ``v2``,
+the former wheel wins.
 
 
-The algorithm
-'''''''''''''
+Ordering algorithm
+''''''''''''''''''
 
 For the purpose of ordering, the combined variant metadata for all
 candidate variant wheels MUST be obtained. It can be sourced either from
