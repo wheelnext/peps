@@ -593,9 +593,11 @@ The algorithm sorts the group of null variant wheels last, as they
 feature no variant properties. The group of non-variant wheels MUST be
 placed after all the other groups.
 
-Within every group, the wheels MUST then be ordered according to their
-platform compatibility tags and build numbers. After this process, the
-variant wheels are sorted from the most preferred to the least
+Within every group, if multiple wheels are compatible, they MUST then be
+ordered according to their remaining properties, such as platform
+compatibility tags and build numbers. This specification does not alter
+this ordering, it remains the same as before. After completing this
+process, the wheels are sorted from the most preferred to the least
 preferred.
 
 The tools MAY provide options to override the default ordering, for
