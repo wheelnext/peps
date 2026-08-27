@@ -1674,6 +1674,13 @@ Change History
     The investigation in the appendix settles the question in favour of
     markers, so the Open Issues section has been removed and the
     reasoning recorded in the Rationale instead.
+  - Removed grouping by build numbers, instead relegating them to
+    tie-breaking along with other wheel properties. This reverts a
+    potential change in behavior for non-variant wheels.
+  - Added a high-level overview to `variant ordering and selection`_,
+    clarified that the ordering of the lists used in the algorithm is
+    from the most preferable to the least preferable and that the
+    ordering by platform compatibility tags is not changed.
 
 - 19-Aug-2026
 
