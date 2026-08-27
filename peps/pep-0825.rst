@@ -1328,12 +1328,12 @@ and a publisher of variant wheels may still take that route.
 The requirement is what makes several of the mechanisms defined here
 work at all. If the wheels of one release disagreed about namespace
 order, there would be no total order over the variants, so `variant
-ordering`_ would have no defined output and two conforming installers
-could select different wheels from the same inputs. ``pylock.toml``
-inlines combined variant metadata, so non-deterministic combination
-would mean that two lock runs over one release can produce different
-lock files. And the `index-level metadata`_ file could neither be
-generated from the uploaded wheels alone, nor be relied upon once
+ordering and selection`_ would have no defined output and two conforming
+installers could select different wheels from the same inputs.
+``pylock.toml`` inlines combined variant metadata, so non-deterministic
+combination would mean that two lock runs over one release can produce
+different lock files. And the `index-level metadata`_ file could neither
+be generated from the uploaded wheels alone, nor be relied upon once
 generated, since a resolver would then have to fetch every candidate
 wheel to discover the true combined picture.
 
