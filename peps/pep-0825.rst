@@ -468,9 +468,8 @@ Variant ordering and selection
 High-level overview
 '''''''''''''''''''
 
-This specification defines an ordering between different wheels based on
-the presence of variant metadata. It is applied to a list of wheels to
-order them from the most preferable to the least preferable.
+This specification defines an ordering of wheels based on their variant
+metadata, from the most preferable to the least preferable.
 
 The ordering of wheels by platform compatibility tags is not currently
 defined by the specification, beyond a guideline that more specific
@@ -483,21 +482,17 @@ version. We define a total ordering to give package authors and users
 control over wheel preference and to ensure that all tools select the
 same variant without ambiguity.
 
-Intuitively, we want to choose the wheel with the best platform support,
-with tie-breakers to remove ambiguity. Every variant property is a
-``namespace :: feature :: value`` triple whose components are ranked in
-that order of significance: by namespace first, then by feature within
-the namespace, then by value within the feature. Only properties
-compatible with the target system take part, and each feature
-contributes just its best compatible value.
+Every variant property is a ``namespace :: feature :: value`` triple
+whose components are ranked in that order of significance: by namespace
+first, then by feature within the namespace, then by value within the
+feature. Only properties compatible with the target system take part,
+and each feature contributes just its best compatible value.
 
 Each wheel is therefore a tuple of such triples, ordered from its
 highest-ranked property downwards, and wheels are compared
 lexicographically over those tuples. This departs from ordinary tuple
 comparison in one place: where one wheel's triples run out first, the
 wheel with *more* triples wins, as it is the more specific of the two.
-That is also what sorts the null variant, which has none, last. Wheels
-whose tuples are equal throughout are ordered by variant label.
 
 The ranking for namespaces comes from the package's variant metadata.
 The method for obtaining the ranking for their features and feature
@@ -508,20 +503,12 @@ The ordering for non-variant wheels is unchanged. Hence, if there are no
 candidate variant wheels, the behavior remains the same as prior to this
 specification.
 
-The algorithm sorting all wheels of a release is provided in the
-subsequent section.
-
-As an example, if there is a GPU-enabled wheel with ``nvidia`` namespace
-properties, and an optimized CPU wheel with ``x86_64`` namespace
-properties, and the package defined that the ``nvidia`` namespace is
-preferable over the ``x86_64`` namespace, the GPU wheel wins. If there
-are two wheels, one with ``nvidia :: cuda_version_lower_bound :: 13.0``
-and another with ``nvidia :: cuda_version_lower_bound :: 12.0``, and the
-ordering defines that ``13.0`` is preferred over ``12.0``, the
-former wheel wins. If two wheels have the same CUDA properties, but
-one has ``x86_64 :: level :: v4`` property while the other has
-``x86_64 :: level :: v2`` property, and ``v4`` is preferred over ``v2``,
-the former wheel wins.
+As an example, take a GPU wheel with ``nvidia`` properties and an
+optimized CPU wheel with ``x86_64`` properties, where the package ranks
+``nvidia`` first: the GPU wheel wins on its first triple. If two wheels
+carry the same CUDA properties, the comparison moves to their next
+triple, and a wheel with ``x86_64 :: level :: v4`` beats one with
+``x86_64 :: level :: v2``, since ``v4`` outranks ``v2``.
 
 
 Ordering algorithm
@@ -552,13 +539,11 @@ algorithm:
    ``default-priorities.namespace`` key from the combined variant
    metadata. This is ``namespace_order`` in the example.
 
-2. For every namespace, take the list of compatible feature names
-   obtained previously, ordered from the most preferable to the least
-   preferable. This is ``feature_order`` in the example.
+2. For every namespace, take the ordered list of compatible feature
+   names obtained previously. This is ``feature_order`` in the example.
 
-3. For every feature, take the list of compatible values obtained
-   previously, ordered from the most preferable to the least preferable.
-   This is ``value_order`` in the example.
+3. For every feature, take the ordered list of compatible values
+   obtained previously. This is ``value_order`` in the example.
 
 4. For every group, determine the most preferred value corresponding to
    every variant feature present in the variant properties corresponding
