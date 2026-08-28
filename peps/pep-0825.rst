@@ -483,17 +483,21 @@ version. We define a total ordering to give package authors and users
 control over wheel preference and to ensure that all tools select the
 same variant without ambiguity.
 
-Intuitively, we want to choose the wheel that has the best platform
-support property, with tie-breaker fallbacks to remove ambiguity. To do
-so, we define a three-level hierarchical ordering between properties. We
-first order by the highest-ranked namespace. If that doesn't suffice, we
-order inside the namespace by its highest-ranked feature, and then
-inside the feature by its highest-ranked value, of which only the best
-supported one is retained per feature. We then compare wheels by their
-best property. If one wheel's best property is better than the best
-property of another wheel, it wins. As a tie-breaker, for two wheels
-that both have the same highest-ranked namespace-feature-value property
-tuple, we look at lower-ranked tuples too.
+Intuitively, we want to choose the wheel with the best platform support,
+with tie-breakers to remove ambiguity. Every variant property is a
+``namespace :: feature :: value`` triple whose components are ranked in
+that order of significance: by namespace first, then by feature within
+the namespace, then by value within the feature. Only properties
+compatible with the target system take part, and each feature
+contributes just its best compatible value.
+
+Each wheel is therefore a tuple of such triples, ordered from its
+highest-ranked property downwards, and wheels are compared
+lexicographically over those tuples. This departs from ordinary tuple
+comparison in one place: where one wheel's triples run out first, the
+wheel with *more* triples wins, as it is the more specific of the two.
+That is also what sorts the null variant, which has none, last. Wheels
+whose tuples are equal throughout are ordered by variant label.
 
 The ranking for namespaces comes from the package's variant metadata.
 The method for obtaining the ranking for their features and feature
