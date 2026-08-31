@@ -491,15 +491,15 @@ ranking compatible value for each feature. The ranking for namespaces comes
 from the package's variant metadata. The ranking for their features and the
 ranking of values within features will be defined in a subsequent PEP.
 
-To compare two wheels by variant preference, compare their best-ranked
-variant property triple. The intuition is that this selects the wheel that
-makes the best use of the target hardware. If both have the same best variant
-property, use the next lower-ranked property as a tiebreaker, repeatedly
-until an ordering is established. All else being equal, the wheel with more
-properties wins. By comparing all compatible wheels, this yields the most
-preferred wheel. This is similar to how Python orders lists and tuples:
-it compares corresponding elements from first to last until it finds an
-unequal pair or one sequence runs out of elements.
+Variant wheels sort as Python sorts lists of tuples, each wheel being
+the list of its property triples ordered best first. Where one wheel's
+triples run out, the longer list therefore wins. The intuition is that
+this selects the wheel that makes the best use of the target hardware.
+
+Spelled out: compare two wheels by their best-ranked property triple; if
+those are equal, use the next lower-ranked property as a tiebreaker,
+repeatedly until an ordering is established. Comparing all compatible
+wheels this way yields the most preferred wheel.
 
 As an example, take four variant wheels of a package that ranks the
 ``nvidia`` namespace above ``x86_64``:
