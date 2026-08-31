@@ -497,9 +497,9 @@ makes the best use of the target hardware. If both have the same best variant
 property, use the next lower-ranked property as a tiebreaker, repeatedly
 until an ordering is established. All else being equal, the wheel with more
 properties wins. By comparing all compatible wheels, this yields most
-preferred wheel. This is similar to list and tuple ordering in Python, which
-starts by comparing the first element, then the second, and so forth until
-either one element is unequal or one list has no more elements.
+preferred wheel. This is similar to how Python orders lists and tuples:
+it compares corresponding elements from first to last until it finds an
+unequal pair or one sequence runs out of elements.
 
 To express it with Python types instead: Each variant wheel has a set of
 3-tuples, its variant properties. Take the compatible wheels and filter
