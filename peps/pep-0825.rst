@@ -496,7 +496,7 @@ variant property triple. The intuition is that this selects the wheel that
 makes the best use of the target hardware. If both have the same best variant
 property, use the next lower-ranked property as a tiebreaker, repeatedly
 until an ordering is established. All else being equal, the wheel with more
-properties wins. By comparing all compatible wheels, this yields most
+properties wins. By comparing all compatible wheels, this yields the most
 preferred wheel. This is similar to how Python orders lists and tuples:
 it compares corresponding elements from first to last until it finds an
 unequal pair or one sequence runs out of elements.
@@ -511,14 +511,15 @@ order semantics, except for using a sort key that use variant property
 ordering over lexicographic ordering for the tuples inside the list. The
 wheel sorted to the top is the most preferred wheel.
 
-As an example, take a GPU wheel with ``cuda`` properties and an
+As an example, take a GPU wheel with ``nvidia`` properties and an
 optimized CPU wheel with ``x86_64`` properties, where the package ranks
-``cuda`` first: the GPU wheel wins on its first triple. If two wheels
+``nvidia`` first: the GPU wheel wins on its first triple. If two wheels
 carry the same CUDA properties, the comparison moves to their next
 triple, and a wheel with ``x86_64 :: level :: v4`` beats one with
 ``x86_64 :: level :: v2``, since ``v4`` outranks ``v2``.
 
 The ordering for non-variant wheels remains unchanged.
+
 
 Ordering algorithm
 ''''''''''''''''''
