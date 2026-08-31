@@ -487,21 +487,24 @@ Every variant property is a ``namespace :: feature :: value`` triple
 whose components are ranked in that order: by namespace first, then by
 feature within the namespace, then by value within the feature. Only
 properties compatible with the target system take part. The ranking for
-namespaces comes from the package's variant metadata. The ranking itself
-for their features and feature values will be defined in a subsequent PEP.
+namespaces comes from the package's variant metadata. The ranking for their
+features and the ranking of values within features will be defined in a
+subsequent PEP.
 
-To compare two wheels by variant preference, compare their best ranked
+To compare two wheels by variant preference, compare their best-ranked
 variant property triple. The intuition is that this selects the wheel that
 makes the best use of the target hardware. If both have the same best variant
-property, use the next lower ranked property as a tiebreaker, repeatedly
+property, use the next lower-ranked property as a tiebreaker, repeatedly
 until an order is established. By comparing all compatible wheels, this
 yields most preferred wheel.
 
 To express it with Python types instead: Each variant wheel has a set of
-3-tuples, its variant properties. Take the wheels compatible with the
-system and filter their property sets to those compatible with the system.
-Then, sort each wheel's set into an (ordered) list, more preferred properties
-sorted higher. Now you can the sort the wheels by comparing their lists. The
+3-tuples, its variant properties. Take the compatible wheels and filter
+their property sets to those compatible with the system. Sort the remaining
+set entries into an (ordered) list, more preferred properties sorted higher.
+Now you can the sort the wheels by comparing their lists with Python list
+order semantics, except for using a sort key that use variant property
+ordering over lexicographic ordering for the tuples inside the list. The
 wheel sorted to the top is the most preferred wheel.
 
 As an example, take a GPU wheel with ``cuda`` properties and an
