@@ -501,22 +501,52 @@ preferred wheel. This is similar to how Python orders lists and tuples:
 it compares corresponding elements from first to last until it finds an
 unequal pair or one sequence runs out of elements.
 
-To express it with Python types instead: Each variant wheel has a set of
-3-tuples, its variant properties. Take the compatible wheels and filter
-their property sets to those compatible with the system as well as values
-that are not the best value in their feature. Sort the remaining set entries
-into an (ordered) list, more preferred properties sorted higher.
-Now you can the sort the wheels by comparing their lists with Python list
-order semantics, except for using a sort key that use variant property
-ordering over lexicographic ordering for the tuples inside the list. The
-wheel sorted to the top is the most preferred wheel.
+As an example, take four variant wheels of a package that ranks the
+``nvidia`` namespace above ``x86_64``:
 
-As an example, take a GPU wheel with ``nvidia`` properties and an
-optimized CPU wheel with ``x86_64`` properties, where the package ranks
-``nvidia`` first: the GPU wheel wins on its first triple. If two wheels
-carry the same CUDA properties, the comparison moves to their next
-triple, and a wheel with ``x86_64 :: level :: v4`` beats one with
-``x86_64 :: level :: v2``, since ``v4`` outranks ``v2``.
+.. code:: python
+
+    # Rankings, most preferred first. The namespace ranking comes from
+    # the package's variant metadata; the feature and value rankings
+    # will be defined in a subsequent PEP.
+    namespaces = ["nvidia", "x86_64"]
+    features = {"nvidia": ["cuda_version_lower_bound"], "x86_64": ["level"]}
+    values = {
+        "nvidia": {"cuda_version_lower_bound": ["13.0", "12.0"]},
+        "x86_64": {"level": ["v4", "v3", "v2"]},
+    }
+
+    # Each variant label maps to its properties, with only the best
+    # compatible value kept for every feature.
+    variant_wheels = {
+        "gpu": [("nvidia", "cuda_version_lower_bound", "13.0")],
+        "gpu_v2": [("nvidia", "cuda_version_lower_bound", "13.0"),
+                   ("x86_64", "level", "v2")],
+        "gpu_v4": [("nvidia", "cuda_version_lower_bound", "13.0"),
+                   ("x86_64", "level", "v4")],
+        "cpu_v4": [("x86_64", "level", "v4")],
+    }
+
+    def rank(prop):
+        """Rank a triple. The ranking lists put the best first, so negate
+        the positions to make a bigger rank mean a better property."""
+        namespace, feature, value = prop
+        return (-namespaces.index(namespace),
+                -features[namespace].index(feature),
+                -values[namespace][feature].index(value))
+
+    def sort_key(label):
+        """Rank a wheel: its property ranks, best first."""
+        return sorted(map(rank, variant_wheels[label]), reverse=True)
+
+    sorted(variant_wheels, key=sort_key, reverse=True)
+    # ['gpu_v4', 'gpu_v2', 'gpu', 'cpu_v4']
+
+The ``gpu*`` wheels sort ahead of ``cpu_v4`` because their best triple
+is in the higher-ranked ``nvidia`` namespace. ``gpu_v4`` beats
+``gpu_v2`` on their second triple, since ``v4`` outranks ``v2``. Both
+beat ``gpu``, whose triples run out first, as the wheel with more
+properties wins.
 
 The ordering for non-variant wheels remains unchanged.
 
