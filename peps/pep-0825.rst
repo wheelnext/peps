@@ -495,7 +495,7 @@ To compare two wheels by variant preference, compare their best-ranked
 variant property triple. The intuition is that this selects the wheel that
 makes the best use of the target hardware. If both have the same best variant
 property, use the next lower-ranked property as a tiebreaker, repeatedly
-until an order is established. All else being equal, the wheel with more
+until an ordering is established. All else being equal, the wheel with more
 properties wins. By comparing all compatible wheels, this yields most
 preferred wheel. This is similar to list and tuple ordering in Python, which
 starts by comparing the first element, then the second, and so forth until
