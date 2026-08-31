@@ -486,8 +486,8 @@ ordering.
 Every variant property is a ``namespace :: feature :: value`` triple
 whose components are ranked in that order: by namespace first, then by
 feature within the namespace, then by value within the feature. Only
-properties compatible with the target system take part, and only the best
-value within each feature. The ranking for namespaces comes from the
+properties compatible with the target system take part, and only the highest
+ranking compatible value for each feature. The ranking for namespaces comes from the
 package's variant metadata. The ranking for their features and the ranking
 of values within features will be defined in a subsequent PEP.
 
