@@ -520,11 +520,11 @@ As an example, take four variant wheels of a package that ranks the
     # compatible value kept for every feature.
     variant_wheels = {
         "gpu": [("nvidia", "cuda_version_lower_bound", "13.0")],
-        "gpu_v2": [("nvidia", "cuda_version_lower_bound", "13.0"),
-                   ("x86_64", "level", "v2")],
-        "gpu_v4": [("nvidia", "cuda_version_lower_bound", "13.0"),
-                   ("x86_64", "level", "v4")],
-        "cpu_v4": [("x86_64", "level", "v4")],
+        "gpu_cpuv2": [("nvidia", "cuda_version_lower_bound", "13.0"),
+                      ("x86_64", "level", "v2")],
+        "gpu_cpuv4": [("nvidia", "cuda_version_lower_bound", "13.0"),
+                      ("x86_64", "level", "v4")],
+        "cpuv4": [("x86_64", "level", "v4")],
     }
 
     def rank(prop):
@@ -540,11 +540,11 @@ As an example, take four variant wheels of a package that ranks the
         return sorted(map(rank, variant_wheels[label]), reverse=True)
 
     sorted(variant_wheels, key=sort_key, reverse=True)
-    # ['gpu_v4', 'gpu_v2', 'gpu', 'cpu_v4']
+    # ['gpu_cpuv4', 'gpu_cpuv2', 'gpu', 'cpuv4']
 
-The ``gpu*`` wheels sort ahead of ``cpu_v4`` because their best triple
-is in the higher-ranked ``nvidia`` namespace. ``gpu_v4`` beats
-``gpu_v2`` on their second triple, since ``v4`` outranks ``v2``. Both
+The ``gpu*`` wheels sort ahead of ``cpuv4`` because their best triple
+is in the higher-ranked ``nvidia`` namespace. ``gpu_cpuv4`` beats
+``gpu_cpuv2`` on their second triple, since ``v4`` outranks ``v2``. Both
 beat ``gpu``, whose triples run out first, as the wheel with more
 properties wins.
 
