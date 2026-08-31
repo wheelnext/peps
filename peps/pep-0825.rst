@@ -480,36 +480,39 @@ there are more, the ordering is either clear or insignificant.
 With wheel variants, there can be several compatible wheels per project
 version. We define a total ordering to give package authors and users
 control over wheel preference and to ensure that all tools select the
-same variant without ambiguity.
+same variant without ambiguity. Tools may allow users to override this
+ordering.
 
 Every variant property is a ``namespace :: feature :: value`` triple
-whose components are ranked in that order of significance: by namespace
-first, then by feature within the namespace, then by value within the
-feature. Only properties compatible with the target system take part,
-and each feature contributes just its best compatible value.
+whose components are ranked in that order: by namespace first, then by
+feature within the namespace, then by value within the feature. Only
+properties compatible with the target system take part. The ranking for
+namespaces comes from the package's variant metadata. The ranking itself
+for their features and feature values will be defined in a subsequent PEP.
 
-Each wheel is therefore a tuple of such triples, ordered from its
-highest-ranked property downwards, and wheels are compared
-lexicographically over those tuples. This departs from ordinary tuple
-comparison in one place: where one wheel's triples run out first, the
-wheel with *more* triples wins, as it is the more specific of the two.
 
-The ranking for namespaces comes from the package's variant metadata.
-The method for obtaining the ranking for their features and feature
-values will be defined in a subsequent PEP. Tools may allow users to
-override this ordering.
+To compare two wheels by variant preference, compare their best ranked
+variant property triple. The intuition is that this selects the wheel that
+makes the best use of the target hardware. If both have the same best variant
+property, use the next lower ranked property as a tiebreaker, repeatedly
+until an order is established. By comparing all compatible wheels, this
+yields most preferred wheel.
 
-The ordering for non-variant wheels is unchanged. Hence, if there are no
-candidate variant wheels, the behavior remains the same as prior to this
-specification.
+To express it with Python types instead: Each variant wheel has a set of
+3-tuples, its variant properties. Take the wheels compatible with the
+system and filter their property sets to those compatible with the system.
+Then, sort each wheel's set into an (ordered) list, more preferred properties
+sorted higher. Now you can the sort the wheels by comparing their lists. The
+wheel sorted to the top is the most preferred wheel.
 
-As an example, take a GPU wheel with ``nvidia`` properties and an
+As an example, take a GPU wheel with ``cuda`` properties and an
 optimized CPU wheel with ``x86_64`` properties, where the package ranks
-``nvidia`` first: the GPU wheel wins on its first triple. If two wheels
+``cuda`` first: the GPU wheel wins on its first triple. If two wheels
 carry the same CUDA properties, the comparison moves to their next
 triple, and a wheel with ``x86_64 :: level :: v4`` beats one with
 ``x86_64 :: level :: v2``, since ``v4`` outranks ``v2``.
 
+The ordering for non-variant wheels remains unchanged.
 
 Ordering algorithm
 ''''''''''''''''''
