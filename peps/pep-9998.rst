@@ -1,0 +1,493 @@
+PEP: 9998
+Title: Wheel Variants: Building
+Author: Jonathan Dekhtiar <jonathan@dekhtiar.com>,
+        Michał Górny <mgorny@quansight.com>,
+        Konstantin Schütze <konstin@mailbox.org>,
+        Ralf Gommers <ralf.gommers@gmail.com>,
+        Andrey Talman <atalman@meta.com>,
+        Charlie Marsh <charlie@astral.sh>,
+        Michael Sarahan <msarahan@gmail.com>,
+        Eli Uriegas <eliuriegas@meta.com>,
+        Barry Warsaw <barry@python.org>,
+        Donald Stufft <donald@stufft.io>,
+        Andy R. Terrel <andy.terrel@gmail.com>
+Discussions-To: Pending
+Status: Draft
+Type: Standards Track
+Topic: Packaging
+Requires: 825, 9999
+Created: 02-Mar-2026
+Post-History: Pending
+
+Abstract
+========
+
+
+Motivation
+==========
+
+:pep:`825` and :pep:`9999` introduced variant wheels while focusing on
+the file format and installation process. This PEP follows up on that by
+defining a consistent data format and behavior for building variant
+wheels.
+
+
+Specification
+=============
+
+Definitions
+-----------
+
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+"SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
+document are to be interpreted as described in :rfc:`2119`.
+
+
+Building variant wheels
+-----------------------
+
+Tools MAY support building variant wheels. When building variant wheels,
+they MUST ensure that the produced wheels conform to :pep:`825` and
+:pep:`9999`. In particular, tools MUST ensure that:
+
+- variant metadata conforms to the schema
+- variant label matches the only key in the ``variants`` dictionary
+- there are entries in ``default-priorities.namespace`` and
+  ``providers`` dictionaries for all namespaces found in variant
+  properties
+- when ``providers.{namespace}.static-properties`` specifies more than
+  one feature name, there are entries for all feature names in
+  ``default-priorities.feature.{namespace}``
+
+Additionally, tools MAY verify that:
+
+- all specified variant properties are valid according to the respective
+  providers (using `extensions to provider plugin API`_)
+
+
+Build backend support
+---------------------
+
+Build backends MAY support building variant wheels. However, :pep:`517`
+and :pep:`660` hooks MUST NOT build variant wheels, unless they are
+explicitly requested by the user.
+
+For consistency, it is RECOMMENDED that build backends implement the
+following interface for building variant wheels:
+
+- variant metadata seed is stored in ``pyproject.toml`` file, as
+  described in `pyproject.toml integration`_
+- the available variants are described in ``variant.variants`` table
+  in said file
+- the ``config_settings`` dictionary of wheel building hooks accepts a
+  ``variant-label`` key that enables building the specified variant from
+  ``variant.variants`` dictionary
+- the ``get_requires_for_build_wheel()`` hook of :pep:`517`,
+  ``get_requires_for_build_editable()`` hook of :pep:`660`, and hooks of
+  similar purpose include the necessary provider plugin packages for the
+  variant being built, and the build backend uses the version installed
+  in the build environment as a result
+
+
+pyproject.toml integration
+--------------------------
+
+This specification extends the ``pyproject.toml`` file originally
+defined in :pep:`518`. Said file MAY contain a top-level ``variant``
+table that contains variant metadata for the project, as defined by
+:pep:`9999` or a subsequent specification, with the extensions listed
+in this PEP, converted into the respective TOML types. When building
+variant wheels, tools SHOULD use the information from this file to seed
+the variant metadata in the built variant wheels. More specifically:
+
+- the ``default-priorities`` dictionary is used to seed
+  ``default-priorities`` in the wheels
+- the ``providers`` dictionary is used to seed ``providers`` in the
+  wheels and to query providers at build time, if necessary
+- the ``variants`` dictionary MAY be used to provide a mapping from
+  variant labels to variant properties, to facilitate requesting a build
+  of a specific variant (``null`` variant does not need to be specified)
+
+Tools MAY provide additional methods of providing the necessary variant
+metadata.
+
+
+Extension to provider metadata
+''''''''''''''''''''''''''''''
+
+The provider information dictionaries used as values in the
+``providers`` dictionary MAY contain the following key:
+
+- ``build-requires: list[str]``: A list of one or more
+  :ref:`dependency specifiers <dependency-specifiers>`, same as
+  ``requires`` but used only to populate ``static-properties`` at build
+  time, as explained in `populating static properties from provider
+  plugins`_.
+
+If ``build-requires`` is specified, both ``requires`` and
+``static-properties`` MUST NOT be present. In the resulting variant
+wheel, the ``build-requires`` and ``plugin-api`` keys MUST be removed,
+and ``static-properites`` MUST be added instead.
+
+
+Example
+'''''''
+
+The ``pyproject.toml`` file corresponding to the package with variant
+metadata equivalent to the one provided in the example in :pep:`9999`
+could look like the following:
+
+.. code:: toml
+
+    [variant]
+    "$schema" = "https://variants-schema.wheelnext.dev/peps/9999/v0.2.0.json"
+
+    [variant.default-priorities]
+    # REQUIRED: specifies that x86_64 CPU properties are more important than
+    # aarch64 CPU properties (both are mutually exclusive, so the exact order
+    # does not matter), and both are more important than specific BLAS/LAPACK
+    # library:
+    namespace = ["x86_64", "aarch64", "blas_lapack"]
+
+    # OPTIONAL: makes "library" the most important feature in "blas_lapack"
+    # namespace
+    feature.blas_lapack = ["library"]
+
+    # OPTIONAL: makes ["mkl", "openblas"] the most important values of
+    # "blas_lapack :: library" feature
+    property.blas_lapack.library = ["mkl", "openblas"]
+
+    # REQUIRED: variant providers
+    # ---------------------------
+    # (keys must matchdefault-priorities.namespace)
+
+    [variant.providers.aarch64]
+    # Specifies provider plugin package. REQUIRED since there is no
+    # "static-properties" -- plugin will be queried at install time.
+    requires = [
+      "provider-variant-aarch64 >=0.0.1",
+    ]
+    # Overrides plugin API endpoint. OPTIONAL; without it, the API
+    # endpoint "provider_variant_aarch64" would be used.
+    plugin-api = "provider_variant_aarch64.plugin:AArch64Plugin"
+
+    [variant.providers.blas_lapack]
+    # REQUIRED: used to populate "static-properties".
+    build-requires = ["blas-lapack-variant-provider"]
+
+    [variant.providers.x86_64]
+    # Specifies provider plugin package. REQUIRED since there is no
+    # "static-properties" -- plugin will be queried at install time.
+    requires = [
+      "provider-variant-x86-64 >=0.0.1; python_version >= '3.12'",
+      "legacy-provider-variant-x86-64 >=0.0.1; python_version < '3.12'",
+    ]
+    # Overrides plugin API endpoint. REQUIRED since "requires" may
+    # evaluate to two different packages depending on Python version.
+    plugin-api = "provider_variant_x86_64.plugin:X8664Plugin"
+
+    # RECOMMENDED: variants that can be built
+    # ---------------------------------------
+
+    # "x86_64_v3_openblas" label corresponds to:
+    # - blas_lapack :: library :: openblas
+    # - x86_64 :: level :: v3
+    [variant.variants.x86_64_v3_openblas]
+    blas_lapack.library = ["openblas"]
+    x86_64.level = ["v3"]
+
+    # "x86_64_v4_mkl" label corresponds to:
+    # - blas_lapack :: library :: mkl
+    # - x86_64 :: level :: v4
+    [variant.variants.x86_64_v4_mkl]
+    blas_lapack.library = ["mkl"]
+    x86_64.level = ["v4"]
+
+
+Extensions to provider plugin API
+---------------------------------
+
+Provider plugins MAY be used at build time, if the provider metadata
+specifies either ``requires`` or ``build-requires`` key, per the
+`extension to provider metadata`_ section.
+
+The plugin interface specified in :pep:`9999` is extended by adding the
+following REQUIRED function:
+
+- ``get_all_configs() -> list[VariantFeatureConfigType]`` that returns a
+  list of variant feature names and their values that are valid
+  according to the provider plugin. The ordering of the lists is
+  insignificant. A particular plugin version MUST always return the same
+  lists (modulo ordering), irrespective of any runtime conditions.
+
+The value returned by ``get_supported_configs()`` MUST be a subset of
+the feature names and values returned by ``get_all_configs()`` (modulo
+ordering).
+
+Additionally, the following OPTIONAL attribute is added:
+
+- ``all_properties_compatible: bool = False``; if it set to ``True``,
+  then all valid feature names and values are always compatible. In that
+  case, the ``get_supported_configs()`` function MUST always return the
+  same value as ``get_all_configs()`` (modulo ordering).
+
+
+Example implementation
+''''''''''''''''''''''
+
+The example plugin implementation from :pep:`9999` can be extended in
+the following way:
+
+.. code:: python
+
+    from dataclasses import dataclass
+
+
+    @dataclass
+    class VariantFeatureConfig:
+        name: str
+        values: list[str]
+        multi_value: bool
+
+
+    # internal -- provided for illustrative purpose
+    _MAX_VERSION = 4
+    _ALL_GPUS = ["narf", "poit", "zort"]
+
+
+    def get_supported_configs() -> list[VariantFeatureConfig]:
+        ...  # same as in PEP 9999
+
+
+    def get_all_configs() -> list[VariantFeatureConfig]:
+        return [
+            VariantFeatureConfig(
+                name="min_version",
+                # [1, 2, 3, 4] (the order does not matter)
+                values=[str(x) for x in range(1, _MAX_VERSION + 1)],
+                # single-valued, since there is always one minimum
+                multi_value=False,
+            ),
+            VariantFeatureConfig(
+                name="gpu",
+                # [narf, poit, zort]
+                values=_ALL_GPUS,
+                # multi-valued, since a package can target multiple GPUs
+                multi_value=True,
+            ),
+        ]
+
+
+Example implementation of a plugin suitable for build-time use
+'''''''''''''''''''''''''''''''''-----------------------------
+
+.. code:: python
+
+    from dataclasses import dataclass
+
+
+    @dataclass
+    class _VariantFeatureConfig:
+        name: str
+        values: list[str]
+        multi_value: bool
+
+
+    all_properties_compatible = True
+
+
+    def get_supported_configs() -> list[_VariantFeatureConfig]:
+        return [
+            VariantFeatureConfig(
+                name="library",
+                values=["accelerate", "openblas", "mkl"],
+                multi_value=False,
+            ),
+        ]
+
+
+    def get_all_configs() -> list[_VariantFeatureConfig]:
+        return get_supported_configs()
+
+
+Populating static properties from provider plugins
+--------------------------------------------------
+
+If a variant provider metadata used at build time contains the
+``build-requires`` key (as specified in the `extension to provider
+metadata`_ section), the specified provider plugin is used to populate
+the ``static-properties`` dictionary while building the variant wheel.
+
+The packages to install and the plugin interface to use are determined
+as specified in :pep:`9999`, except that:
+
+- the ``build-requires`` key is used in place of ``requires`` key
+- all providers are assumed to be enabled and trusted
+
+In particular, the ``plugin-api`` key MAY be specified to override the
+plugin API endpoint.
+
+When populating static properties, the tool MUST:
+
+1. Ensure that the loaded plugin has ``all_properties_compatible ==
+   True`` attribute. It is invalid to use a plugin without that
+   attribute in ``build-requires``.
+
+2. Call ``get_supported_configs()`` to obtain the ordered lists of
+   supported feature name and their values.
+
+3. Verify that the properties the wheel is built with are compatible per
+   ``get_supported_configs()``. It is invalid to build a variant wheel
+   with properties that are not permitted by ``static-properties``.
+
+4. Remove ``build-requires`` and ``plugin-api`` keys from the provider
+   metadata.
+
+5. Add ``static-properties`` key to the provider metadata, populating it
+   using the lists obtained from ``get_supported_configs()``.
+
+6. If ``get_supported_configs()`` returned more than one feature name,
+   ensure that all feature names are present in
+   ``default-priorities.feature.{namespace}`` list. Any feature names
+   missing should be appended in the same order as returned by
+   ``get_supported_configs()``.
+
+
+Rationale
+=========
+
+This PEP considers a variety of possible tools that may emit variant
+wheels, including build backends, build frontends and tools dedicated to
+converting regular wheels into variant wheels. A standardized interfaces
+for project tree metadata and build backends are proposed to offer
+consistent user experience, but are by no means mandatory. The standard
+``pyproject.toml`` file is used to avoid spreading the project
+configuration across multiple files, and the same schema as for variant
+metadata is used.
+
+When using build backends, using ``get_requires*()`` hooks for exposing
+provider plugin dependencies is recommended, to reuse the existing logic
+for creating isolated environments and installing packages. This implies
+that provider plugin packages are treated as regular build dependencies.
+
+The provider plugin API is extended to enable verifying whether the
+properties specified for a variant are correct. To this purpose, a
+``get_all_configs()`` function is introduced that is symmetric to
+``get_supported_configs()`` introduced in :pep:`9999`. However, the
+build tools are not required to perform this validation, as it requires
+installing and querying provider plugins.
+
+Furthermore, this PEP permits populating ``static-properties`` in
+provider information using provider plugins. This needs both to be
+supported by the plugin in question, and explicitly enabled in the
+package, through using ``build-requires`` in place of ``requires``. This
+can be used to ensure that multiple packages use the same properties for
+the same features, such as BLAS/LAPACK library names. The process is
+handled entirely at build time, and the resulting wheel is fully
+compliant with :pep:`9999`.
+
+Technically, the presence of both ``get_supported_configs()`` and
+``get_all_configs()`` when all properties are compatible is redundant:
+both must return the same values, except that the latter may return them
+in any order.  However, the specification requires both to keep a single
+interface for all provider plugins.
+
+
+Backwards Compatibility
+=======================
+
+As noted in :pep:`825`, variant wheels are incompatible with the
+existing tooling. To avoid disrupting existing workflows, this PEP
+requires (in `build backend support`_) that build backends do not build
+variant wheels by default.
+
+The introduction of a new ``variant`` table (in `pyproject.toml
+integration`_) follows from :pep:`518` specifying that such tables are
+"reserved for future use by other PEPs". Therefore, introducing the
+``[variant]`` table is backwards compatible.
+
+
+Security Implications
+=====================
+
+There are no new security implications beyond what is already noted in
+:pep:`9999`. In particular, the use of provider plugins during build
+time is not seen as an additional risk, given that the dependencies are
+provider by the user directly (for example, in ``pyproject.toml``) and
+they are treated equivalently to other build dependencies.
+
+
+How to Teach This
+=================
+
+This PEP is primarily oriented towards package maintainers. The primary
+source of information will be the documentation of build backends and
+other tools that support building variant wheels. The documentation
+present on ``packaging.python.org`` will also be updated for the
+recommended build backend interface.
+
+
+Reference Implementation
+========================
+
+The `variantlib <https://github.com/wheelnext/variantlib>`__ project
+provides a reference implementation of low-level library functions for
+this PEP. The `pep_817_wheel_variants
+<https://github.com/wheelnext/pep_817_wheel_variants>`__ monorepo
+includes a demo ports of a few build systems.
+
+
+Rejected Ideas
+==============
+
+
+
+Open Issues
+===========
+
+
+Acknowledgements
+================
+
+This work would not have been possible without the contributions and
+feedback of many people in the Python packaging community. In
+particular, we would like to credit the following individuals for their
+help in shaping this PEP (in alphabetical order):
+
+Alban Desmaison, Bradley Dice, Chris Gottbrath, Dmitry Rogozhkin,
+Emma Smith, Geoffrey Thomas, Henry Schreiner, Jeff Daily, Jeremy Tanner,
+Jithun Nair, Keith Kraus, Leo Fang, Mike McCarty, Nikita Shulga,
+Paul Ganssle, Philip Hyunsu Cho, Robert Maynard, Vyas Ramasubramani,
+and Zanie Blue.
+
+
+Change History
+==============
+
+- xx-yyy-2026
+
+  - Initial version, split from :pep:`817` draft.
+  - A specific build backend interface for building variant wheels was
+    proposed.
+  - The ``variants`` dictionary is now permitted in ``pyproject.toml``
+    metadata, and it can be used to define available variants to build.
+  - A new ``build-requires`` key was introduced in provider metadata.
+    It can only be used ``pyproject.toml`` and it is used to populate
+    ``static-properties`` from a provider plugin at build time. It
+    replaced the previous combination of ``install-time = false`` with
+    non-empty ``requires``.
+
+
+Appendices
+==========
+
+::
+
+    - :ref:`pep9998-variant-json-schema`
+
+
+Copyright
+=========
+
+This document is placed in the public domain or under the
+CC0-1.0-Universal license, whichever is more permissive.
