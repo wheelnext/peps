@@ -476,6 +476,8 @@ Change History
     ``static-properties`` from a provider plugin at build time. It
     replaced the previous combination of ``install-time = false`` with
     non-empty ``requires``.
+  - The ``is_aot_plugin`` attribute of the plugin interface has been
+    renamed to ``all_properties_compatible``.
 
 
 Appendices
