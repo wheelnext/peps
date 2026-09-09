@@ -397,9 +397,9 @@ attributes:
 - ``name: str`` specifying the feature name.
 
 - ``multi_value: bool`` specifying whether the feature is allowed to
-  have multiple corresponding values within a single variant wheel. If
-  it is ``False``, then it is an error to specify multiple values for
-  the feature.
+  have multiple corresponding values within a single entry in the
+  ``variants`` dictionary. If it is ``False``, then it is an error to
+  specify multiple values for the feature.
 
 - ``values: list[str]`` specifying feature values. In contexts where the
   order is significant, the values MUST be ordered from the most
