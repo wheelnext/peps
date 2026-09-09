@@ -85,7 +85,9 @@ namespaces, as required by :pep:`825`.
 The namespace ``abi_dependency`` is reserved for the `ABI Dependency
 Variant Provider <#abi-dependency-variant-provider-optional>`_. The
 providers for all the other namespaces used MUST be defined in the
-`provider information`_ dictionary in `variant metadata`_.
+`provider information`_ dictionary in `variant metadata`_. This PEP is
+concerned only with consuming said dictionary; the process of building
+variant wheels will be covered in a subsequent PEP.
 
 Each of these providers either defines a static list of compatible
 features and their values, or specifies a Python plugin package that
@@ -760,13 +762,6 @@ followed by explicit implementation process. Deployment of new variant
 properties would be entirely dependent on tool updates. The added
 maintenance cost could lead to support for less popular variant axes not
 being accepted, or lack of feature parity between different tools.
-
-
-Open Issues
-===========
-
-This PEP is concerned with installing wheels only. A subsequent PEP will
-address building variant wheels.
 
 
 Acknowledgements
