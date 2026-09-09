@@ -403,7 +403,7 @@ attributes:
 
 - ``values: list[str]`` specifying feature values. In contexts where the
   order is significant, the values MUST be ordered from the most
-  preferred to the least preferred.
+  preferred to the least preferred. This list MUST NOT be empty.
 
 Equivalently, it can be described using the following protocol:
 
