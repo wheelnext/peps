@@ -782,7 +782,7 @@ and Zanie Blue.
 Change History
 ==============
 
-- 17-Feb-2026
+- xx-yyy-2026
 
   - Initial version, split from :pep:`817` draft.
   - Namespaces have been removed from the `provider plugin API`_.
@@ -792,6 +792,11 @@ Change History
     `provider information`_, as they were deemed redundant.
   - The ``static-properties`` table has been moved into `provider
     information`_.
+  - The ``feature-order`` key has been added to facilitate the static
+    property ordering after the removal of
+    ``default-priorities.feature`` from :pep:`825`.
+  - The ``values`` member of the `variant feature config class`_ is now
+    required to be non-empty.
 
 
 Appendices
