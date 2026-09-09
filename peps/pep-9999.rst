@@ -23,11 +23,14 @@ Abstract
 ========
 
 This PEP is a followup to :pep:`825` that defines how variant properties
-are governed and how their compatibility is determined. This is
-primarily done via opt-in plugins that are Python packages specified in
-variant metadata, but can also be vendored or reimplemented by the
-tools. Package maintainers and users can only supply static
-compatibility data to avoid the need for plugins.
+are governed and how their compatibility is determined. This is done
+either via static feature and feature value compatibility lists
+specified in the variant metadata, or by querying opt-in plugins that
+are Python packages, but can also be vendored or reimplemented by the
+tools. A static list can also be provided in place of querying the
+plugins. Additionally, an ABI Dependency Variant Provider is defined
+to facilitate builds of the same package against different dependency
+versions.
 
 
 Motivation
