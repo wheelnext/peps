@@ -523,9 +523,7 @@ Change History
 Appendices
 ==========
 
-::
-
-    - :ref:`pep9998-variant-json-schema`
+- :ref:`pep9998-variant-json-schema`
 
 
 Copyright
