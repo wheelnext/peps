@@ -231,6 +231,46 @@ Additionally, the following OPTIONAL attribute is added:
   case, the ``get_supported_configs()`` function MUST always return the
   same value as ``get_all_configs()`` (modulo ordering).
 
+The resulting interface can be described using the following protocol:
+
+.. code:: python
+
+    from abc import abstractmethod
+    from typing import Protocol
+
+
+    class PluginType(Protocol):
+        # Note: properties are used here for docstring purposes, these must
+        # be actually implemented as attributes.
+
+        @property
+        def all_properties_compatible(self) -> bool:
+            """
+            Is this plugin valid for use with `build-requires`?
+
+            If this is True, then `get_supported_configs()` must always
+            return the same values, irrespective of the platform used.
+            This permits the plugin to be used via `build-requires`,
+            where the supported properties are recorded at build time.
+
+            If the value of `get_supported_configs()` may change in any way
+            depending on the platform used, then it must be False
+            (the default).
+            """
+            return False
+
+        @classmethod
+        @abstractmethod
+        def get_all_configs(cls) -> list[VariantFeatureConfigType]:
+            """Get all valid configs for the plugin"""
+            raise NotImplementedError
+
+        @classmethod
+        @abstractmethod
+        def get_supported_configs(cls) -> list[VariantFeatureConfigType]:
+            """Get ordered lists of compatible features and their values"""
+            raise NotImplementedError
+
 
 Example implementation
 ''''''''''''''''''''''
