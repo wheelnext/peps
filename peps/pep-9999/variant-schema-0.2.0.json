@@ -37,14 +37,24 @@
           "type": "object",
           "description": "Provider information",
           "properties": {
-            "plugin-api": {
-              "description": "Object reference to plugin class",
-              "type": "string",
-              "pattern": "^([a-zA-Z0-9._]+ *: *[a-zA-Z0-9._]+)|([a-zA-Z0-9._]+)$"
+            "feature-order": {
+              "description": "Feature order for static-properties",
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[a-z0-9_]+$"
+              },
+              "minItems": 0,
+              "uniqueItems": true
             },
             "optional": {
               "description": "Whether the provider is optional (disabled by default)",
               "type": "boolean"
+            },
+            "plugin-api": {
+              "description": "Object reference to plugin class",
+              "type": "string",
+              "pattern": "^([a-zA-Z0-9._]+ *: *[a-zA-Z0-9._]+)|([a-zA-Z0-9._]+)$"
             },
             "requires": {
               "description": "Dependency specifiers for how to install the plugin",
