@@ -22,14 +22,14 @@ Post-History: Pending
 Abstract
 ========
 
-This PEP is a followup to :pep:`825` that defines how variant properties
-are governed and how their compatibility is determined. This is done
-either via static feature and feature value compatibility lists
-specified in the variant metadata, or by querying opt-in plugins that
-are Python packages, but can also be vendored or reimplemented by the
-tools. A static list can also be provided in place of querying the
-plugins. Additionally, an ABI Dependency Variant Provider is defined
-to facilitate builds of the same package against different dependency
+This PEP extends :pep:`825` by defining how variant properties are
+governed and how their compatibility is determined. This is done either
+via static feature and feature value compatibility lists specified in
+the variant metadata, or by querying opt-in plugins that are Python
+packages, but can also be vendored or reimplemented by the tools. A
+static list can also be provided in place of querying the plugins.
+Additionally, an ABI Dependency Variant Provider is defined to
+facilitate builds of the same package against different dependency
 versions.
 
 
@@ -120,7 +120,7 @@ namespace:
 3. The tools SHOULD implement a way for the user to provide a static
    list of compatible features and their values. If the user provided
    said list, the tools MUST use it exclusively. Otherwise, proceed to
-   step 4.
+   step 4. Standardizing this format is left to a future PEP.
 
 4. If no static list of compatible features and their values is
    provided, the variant provider metadata MUST specify a Python package
