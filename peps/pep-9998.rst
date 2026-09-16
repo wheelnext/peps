@@ -124,10 +124,26 @@ The provider information dictionaries used as values in the
   time, as explained in `populating static properties from provider
   plugins`_.
 
-If ``build-requires`` is specified, both ``requires`` and
-``static-properties`` MUST NOT be present. In the resulting variant
-wheel, the ``build-requires`` and ``plugin-api`` keys MUST be removed,
-and ``static-properites`` MUST be added instead.
+If the ``build-requires`` key is specified, then ``feature-order``,
+``requires`` and ``static-properties`` keys MUST NOT be present.
+
+The ``build-requires`` key is only valid in the ``pyproject.toml`` file.
+In a variant wheel built from that file, the ``build-requires`` and
+``plugin-api`` keys MUST be removed, and ``static-properties`` MUST be
+added instead. If the resulting ``static-properties`` dictionary lists
+more than one feature, then the ``feature-order`` key MUST be added as
+well.
+
+Consequently, every provider metadata MUST use exactly one of these
+three key combinations:
+
+1. ``requires``, and optionally ``plugin-api``
+2. ``build-requires``, and optionally ``plugin-api`` (valid only in
+   ``pyproject.toml``)
+3. ``static-properties``, and optionally ``feature-order``
+
+In addition to that, the ``optional`` key is always valid. Further rules
+on when the optional keys are required are specified in :pep:`9999`.
 
 
 Example
