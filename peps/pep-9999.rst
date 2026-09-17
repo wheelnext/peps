@@ -105,20 +105,21 @@ compatible with the system MUST follow the specified algorithm in order
 to obtain the list of compatible features and feature values for every
 namespace:
 
-1. Read the ``optional`` key from the `provider information`_ to
-   determine whether the variant provider is disabled by default.  The
+1. The tools SHOULD implement a way for the user to provide a static
+   list of compatible features and their values for a particular
+   provider. Standardizing this format is left to a future PEP. If the
+   user provided said list, the tools MUST use it exclusively.
+   Otherwise, proceed to step 2.
+
+2. Read the ``optional`` key from the `provider information`_ to
+   determine whether the variant provider is disabled by default. The
    tools SHOULD provide a way to explicitly enable a provider, and MAY
    provide a way to disable one. If a provider is disabled, the list of
-   compatible features is empty. Otherwise, proceed to step 2.
+   compatible features is empty. Otherwise, proceed to step 3.
 
-2. Read the ``static-properties`` key from the `provider information`_
+3. Read the ``static-properties`` key from the `provider information`_
    dictionary. If it is present, the tools MUST use the static lists of
-   properties therein exclusively. Otherwise, proceed to step 3.
-
-3. The tools SHOULD implement a way for the user to provide a static
-   list of compatible features and their values. Standardizing this
-   format is left to a future PEP. If the user provided said list, the
-   tools MUST use it exclusively. Otherwise, proceed to step 4.
+   properties therein exclusively. Otherwise, proceed to step 4.
 
 4. If no static list of compatible features and their values is
    provided, read the ``requires`` key in the `provider information`_
