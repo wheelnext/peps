@@ -812,12 +812,15 @@ Change History
   - The ``enable-if`` and ``install-time`` keys have been removed from
     `provider information`_, as they were deemed redundant.
   - The ``static-properties`` table has been moved into `provider
-    information`_.
+    information`_, and made mutually exclusive with the ``requires``
+    key.
   - The ``feature-order`` key has been added to facilitate the static
     property ordering after the removal of
     ``default-priorities.feature`` from :pep:`825`.
   - The ``values`` member of the `variant feature config class`_ is now
     required to be non-empty.
+  - The entry point name is now used to provide the recommended
+    namespace for a provider.
 
 
 Appendices
