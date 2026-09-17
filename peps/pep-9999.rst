@@ -640,8 +640,7 @@ plugins with a new package version.
 The ``requires`` and ``plugin-api`` keys follow the precedent of
 ``build-system.requires`` and ``build-system.build-backend`` keys of
 :pep:`517`. However, the ``plugin-api`` key has been made optional and
-defaults to being inferred from the package name, addressing a criticism
-of the original design.
+defaults to being inferred from the package name, reducing boilerplate.
 
 It is recommended for plugins to install entry points to facilitate
 discovery when installed in development environments. This can be used
@@ -678,28 +677,23 @@ for malicious actors to inject arbitrary code payload:
 2. Introducing a malicious variant provider plugin in an existing
    package metadata.
 
-Admittedly, such attacks can already be done to the package's
-dependencies. However, in some cases the affected tools are executed
-with elevated privileges (such as when installing packages for
-multi-user systems), while the package itself will only be run with
-regular user privileges. Therefore, variant provider plugins could
-introduce a Remote Code Execution vulnerability with elevated
-privileges.
+While such attacks can already be done to the package's
+dependencies, it i prudent not to add another attack
+surface.
 
 A similar issue already exists in the packaging ecosystem when packages
 are installed from source distributions, with build backends and other
-build dependencies are being installed and executed. However, various
-tools operating purely on wheels, as well as users using tool-specific
-options to disable the use of source distributions, have been relying on
-the assumption that no such code execution will happen. To uphold this
-assumption, the proposal makes plugin packages opt-in.
+build dependencies are being installed and executed by default. Users
+are often unaware of this risk. Securing build dependencies is
+non-trivial and not commonly done. More commonly, users opt-out
+of source distribution builds altogether instead.
 
 Unfortunately, an opt-in system creates a risk of security fatigue.
 Users wishing to use variant wheels may start blanket-enabling all use
 of provider plugins, reintroducing the RCE danger. To avoid this and
-improve user experience, the PEP permits tool maintainers to provide
-opt-out experience for selected plugins. A subsequent PEP will give
-further recommendations for improved user experience.
+improve user experience, the PEP proposes that tool provide a selected
+set of trusted plugins, only requiring opt-in for uncommon plugins. 
+A subsequent PEP will give further recommendations for improved user experience.
 
 
 How to Teach This
@@ -713,7 +707,9 @@ on ``packaging.python.org`` will need to be updated as well.
 
 Ideally, in the most common use cases variants will work out of the box
 and non-expert users will not need to be aware of them, much like they
-do not need to be aware of Platform compatibility tags.
+do not need to be aware of Platform compatibility tags. Some packages
+will be able to simplify their installation instructions to a single
+command covering the different hardware accelerators.
 
 Expert users will need guidance that will largely be specific to
 particular installer implementation, as it involves user interface
