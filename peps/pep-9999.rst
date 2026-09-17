@@ -396,6 +396,18 @@ name to recommend the namespace to use, and the associated package
 distribution metadata to determine which package provides a given
 plugin.
 
+For example, with ``provider-variant-x86-64==0.0.3`` package installing
+the entry point shown above, ``variantlib update-pyproject-toml --add x86_64``
+would add the following metadata to ``pyproject.toml``:
+
+.. code:: toml
+
+    [variant.default-priorities]
+    namespace = ["x86_64"]
+
+    [variant.providers.x86_64]
+    requires = ["provider-variant-x86-64 >=0.0.3"]
+
 
 Variant feature config class
 ''''''''''''''''''''''''''''
