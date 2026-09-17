@@ -37,12 +37,13 @@ Motivation
 ==========
 
 :pep:`825` defines a protocol for recording additional compatibility
-data for binary packages, in the form of variant properties, but does not
-define how to obtain the matching information for the system. This PEP defines
-how to determine which variant properties are compatible with a particular
-system and how variant namespaces are governed.
+data for binary packages, in the form of variant properties, but does
+not define how to obtain the matching information for the system. This
+PEP defines how to determine which variant properties are compatible
+with a particular system and how variant namespaces are governed.
 
-This PEP introduces three different ways of defining and obtaining variant properties for three different use cases:
+This PEP introduces three different ways of defining and obtaining
+variant properties for three different use cases:
 
 1. Variants that express platform compatibility, for example GPU or CPU
    capabilities. In this case, the goal is to select the best wheel that
@@ -89,13 +90,13 @@ concerned only with consuming said dictionary; the process of building
 variant wheels will be covered in a subsequent PEP.
 
 Each of these providers either defines a static list of compatible
-features and their values, or specifies a requirement referring to
-a Python plugin package. The name in the requirement uniquely identifies the
-provider, and the version specifier declares the required feature level. For
-security, the plugin packages MUST NOT be fetched from an index by default. Tools
-are permitted to vendor, reimplement or consider
-a set of trusted of plugin packages, and enable them by
-default. Users can opt-in untrusted providers, or to provide a static list of
+features and their values, or specifies a requirement referring to a
+Python plugin package. The name in the requirement uniquely identifies
+the provider, and the version specifier declares the required feature
+level. For security, the plugin packages MUST NOT be fetched from an
+index by default. Tools are permitted to vendor, reimplement or consider
+a set of trusted of plugin packages, and enable them by default. Users
+can opt-in untrusted providers, or to provide a static list of
 compatible features and their values to use instead of querying the
 plugin. Further recommendations on this matter will be provided by a
 subsequent PEP.
@@ -692,8 +693,9 @@ Unfortunately, an opt-in system creates a risk of security fatigue.
 Users wishing to use variant wheels may start blanket-enabling all use
 of provider plugins, reintroducing the RCE danger. To avoid this and
 improve user experience, the PEP proposes that tool provide a selected
-set of trusted plugins, only requiring opt-in for uncommon plugins.
-A subsequent PEP will give further recommendations for improved user experience.
+set of trusted plugins, only requiring opt-in for uncommon plugins. A
+subsequent PEP will give further recommendations for improved user
+experience.
 
 
 How to Teach This
