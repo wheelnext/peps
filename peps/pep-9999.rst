@@ -677,9 +677,8 @@ for malicious actors to inject arbitrary code payload:
 2. Introducing a malicious variant provider plugin in an existing
    package metadata.
 
-While such attacks can already be done to the package's
-dependencies, it i prudent not to add another attack
-surface.
+While such attacks can already be done to the package's dependencies, it
+is prudent not to add another attack surface.
 
 A similar issue already exists in the packaging ecosystem when packages
 are installed from source distributions, with build backends and other
@@ -692,7 +691,7 @@ Unfortunately, an opt-in system creates a risk of security fatigue.
 Users wishing to use variant wheels may start blanket-enabling all use
 of provider plugins, reintroducing the RCE danger. To avoid this and
 improve user experience, the PEP proposes that tool provide a selected
-set of trusted plugins, only requiring opt-in for uncommon plugins. 
+set of trusted plugins, only requiring opt-in for uncommon plugins.
 A subsequent PEP will give further recommendations for improved user experience.
 
 
