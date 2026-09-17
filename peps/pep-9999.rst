@@ -117,41 +117,39 @@ compatible with the system MUST follow the specified algorithm in order
 to obtain the list of compatible features and feature values for every
 namespace:
 
-1. The tools SHOULD implement a way for the user to provide a static
-   list of compatible features and their values for a particular
-   provider. Standardizing this format is left to a future PEP. If the
-   user provided said list, the tools MUST use it exclusively.
-   Otherwise, proceed to step 2.
+1. The tool SHOULD implement a way for the user to provide a static list
+   of compatible features and their values for a particular provider.
+   Standardizing this format is left to a future PEP. If the user
+   provided said list, the tool MUST use it exclusively.  Otherwise,
+   proceed to step 2.
 
-2. Read the ``optional`` key from the `provider information`_ to
-   determine whether the variant provider is disabled by default. The
-   tools SHOULD provide a way to explicitly enable a provider, and MAY
-   provide a way to disable one. If a provider is disabled, the list of
-   compatible features is empty. Otherwise, proceed to step 3.
+2. The tool MUST read the ``optional`` key from the `provider
+   information`_ to determine whether the variant provider is disabled
+   by default. It SHOULD provide a way to explicitly enable a provider,
+   and MAY provide a way to disable one. If a provider is disabled, the
+   list of compatible features is empty. Otherwise, proceed to step 3.
 
-3. Read the ``static-properties`` key from the `provider information`_
-   dictionary. If it is present, the tools MUST use the static lists of
-   properties therein exclusively. Otherwise, proceed to step 4.
+3. The tool MUST read the ``static-properties`` key from the `provider
+   information`_ dictionary. If it is present, the tool MUST use the
+   static lists of properties therein exclusively. Otherwise, proceed to
+   step 4.
 
 4. If no static list of compatible features and their values is
-   provided, read the ``requires`` key in the `provider information`_
-   dictionary to determine the packages providing the compatibility
-   information. The tools MAY choose to vendor or reimplement a chosen
-   subset of plugin packages. If that were the case, they SHOULD obtain
+   provided, the tool MUST read the ``requires`` and ``plugin-api`` keys
+   in the `provider information`_ dictionary to determine the packages
+   providing the compatibility information. If the tool provides a
+   secure implementation of the specific providers, it SHOULD obtain
    the list from their implementation. Otherwise, proceed to step 5.
 
-5. The tools MAY consider some of the required provider plugin packages
-   (and their dependencies) to be trusted by default, and install them
-   automatically. They SHOULD provide a way for the user to permit
-   installing additional provider packages. They MUST NOT install or use
-   any provider packages that are not considered trusted. The tools
-   SHOULD use an isolated virtual environment while installing provider
-   plugin packages.
+5. The tool SHOULD provide a way for the user to permit installing
+   specific provider packages. It MUST NOT install or use any provider
+   packages that are not considered trusted. It SHOULD use an isolated
+   virtual environment while installing provider plugin packages.
 
-6. The tools MUST query the trusted and installed provider packages
-   via the `provider plugin API`_ to obtain the list of compatible
-   features and feature values. For providers that were not trusted,
-   the tools MUST assume that the list of compatible features is empty.
+6. The tool MUST query the trusted and installed provider packages via
+   the `provider plugin API`_ to obtain the list of compatible features
+   and feature values. For providers that were not trusted, it MUST
+   assume that the list of compatible features is empty.
 
 
 Variant metadata
