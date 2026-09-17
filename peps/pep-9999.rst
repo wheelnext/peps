@@ -324,7 +324,9 @@ As noted in the `Providers`_ section, these plugins can also be
 reimplemented by tools needing them. If that is the case, the API
 defined in this section does not apply to these implementations.
 However, the reimplementer is responsible for ensuring consistent
-behavior with the published provider.
+behavior with the published provider. The reimplemenetations and
+vendored providers MUST be matched to the published providers using the
+``requires`` and ``plugin-api`` keys, rather than namespaces.
 
 A plugin implemented as Python package exposes callables that are called
 via:
