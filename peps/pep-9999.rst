@@ -90,16 +90,27 @@ concerned only with consuming said dictionary; the process of building
 variant wheels will be covered in a subsequent PEP.
 
 Each of these providers either defines a static list of compatible
-features and their values, or specifies a requirement referring to a
-Python plugin package. The name in the requirement uniquely identifies
-the provider, and the version specifier declares the required feature
-level. For security, the plugin packages MUST NOT be fetched from an
-index by default. Tools are permitted to vendor, reimplement or consider
-a set of trusted of plugin packages, and enable them by default. Users
-can opt-in untrusted providers, or to provide a static list of
-compatible features and their values to use instead of querying the
-plugin. Further recommendations on this matter will be provided by a
-subsequent PEP.
+features and their values, or specifies a list of requirements referring
+to Python packages. In the latter case, an API endpoint is either
+explicitly specified or inferred from the first dependency string. The
+canonical way of querying the list of compatible features and their
+values is then to install the specified packages and call this endpoint.
+The combination of dependency strings and the API endpoint are used to
+uniquely identify the provider, while the respective version constraints
+can be used to indicate the minimum versions emitting variant properties
+used in the package.
+
+For security reasons, none of these packages are installed or used by
+default. Tools can provide a way to securely use a subset of provider
+packages, for example through vendoring, a reimplementation or an
+embedded lockfile. To aid in this, a shared list of such packages along
+with trusted implementations will be maintained; the details of said
+list and its governance will be provided in a subsequent PEP. Using
+provider plugins that are not trusted, such as the actual package from
+an index fulfilling the requirement, requires explicit user opt-in. This
+ensures only trusted code is executed during installation, while still
+supporting the evolution of providers and establishing clear governance
+over each namespace.
 
 Installers and other tools that need to determine whether a variant is
 compatible with the system MUST follow the specified algorithm in order
