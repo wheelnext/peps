@@ -1669,6 +1669,50 @@ The obtained list will be embedded as ``static-properties`` in the built
 wheel, so the installer does not have to query the plugin anymore.
 
 
+Depending on a variant-enabled package
+--------------------------------------
+
+A project cannot declare a dependency on a particular variant of another
+project. There is no way to write ``dependencies = ["torch+cu126"]`` or
+anything equivalent; a dependency names a project and a version range,
+as it does today. Making ``dependencies = ["torch"]`` reliable is the
+goal of this design, rather than allowing build choices to be fixed
+across project boundaries.
+
+Three things argue against permitting it. The first is that naming a
+variant couples one project's metadata to another project's build
+choices, and those shift over time. A project depending on
+``torch+cu124`` would not fail once ``torch`` moved on to ``cu126``; it
+would quietly hold its users on the last release that still shipped
+``cu124``, where a dependency on ``torch`` would have kept selecting the
+highest version. The second is that it would draw variants into the
+resolver's search, with the consequences described in `Why variants stay
+out of the resolver's search`_. The third is that installers assume
+every wheel of a given project version declares the same dependency
+metadata, with any differences expressed through environment markers
+rather than through separate metadata per wheel; variant-specific
+dependencies would break that assumption, and locking across platforms
+rests on it. Such a specifier would also offer a way to install a
+variant wheel on a system whose user has enabled no providers at all.
+
+What holds a set of packages together instead is the providers they
+share. Where a project and its dependency offer variants governed by the
+same provider, the installer makes each selection independently and
+arrives at matching values, because the provider reports the same
+ordered properties in both cases.
+
+Not every axis needs to match. A project built without a particular CPU
+instruction set runs perfectly well alongside a dependency built with
+one; what matters are the axes where combinations are genuinely
+incompatible. For those, the recommendation is that a project should not
+publish variant builds that fail to work with one of the variants of its
+dependency. Exceptions should be rare, and worth stating plainly in the
+project's documentation.
+
+Matching the ABI of a dependency is a related but distinct problem, and
+one the design does address; see `Package ABI matching`_ below.
+
+
 Package ABI matching
 --------------------
 
