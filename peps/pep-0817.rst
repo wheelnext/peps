@@ -98,6 +98,7 @@ a single wheel of considerable size, or using separate package names
 (``mypackage-gpu``, ``mypackage-cpu``, etc.). Each of these approaches
 has significant drawbacks and potential security implications.
 
+
 The limitations of platform compatibility tags
 ----------------------------------------------
 
@@ -931,12 +932,16 @@ this.
 The approach taken
 ------------------
 
-The Wheel Variants design, described in the next section, takes two of
-the approaches above rather than one. Variant providers are the default
-mechanism, and a user-declared description of the environment is
+The design set out further down in `The wheel variants design`_ takes
+two of the approaches above rather than one. Variant providers are the
+default mechanism, and a user-declared description of the environment is
 supported alongside them as a first-class path rather than as a
 fallback; `Using static compatibility information`_ describes the form
 that description takes.
+
+
+Why providers are the default
+'''''''''''''''''''''''''''''
 
 Providers are the default because they are the only approach that
 satisfies three requirements at once: the right wheel is selected
@@ -960,6 +965,10 @@ environment hands the question back to the user, and separate names do
 not answer it at all, since something must still determine which name
 applies.
 
+
+Why a declared environment sits alongside
+'''''''''''''''''''''''''''''''''''''''''
+
 The user-declared path is not present to compensate for a weakness in
 providers. It answers requirements that detection cannot, whatever one's
 view of running code at install time. Installing for a machine other
@@ -982,6 +991,33 @@ know which, so the declared path substitutes at a single point instead
 of running as a second mechanism in parallel. That is what makes it
 reasonable to offer both without doubling what has to be specified,
 implemented and reasoned about.
+
+
+Why variants stay out of the resolver's search
+'''''''''''''''''''''''''''''''''''''''''''''''
+
+One boundary of the design is worth stating explicitly. Variant
+selection chooses among the wheels of a package version that the
+resolver has already selected; with one optional exception noted below,
+it does not make variants part of the resolver's search. This keeps a
+substantial change out of dependency
+resolution, where the algorithms in use - backtracking, SAT, PubGrub -
+would all have to accommodate it, and where the nearest precedent,
+extras, is a cautionary one. The cost is that a conflict between the
+variants of two different packages cannot be resolved by searching: if
+one package is installed against one BLAS implementation and another
+publishes only wheels built against a different one, an installer can
+backtrack to an older version of the first package, but it cannot
+revisit the wheel it chose for the version it had already settled on. It
+has to report the conflict rather than work around it.
+
+Two things limit how often that arises. Packages sharing a provider
+receive the same properties in the same preference order, so independent
+per-package choices tend to converge without coordination, and a user
+who needs a particular combination can declare it. The one exception is
+the ``abi_dependency`` provider described in `Package ABI matching`_,
+which does require a resolver to take variants into account, and which
+is optional for precisely that reason.
 
 
 How much code should run, and when
@@ -1660,7 +1696,13 @@ version.
 
 ``abi_dependency`` is meant to be the only piece of metadata introduced
 by the specification that affects dependency resolution rather than only
-wheel selection within a version.
+wheel selection within a version. Choosing among variants in order to
+satisfy constraints elsewhere in the dependency graph is ruled out for
+variants in general (see `Why variants stay out of the resolver's
+search`_), because doing so may be difficult to implement. Support for
+``abi_dependency`` is therefore optional for installers: one that does
+not implement it selects a variant in the ordinary way and reports any
+conflict it cannot resolve.
 
 
 Key points
