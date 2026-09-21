@@ -1791,7 +1791,8 @@ Security Implications
 =====================
 
 The full security considerations will be provided in the individual PEPs
-listed in `Scope and Standards Track PEPs`_.
+listed in `Scope and Standards Track PEPs`_. The most significant are
+summarized here.
 
 The most important concern is that wheel variants introduce a plugin
 system for querying the platform capabilities. Tools may install these
@@ -1806,6 +1807,27 @@ fatigue causing users to blanket enable all plugins, tool maintainers
 will be allowed to vendor, reimplement or otherwise trust specific
 plugins. A governance model to maintain a repository of trustworthy
 plugins will be proposed as well.
+
+A provider is expected to run in an environment isolated from the one
+being modified, so that it does not gain access to the environment whose
+contents it is helping to select, and so that the packages it requires
+do not enter that environment. This is expressed as a recommendation
+rather than a requirement because the environment that is appropriate
+differs between tools: a build frontend, for instance, already has an
+isolated environment of its own and may reasonably reuse it.
+
+A second concern is name squatting, which `Package names as variants`_
+describes as a hazard of the current workarounds: projects register many
+similarly named packages, and users learn to expect suffixes that an
+attacker can then supply. Variant wheels reduce that pressure rather
+than repeat it, since every variant of a release lives under one project
+name. Nor do variant namespaces amount to a new global namespace to be
+claimed. A namespace has meaning only within the variant metadata of the
+project that uses it, and that project also names the provider package
+implementing it, so choosing a provider is an ordinary dependency
+decision, open to the same scrutiny as any other. Which parties may
+define a namespace, and how reserved names such as ``abi_dependency``
+are administered, is covered by the Providers PEP.
 
 
 Backwards Compatibility
