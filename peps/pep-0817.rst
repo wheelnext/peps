@@ -875,15 +875,6 @@ the user's choice. The objection is narrower: the burden remains with
 the user, whereas ``{tool} install <package>`` selecting a working wheel
 without it is the goal stated in the abstract.
 
-The Wheel Variants design does not treat this as an alternative to be
-discarded. A static description of the environment is a first-class part
-of it, as described in `Using static compatibility information`_, and it
-is needed regardless of any position on trust: installing for a target
-that is not the machine running the installer - building container
-images for other hardware, populating a wheelhouse, or reproducing an
-environment in CI - requires exactly this mechanism.
-
-
 Variant providers
 '''''''''''''''''
 
@@ -930,7 +921,8 @@ The Wheel Variants design, described in the next section, takes two of
 the approaches above rather than one. Variant providers are the default
 mechanism, and a user-declared description of the environment is
 supported alongside them as a first-class path rather than as a
-fallback.
+fallback; `Using static compatibility information`_ describes the form
+that description takes.
 
 Providers are the default because they are the only approach that leaves
 ``{tool} install <package>`` working for a user who does not know which
