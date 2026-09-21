@@ -24,32 +24,39 @@ Abstract
 
 Python's existing wheel packaging format uses
 :doc:`packaging:specifications/platform-compatibility-tags` to specify a
-given wheel's supported environments. These tags are unable to express
-modern hardware configurations and their features, such as the
-availability of GPU acceleration. The tags fail to provide custom
-package variants, such as builds against different dependency ABIs.
-These inabilities are particularly challenging for scientific computing,
-artificial intelligence (AI), machine learning (ML), and
-high-performance computing (HPC) communities.
+given wheel's supported environments. These tags cannot express modern
+hardware configurations and their features, such as the availability of
+GPU acceleration or the instruction sets a CPU supports. Neither can
+they express build-time choices that matter at run time, such as which
+BLAS implementation a wheel was built against, or which version of a
+dependency it matches at the ABI level. These inabilities are
+particularly challenging for scientific computing, artificial
+intelligence (AI), machine learning (ML), and high-performance computing
+(HPC) communities.
 
-This PEP proposes "Wheel Variants", an extension to the
-:doc:`packaging:specifications/binary-distribution-format`. This
-extension introduces a mechanism for package maintainers to declare
-multiple variant builds for the same package version, while allowing
-installers to automatically select the most appropriate variant based on
-system hardware and software characteristics. More specifically, it
-proposes:
+"Wheel Variants" is an extension to the
+:doc:`packaging:specifications/binary-distribution-format` that lets a
+project publish several wheels for the same version, distinguished by
+properties the platform tags cannot carry, and lets installers choose
+between them automatically. It comprises:
 
-- An evolution of the wheel format called **Wheel Variant** that allows
-  wheels to be distinguished by hardware or software attributes.
+- **Variant wheels**, which declare the variant properties they were
+  built for alongside the existing platform tags.
 
-- A **variant provider plugin** interface that allows installers to
-  dynamically detect platform attributes and select the most suitable
-  wheel.
+- **Variant providers**, which determine the properties a system
+  supports. A provider may establish that by inspecting the system at
+  install time, or supply it statically where there is nothing to
+  detect, as when choosing between BLAS implementations.
 
-The goal is for the obvious installation commands (``{tool} install
-<package>``) to select the most appropriate wheel, and provide the best
-user experience.
+- A **static description of an environment**, which a user may supply in
+  place of any inspection. It is needed when installing for a machine
+  other than the one running the installer, and available to anyone who
+  would rather no provider code ran at all.
+
+The goal is for the obvious installation command (``{tool} install
+<package>``) to select the most appropriate wheel, whether that choice
+is detected or declared, with no index URLs, package-name suffixes or
+per-project install instructions.
 
 
 Scope and Standards Track PEPs
