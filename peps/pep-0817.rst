@@ -681,6 +681,256 @@ are used in conjunction with USE flags. For example,
 build against.
 
 
+The design space
+================
+
+Platform compatibility tags cannot express the characteristics described
+above, so something must determine whether a given wheel is suitable for
+a given system. The question that shapes the rest of the design is where
+that knowledge lives, and who is able to add to it.
+
+One point is worth making at the outset, because it is easily lost:
+every approach described here requires a PEP. They differ in what
+requires one *next time*. An approach that standardizes the individual
+compatibility axes requires a further round of standardization, followed
+by an implementation in every installer, each time hardware or a library
+introduces an axis that is not already covered. An approach that
+standardizes an interface requires that round once.
+
+.. list-table::
+    :header-rows: 1
+    :widths: 20 30 26 24
+
+    * - Approach
+      - Adding a new compatibility axis requires
+      - Detection logic maintained by
+      - Third-party code runs at install time
+    * - Fixed set of axes
+      - A PEP, then an implementation in every installer
+      - Installer maintainers
+      - No
+    * - Logic shipped per package
+      - Nothing; each project decides
+      - Every variant-shipping project
+      - Yes
+    * - Separate package names
+      - Nothing; a new project name
+      - Not applicable
+      - No
+    * - User-declared environment
+      - A PEP defining the new marker
+      - Not applicable; values are supplied by the user
+      - No
+    * - Variant providers
+      - A provider package release
+      - Provider maintainers
+      - Yes, unless static information is supplied
+
+The table states what each approach costs and where the work lands. The
+sections below explain why those costs were weighed as they were.
+
+
+Alternatives considered
+-----------------------
+
+A fixed set of compatibility axes
+'''''''''''''''''''''''''''''''''
+
+A PEP could define an extended set of compatibility markers - CUDA
+runtime version, GPU architecture, CPU instruction set level, and so
+on - together with the semantics for matching them. Wheels would declare
+their requirements against these markers, and each installer would
+implement the detection needed to evaluate them. The specification would
+not need to say how a tool measures any particular marker; that would
+remain an implementation matter for each tool.
+
+This approach has real advantages, and it is the alternative most
+frequently raised in discussion. It introduces no new kind of artifact
+and no new execution model. The specification stays purely declarative,
+and the code performing detection is first-party installer code, so no
+new trust surface is created.
+
+The cost is that the specification becomes the gatekeeper for every
+compatibility axis. Each new axis requires agreement across the
+packaging community followed by an implementation in each installer, and
+a newly specified axis is only as useful as its slowest widely deployed
+implementation. The axes in demand today already extend well past GPUs:
+CPU instruction set levels, BLAS and LAPACK implementations, OpenMP
+runtimes, C++ ABIs, and matching against the ABI of a dependency such as
+PyTorch_. Hardware vendors would depend on the standards process in
+order to ship optimized wheels, on a timescale measured against their
+own release cadence.
+
+A narrower form of this proposal is to standardize deliberately few
+axes - a small set of community-supported hardware target levels,
+refreshed periodically - rather than attempting to cover the space. This
+is coherent, and it answers a genuine concern: a design permitting many
+axes also permits build matrices that are difficult to test and to
+audit. Two considerations weigh against it. The set requiring
+maintenance is not limited to hardware, as the list above shows, so the
+curation burden is larger than it first appears. And it places the
+judgment about which hardware merits support with the packaging
+community rather than with the vendors and projects that have the
+expertise and the motivation to maintain it. The concern about
+unmanageable build matrices is better met by observing that nothing
+obliges a project to publish many variants; how many to ship remains
+that project's decision.
+
+
+Compatibility logic shipped by each project
+'''''''''''''''''''''''''''''''''''''''''''
+
+Each project shipping variants could provide its own detection code,
+which the installer would run to choose among that project's wheels,
+with no mechanism shared between projects. This is the current situation
+extrapolated rather than a new design: the approach described in `Wheel
+variant selection via source distribution`_ already works this way.
+
+The same detection would then be written many times over. Every project
+would present its own behavior, its own failure modes and its own user
+interface for the same underlying questions, and there would be no
+shared story for auditing any of it. Coordination across projects -
+ensuring that NumPy_ and SciPy_ agree on a BLAS implementation, or that
+everything in an environment is built against the same CUDA major
+version - would have no mechanism at all.
+
+
+Separate package names
+''''''''''''''''''''''
+
+`Package names as variants`_ describes what projects do today. A more
+deliberate version of the same idea is to make the mapping part of
+installation: the user requests ``torch``, and the installer resolves
+that to a project name such as ``torch_cu128`` appropriate for the
+current platform.
+
+This has the attraction of working within the format as it stands. It
+requires no filename changes and no metadata changes, and publishers
+retain control over what they publish. The drawbacks described in
+`Package names as variants`_ still apply: name squatting becomes easier,
+packages installing overlapping files cannot be declared mutually
+exclusive, and releases cannot be published synchronously across several
+project names.
+
+Two further problems are specific to the mapping. A project depending on
+any variant of another project still has no way to express that, and
+must either choose one name or enumerate them all. More fundamentally,
+the mapping needs a source of truth: something must still determine
+which name is appropriate for the current system. That is the question
+this section is about, so this approach relocates it rather than
+answering it.
+
+
+A user-declared environment
+'''''''''''''''''''''''''''
+
+Compatibility could be matched against values the user declares rather
+than values a tool detects. Wheels would carry markers as above, and the
+installer would compare them against a description of the environment
+supplied by hand or produced by a separate tool. No detection code would
+run anywhere during installation.
+
+This has the smallest trust surface of any approach considered, since no
+code runs in order to make a compatibility decision, and it describes
+how a substantial group of users already works. HPC sites and
+locked-down corporate environments commonly declare the available
+toolchain, accelerator and library stack as a matter of policy, using
+mechanisms such as those described in `Spack / Archspec`_, and prefer an
+explicit, auditable description to anything discovered at install time.
+
+It is nonetheless unsuitable as the only mechanism, because it requires
+every user to know and state their CUDA runtime version, driver version
+and instruction set level. That is precisely the knowledge this proposal
+exists to stop requiring, and ``{tool} install <package>`` selecting a
+working wheel without it is the goal stated in the abstract.
+
+The design does not treat this as an alternative to be discarded. A
+static description of the environment is a first-class part of it, as
+described in `Using static compatibility information`_, and it is needed
+regardless of any position on trust: installing for a target that is not
+the machine running the installer - building container images for other
+hardware, populating a wheelhouse, or reproducing an environment in
+CI - requires exactly this mechanism.
+
+
+The approach taken: variant providers
+-------------------------------------
+
+The design described in the next section standardizes an interface
+rather than a list of axes. Compatibility within a namespace is
+determined by a provider, and a new compatibility axis is introduced by
+publishing or updating a provider rather than by amending a
+specification.
+
+This places the detection logic with those who have both the expertise
+and the motivation to maintain it. A hardware vendor can ship support
+for a new accelerator, and correct compatibility rules when they change,
+on its own release cadence. Installers remain generic, and do not
+acquire a standing obligation to understand every accelerator and ABI on
+every platform. Because providers are shared between projects,
+coordinating a consistent choice across an environment remains possible.
+Where nothing needs to be detected, as with a choice between BLAS
+implementations, a provider supplies its properties statically and no
+code runs at install time at all; this is described in `Static
+properties in wheels`_.
+
+The costs are real and worth stating plainly. The ecosystem acquires a
+new kind of artifact, with its own questions of versioning, trust and
+governance. System inspection moves into dependency resolution, where it
+was previously confined to the tags a tool computes for itself. Users
+may need to obtain a provider in order to install a package they
+previously installed without one. And because the properties driving
+selection are held in metadata rather than in the filename, determining
+which wheel a given system will select requires reading that metadata
+rather than a directory listing; :pep:`825` discusses the alternatives
+considered for this.
+
+
+How much code should run, and when
+----------------------------------
+
+Choosing providers settles where compatibility logic lives. It does not
+settle how much of that logic should run without the user having said
+so, and that question remains genuinely open. It is raised here because
+it is the most contested aspect of the design; the mechanisms themselves
+belong to the subsequent `Standards Track PEPs for wheel variants`_.
+
+Both extremes fail. An installer automatically running whatever provider
+a wheel's metadata names turns that metadata into a means of executing
+code on any machine that merely resolves against the package, before the
+user has agreed to install anything. An installer prompting for every
+provider produces prompts often enough that they stop being read, and
+users grant them wholesale, which arrives at the same place with
+additional ceremony. The risk of security fatigue is not a rhetorical
+objection to opt-in designs; it is the reason a purely opt-in design
+does not by itself resolve the problem.
+
+It is worth being precise about what changes. System inspection during
+resolution is not new: determining whether a ``manylinux`` or
+``musllinux`` wheel is compatible already requires probing the running
+system, down to reading the interpreter's ELF headers to identify the C
+library and its version, and installers perform that inspection today
+from vendored code. A provider an installer vendors is much the same
+kind of artifact. What is new is that a provider may instead come from a
+third party, named by the package being installed.
+
+Several mechanisms narrow the gap, each with its own cost. Installers
+may vendor or reimplement the most widely used providers, which keeps
+the common path free of third-party code but concentrates the work on
+installer maintainers. A curated list of vetted providers avoids that
+concentration, but constitutes a curation authority that must be
+governed and that is worth capturing. A static description of the
+environment removes the question entirely for users who want that, at
+the cost of requiring them to produce one.
+
+This PEP does not attempt to settle that trade-off. What would change
+the reasoning above is a demonstration that the compatibility axes in
+demand can be enumerated and kept current through the standards process
+at the rate hardware actually changes, or evidence that a static
+description of the environment is sufficient for the general case rather
+than for those users who already prefer it.
+
+
 The wheel variants design
 =========================
 
