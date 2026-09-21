@@ -686,50 +686,63 @@ The design space
 
 Platform compatibility tags cannot express the characteristics described
 above, so something must determine whether a given wheel is suitable for
-a given system. The question that shapes the rest of the design is where
-that knowledge lives, and who is able to add to it.
+a given system. The question that shapes the design is where that
+knowledge lives, and who is able to add to it.
 
-One point is worth making at the outset, because it is easily lost:
-every approach described here requires standardization. They differ in
-how much, and in what requires more of it *next time*. Standardizing the
-compatibility axes themselves means a document for each, since the rules
-governing NVIDIA CUDA compatibility have little in common with those
-governing AMD ROCm and less still with x86-64 instruction set levels,
-and a further document each time hardware or a library introduces an
-axis not already covered - followed in every case by an implementation
-in each installer. Standardizing an interface means one document, once.
+The approaches below differ in how much standardization they require,
+and in whether that requirement returns each time a new compatibility
+axis appears. For two of them - logic shipped per project, and separate
+package names - adding an axis requires no standardization at all, which
+is why both already exist as workarounds today; their cost falls
+elsewhere.
+
+Where standardization is required, its shape differs sharply.
+Standardizing the compatibility axes themselves means a PEP per axis,
+since the rules governing NVIDIA CUDA compatibility have little in
+common with those governing AMD ROCm and less still with x86-64
+instruction set levels, and a further PEP each time hardware or a
+library introduces an axis not already covered - followed in every case
+by an implementation in each installer. Standardizing an interface means
+one PEP, once.
 
 .. list-table::
     :header-rows: 1
-    :widths: 20 30 26 24
+    :widths: 18 12 26 22 22
 
     * - Approach
+      - Selects without user input
       - Adding a new compatibility axis requires
       - Detection logic maintained by
       - Third-party code runs at install time
     * - Fixed set of axes
+      - Yes
       - A PEP for that axis, then an implementation in every installer
       - Installer maintainers
       - No
-    * - Logic shipped per package
+    * - Logic shipped per project
+      - Yes
       - Nothing; each project decides
       - Every variant-shipping project
       - Yes
     * - Separate package names
+      - Unresolved
       - Nothing; a new project name
-      - Not applicable
+      - Unspecified; something must still choose the right name
       - No
-    * - User-declared environment
-      - A PEP defining the new marker
+    * - User-declared environments
+      - No
+      - A PEP for that axis, but no detection to implement
       - Not applicable; values are supplied by the user
       - No
     * - Variant providers
+      - Yes
       - A provider package release
       - Provider maintainers
-      - Yes, unless static information is supplied
+      - Yes, unless the provider is vendored or supplied statically
 
 The table states what each approach costs and where the work lands. The
-sections below explain why those costs were weighed as they were.
+sections below take each in turn; `The approach taken`_ explains the
+choice that follows from them.
 
 
 Approaches considered
@@ -874,6 +887,7 @@ does not, so today a project that merely depends on PyTorch_ can undo
 the user's choice. The objection is narrower: the burden remains with
 the user, whereas ``{tool} install <package>`` selecting a working wheel
 without it is the goal stated in the abstract.
+
 
 Variant providers
 '''''''''''''''''
