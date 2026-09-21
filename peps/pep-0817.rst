@@ -93,14 +93,18 @@ three are in preparation, and their scope and details may change.
 Some aspects are deliberately left outside the sequence, to evolve via
 tools or further PEPs. A non-exhaustive list:
 
-- The format of a static file to select variants deterministically or
-  include variants in a ``pylock.toml`` file,
+- The exact format of a static file describing an environment's variant
+  properties,
 - The list of variant providers that are vendored or re-implemented by
   installers,
 - The specific opt-in mechanisms and UX for allowing an installer to run
   non-vendored variant providers,
 - How to instruct build backends to emit variants through the :pep:`517`
   mechanism.
+
+The first of these concerns the encoding only. The sequence requires
+installers to accept a static description of an environment's variant
+properties; what it leaves open is the form that description takes.
 
 
 Motivation
