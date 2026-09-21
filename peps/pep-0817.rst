@@ -924,15 +924,27 @@ supported alongside them as a first-class path rather than as a
 fallback; `Using static compatibility information`_ describes the form
 that description takes.
 
-Providers are the default because they are the only approach that leaves
-``{tool} install <package>`` working for a user who does not know which
-accelerator or instruction set their machine has, without making the
-specification the gatekeeper for every compatibility axis. Each of the
-other approaches gives up one half of that: a fixed set of axes keeps
-the declarative model but puts every future axis through the standards
-process, per-project logic multiplies the same work by the number of
-projects, and separate names relocate the question rather than answering
-it.
+Providers are the default because they are the only approach that
+satisfies three requirements at once: the right wheel is selected
+without the user having to supply the answer, a new compatibility axis
+does not require a new round of standardization, and the detection logic
+is written once and shared rather than once per project.
+
+The first of those requirements matters to more people than those who do
+not know what hardware they have. The answer is perishable, since a
+driver upgrade or a move to another machine can invalidate it;
+establishing it is work, and work repeated for every environment; and it
+is easy to get wrong in a way that surfaces much later, as a crash or as
+an unexplained slowdown.
+
+The other approaches satisfy some of the three but not all. A fixed set
+of axes selects automatically and keeps the logic out of individual
+projects, but routes every future axis through the standards process.
+Per-project logic avoids that, but writes the same detection once per
+project and forgoes any coordination between them. A user-declared
+environment hands the question back to the user, and separate names do
+not answer it at all, since something must still determine which name
+applies.
 
 The user-declared path is not present to compensate for a weakness in
 providers. It answers requirements that detection cannot, whatever one's
@@ -941,17 +953,21 @@ than the one running the installer - building a container image for
 other hardware, populating a wheelhouse, reproducing an environment in
 CI - offers nothing to detect, because the target system is absent.
 Environments whose policy forbids executing code during installation
-need a route that involves none. A user whose hardware is misdetected
-needs a way to say so.
+need a route that involves none. Deployments that must install
+identically across a fleet of machines differing in CPU generation
+within one family need the same route for a different reason: detection
+would correctly select a different wheel on each, when the point is for
+them to match. A user whose hardware is misdetected needs a way to say
+so.
 
-The two fit together rather than merely coexisting, because they supply
-the same thing. A provider's output is a set of supported properties in
-preference order; a static description declares that set directly.
-Selection consumes one form or the other without needing to know which,
-so the declared path substitutes at a single point instead of running as
-a second mechanism in parallel. That is what makes it reasonable to
-offer both without doubling what has to be specified, implemented and
-reasoned about.
+The two approaches fit together rather than merely coexisting, because
+they supply the same thing. A provider's output is a set of supported
+properties in preference order; a static description declares that set
+directly. Selection consumes one form or the other without needing to
+know which, so the declared path substitutes at a single point instead
+of running as a second mechanism in parallel. That is what makes it
+reasonable to offer both without doubling what has to be specified,
+implemented and reasoned about.
 
 
 How much code should run, and when
