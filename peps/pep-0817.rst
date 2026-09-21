@@ -52,8 +52,8 @@ The goal is for the obvious installation commands (``{tool} install
 user experience.
 
 
-Scope and the PEP sequence
-==========================
+Scope and Standards Track PEPs
+==============================
 
 This PEP is Informational: it specifies nothing normatively. It serves
 as the umbrella for a sequence of four Standards Track PEPs, supplying
@@ -1067,8 +1067,7 @@ not run merely because a wheel names it, and the user is not asked about
 each one in turn. What remains open is how a provider comes to be
 trusted, so that it runs without the user opting in to it. That is the
 most contested aspect of the design, and the mechanisms themselves
-belong to the Standards Track PEPs listed in `Scope and the PEP
-sequence`_.
+belong to the PEPs listed in `Scope and Standards Track PEPs`_.
 
 Both extremes fail. An installer automatically running whatever provider
 a wheel's metadata names turns that metadata into a means of executing
@@ -1747,8 +1746,8 @@ The key points in the design we arrived at are:
 Security Implications
 =====================
 
-The full security considerations will be provided in the individual
-Standards Track PEPs listed in `Scope and the PEP sequence`_.
+The full security considerations will be provided in the individual PEPs
+listed in `Scope and Standards Track PEPs`_.
 
 The most important concern is that wheel variants introduce a plugin
 system for querying the platform capabilities. Tools may install these
