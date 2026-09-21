@@ -52,13 +52,46 @@ The goal is for the obvious installation commands (``{tool} install
 user experience.
 
 
-Informational PEP
------------------
+Scope and the PEP sequence
+==========================
 
-This PEP presents the minimal scope required to meet modern
-heterogeneous system needs. It leaves aspects beyond the minimal scope
-to evolve via tools or future PEPs. A non-exhaustive list of these
-aspects include:
+This PEP is Informational: it specifies nothing normatively. It serves
+as the umbrella for a sequence of four Standards Track PEPs, supplying
+the motivation, the prior art, and the reasoning behind the design
+choices those PEPs make, so that each of them can be read against a
+shared context rather than restating it. It aims to give a concise
+high-level overview of wheel variants; it does not cover the complete
+functionality proposed as part of the standard, nor does it provide
+normative guidance on implementing it.
+
+The four PEPs are:
+
+- :pep:`PEP 825: Package Format <825>`: changes to the wheel format, the
+  initial definition of variant metadata, the index-level metadata file,
+  variant wheel ordering rules, environment markers and ``pylock.toml``
+  integration.
+
+- Providers: the governance of variant namespaces; extending variant
+  metadata with provider information; introducing providers that supply
+  compatible properties statically via variant metadata or dynamically
+  via opt-in Python packages, along with the security considerations for
+  their use; defining the relevant plugin API; introducing a special
+  provider concerned with ABI compatibility.
+
+- Building: integration with build backends and the ``pyproject.toml``
+  file; extending variant metadata and the plugin API to support
+  verifying the validity of variant properties and embedding static
+  properties via plugins at build time.
+
+- UX, maintainability, security and governance: the introduction
+  strategy, and a community maintained repository of trusted variant
+  providers that can be integrated with installers for opt-out behavior.
+
+Of these, :pep:`825` has been accepted as Provisional; the remaining
+three are in preparation, and their scope and details may change.
+
+Some aspects are deliberately left outside the sequence, to evolve via
+tools or further PEPs. A non-exhaustive list:
 
 - The format of a static file to select variants deterministically or
   include variants in a ``pylock.toml`` file,
@@ -1030,7 +1063,8 @@ not run merely because a wheel names it, and the user is not asked about
 each one in turn. What remains open is how a provider comes to be
 trusted, so that it runs without the user opting in to it. That is the
 most contested aspect of the design, and the mechanisms themselves
-belong to the subsequent `Standards Track PEPs for wheel variants`_.
+belong to the Standards Track PEPs listed in `Scope and the PEP
+sequence`_.
 
 Both extremes fail. An installer automatically running whatever provider
 a wheel's metadata names turns that metadata into a means of executing
@@ -1112,43 +1146,6 @@ Variant provider
     Can either be a static list of ordered properties, or a Python
     package that dynamically determines the properties that are
     compatible with the system.
-
-
-Standards Track PEPs for wheel variants
----------------------------------------
-
-This PEP aims to provide a concise high-level overview of wheel
-variants. It does not cover the complete functionality proposed as part
-of the standard, nor does it provide normative guidance on
-implementing it. These are provided in subsequent PEPs.
-
-Currently, the following PEPs are published:
-
-- :pep:`PEP 825: Package Format <825>`: covering changes to the wheel
-  format, initial definition of variant metadata, index-level metadata
-  file, variant wheel ordering rules, environment markers and
-  ``pylock.toml`` integration.
-
-The following subsequent PEPs are currently planned:
-
-- Providers: covering the governance of variant namespaces; extending
-  variant metadata with provider information; introducing providers that
-  supply compatible properties statically via variant metadata or
-  dynamically via opt-in Python packages, along with the security
-  considerations for their use; defining the relevant plugin API;
-  introducing a special provider concerned with ABI compatibility.
-
-- Building: covering integration with build backends and
-  ``pyproject.toml`` file; extending variant metadata and plugin API to
-  support verifying the validity of variant properties and embedding
-  static properties via plugins at build time.
-
-- TBD: covering UX, maintainability, security, governance and
-  introduction strategy; introducing a community maintained repository
-  of trusted variant providers that can be integrated with installers
-  for opt-out behavior.
-
-The scope and details of these PEPs may be subject to change.
 
 
 High-level overview
@@ -1747,7 +1744,7 @@ Security Implications
 =====================
 
 The full security considerations will be provided in the individual
-`Standards Track PEPs for wheel variants`_.
+Standards Track PEPs listed in `Scope and the PEP sequence`_.
 
 The most important concern is that wheel variants introduce a plugin
 system for querying the platform capabilities. Tools may install these
