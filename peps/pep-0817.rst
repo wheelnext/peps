@@ -732,8 +732,8 @@ The table states what each approach costs and where the work lands. The
 sections below explain why those costs were weighed as they were.
 
 
-Alternatives considered
------------------------
+Approaches considered
+---------------------
 
 A fixed set of compatibility axes
 '''''''''''''''''''''''''''''''''
@@ -847,10 +847,12 @@ A user-declared environment
 '''''''''''''''''''''''''''
 
 Compatibility could be matched against values the user declares rather
-than values a tool detects. Wheels would carry markers as above, and the
-installer would compare them against a description of the environment
-supplied by hand or produced by a separate tool. No detection code would
-run anywhere during installation.
+than values a tool detects. This shares its vocabulary with the first
+alternative above - markers for CUDA runtime version, GPU architecture,
+instruction set level and so on, defined by the standards process - but
+takes their values from a description of the environment that the user
+supplies, by hand or produced by a separate tool, rather than from
+detection. No detection code would run anywhere during installation.
 
 This has the smallest trust surface of any approach considered, since no
 code runs in order to make a compatibility decision, and it describes
@@ -862,27 +864,35 @@ explicit, auditable description to anything discovered at install time.
 
 It is nonetheless unsuitable as the only mechanism, because it requires
 every user to know and state their CUDA runtime version, driver version
-and instruction set level. That is precisely the knowledge this proposal
-exists to stop requiring, and ``{tool} install <package>`` selecting a
-working wheel without it is the goal stated in the abstract.
+and instruction set level. The weight of that objection should not be
+overstated. Users already need this knowledge today, where it is
+translated into a choice of index URL and a bespoke install command, and
+declaring it once to the installer would be an improvement on that - not
+least because a declared environment composes with dependency
+resolution, whereas an index URL is a property of a single command and
+does not, so today a project that merely depends on PyTorch_ can undo
+the user's choice. The objection is narrower: the burden remains with
+the user, whereas ``{tool} install <package>`` selecting a working wheel
+without it is the goal stated in the abstract.
 
-The design does not treat this as an alternative to be discarded. A
-static description of the environment is a first-class part of it, as
-described in `Using static compatibility information`_, and it is needed
-regardless of any position on trust: installing for a target that is not
-the machine running the installer - building container images for other
-hardware, populating a wheelhouse, or reproducing an environment in
-CI - requires exactly this mechanism.
+The Wheel Variants design does not treat this as an alternative to be
+discarded. A static description of the environment is a first-class part
+of it, as described in `Using static compatibility information`_, and it
+is needed regardless of any position on trust: installing for a target
+that is not the machine running the installer - building container
+images for other hardware, populating a wheelhouse, or reproducing an
+environment in CI - requires exactly this mechanism.
 
 
-The approach taken: variant providers
--------------------------------------
+Variant providers
+'''''''''''''''''
 
-The design described in the next section standardizes an interface
-rather than a list of axes. Compatibility within a namespace is
-determined by a provider, and a new compatibility axis is introduced by
-publishing or updating a provider rather than by amending a
-specification.
+Compatibility could be determined by named, versioned plugins - variant
+providers - each owning one or more axes of the variant space. The
+standards process would define the interface such a plugin exposes and
+how its results are used, rather than defining the axes themselves. A
+new compatibility axis would then be introduced by publishing or
+updating a provider rather than by amending a specification.
 
 This places the detection logic with those who have both the expertise
 and the motivation to maintain it. A hardware vendor can ship support
@@ -898,14 +908,58 @@ properties in wheels`_.
 
 The costs are real and worth stating plainly. The ecosystem acquires a
 new kind of artifact, with its own questions of versioning, trust and
-governance. System inspection moves into dependency resolution, where it
-was previously confined to the tags a tool computes for itself. Users
-may need to obtain a provider in order to install a package they
-previously installed without one. And because the properties driving
-selection are held in metadata rather than in the filename, determining
-which wheel a given system will select requires reading that metadata
-rather than a directory listing; :pep:`825` discusses the alternatives
-considered for this.
+governance. The system inspection performed during resolution expands
+considerably: installers already probe the platform to evaluate
+compatibility tags, but that inspection is bounded and first-party,
+whereas a provider's is open-ended and may be third-party. Whether a
+user benefits at all depends on the relevant provider being available to
+their installer; where it is not vendored, allowlisted or opted into,
+its properties are treated as incompatible and the installer falls back
+to a generic wheel - a working result, but not the one the hardware
+could have had. And because the properties driving selection are held in
+metadata rather than in the filename, determining which wheel a given
+system will select requires reading that metadata rather than a
+directory listing; :pep:`825` discusses the alternatives considered for
+this.
+
+
+The approach taken
+------------------
+
+The Wheel Variants design, described in the next section, takes two of
+the approaches above rather than one. Variant providers are the default
+mechanism, and a user-declared description of the environment is
+supported alongside them as a first-class path rather than as a
+fallback.
+
+Providers are the default because they are the only approach that leaves
+``{tool} install <package>`` working for a user who does not know which
+accelerator or instruction set their machine has, without making the
+specification the gatekeeper for every compatibility axis. Each of the
+other approaches gives up one half of that: a fixed set of axes keeps
+the declarative model but puts every future axis through the standards
+process, per-project logic multiplies the same work by the number of
+projects, and separate names relocate the question rather than answering
+it.
+
+The user-declared path is not present to compensate for a weakness in
+providers. It answers requirements that detection cannot, whatever one's
+view of running code at install time. Installing for a machine other
+than the one running the installer - building a container image for
+other hardware, populating a wheelhouse, reproducing an environment in
+CI - offers nothing to detect, because the target system is absent.
+Environments whose policy forbids executing code during installation
+need a route that involves none. A user whose hardware is misdetected
+needs a way to say so.
+
+The two fit together rather than merely coexisting, because they supply
+the same thing. A provider's output is a set of supported properties in
+preference order; a static description declares that set directly.
+Selection consumes one form or the other without needing to know which,
+so the declared path substitutes at a single point instead of running as
+a second mechanism in parallel. That is what makes it reasonable to
+offer both without doubling what has to be specified, implemented and
+reasoned about.
 
 
 How much code should run, and when
