@@ -990,29 +990,34 @@ objection to opt-in designs; it is the reason a purely opt-in design
 does not by itself resolve the problem.
 
 It is worth being precise about what changes. System inspection during
-resolution is not new: determining whether a ``manylinux`` or
-``musllinux`` wheel is compatible already requires probing the running
-system, down to reading the interpreter's ELF headers to identify the C
-library and its version, and installers perform that inspection today
-from vendored code. A provider an installer vendors is much the same
-kind of artifact. What is new is that a provider may instead come from a
-third party, named by the package being installed.
+resolution is not new, and is already more involved than reading a
+version string. Establishing ``manylinux`` compatibility requires the
+glibc version, which ``packaging`` can obtain by using ``ctypes`` to
+load the C library of the running process and call the function that
+reports its version. Establishing ``musllinux`` compatibility requires
+parsing the interpreter's ELF headers to locate the dynamic loader, then
+running that loader as a subprocess and reading the version out of its
+output. Installers do this today either by vendoring that code or by
+reimplementing it - pip takes the first route, uv the second - and those
+are exactly the two strategies proposed for providers. A provider that
+an installer vendors or reimplements is much the same kind of artifact.
+What is new is that a provider may instead come from a third party,
+named by the package being installed.
 
 Several mechanisms narrow the gap, each with its own cost. Installers
 may vendor or reimplement the most widely used providers, which keeps
 the common path free of third-party code but concentrates the work on
 installer maintainers. A curated list of vetted providers avoids that
 concentration, but constitutes a curation authority that must be
-governed and that is worth capturing. A static description of the
-environment removes the question entirely for users who want that, at
-the cost of requiring them to produce one.
+governed. A static description of the environment removes the question
+entirely for users who want that, at the cost of requiring them to
+produce one.
 
-This PEP does not attempt to settle that trade-off. What would change
-the reasoning above is a demonstration that the compatibility axes in
-demand can be enumerated and kept current through the standards process
-at the rate hardware actually changes, or evidence that a static
-description of the environment is sufficient for the general case rather
-than for those users who already prefer it.
+This PEP does not attempt to settle that trade-off. The fourth PEP in
+the sequence, covering UX, maintainability, security and governance,
+takes it up: the opt-in mechanisms, a community-maintained repository of
+trusted variant providers that installers can treat as opt-out, and the
+model that governs what goes into it.
 
 
 The wheel variants design
