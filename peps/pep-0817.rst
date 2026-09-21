@@ -1827,9 +1827,24 @@ and Zanie Blue.
 Change History
 ==============
 
-- 14-Aug-2026
+- 21-Sep-2026
 
-  - Change to informational PEP
+  - Change this PEP to an Informational PEP, as an umbrella for
+    the Standards Track PEPs split off from the first version of
+    this PEP.
+  - Added a "The design space" section between the prior art and the
+    design itself, covering the approaches considered for determining
+    which variant fits a system, the reasons for choosing variant
+    providers together with a user-declared environment, and the open
+    question of how much provider code should run without the user
+    asking for it.
+  - Stated that variant selection chooses among the wheels of an
+    already-selected version rather than taking part in the resolver's
+    search, and that support for ``abi_dependency``, which is the
+    exception to that, is optional for installers.
+  - Clarified that the sequence requires installers to accept a static
+    description of an environment's variant properties, while leaving
+    the format of that description open.
 
 
 - 18-Mar-2026
