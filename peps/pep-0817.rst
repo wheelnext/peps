@@ -798,7 +798,11 @@ Each project shipping variants could provide its own detection code,
 which the installer would run to choose among that project's wheels,
 with no mechanism shared between projects. This is the current situation
 extrapolated rather than a new design: the approach described in `Wheel
-variant selection via source distribution`_ already works this way.
+variant selection via source distribution`_ already works this way, and
+`wheel-stub <https://github.com/wheelnext/wheel-stub>`__ packages it as
+a reusable build backend. Both are confined to source distributions, so
+they require arbitrary code execution at install time and leave the
+wheel that is actually installed outside anything a lock file records.
 
 The same detection would then be written many times over. Every project
 would present its own behavior, its own failure modes and its own user
