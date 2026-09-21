@@ -822,21 +822,25 @@ installation: the user requests ``torch``, and the installer resolves
 that to a project name such as ``torch_cu128`` appropriate for the
 current platform.
 
-This has the attraction of working within the format as it stands. It
-requires no filename changes and no metadata changes, and publishers
+This has the attraction of working within the wheel format as it stands.
+It requires no filename changes and no metadata changes, and publishers
 retain control over what they publish. The drawbacks described in
 `Package names as variants`_ still apply: name squatting becomes easier,
 packages installing overlapping files cannot be declared mutually
 exclusive, and releases cannot be published synchronously across several
 project names.
 
-Two further problems are specific to the mapping. A project depending on
-any variant of another project still has no way to express that, and
-must either choose one name or enumerate them all. More fundamentally,
-the mapping needs a source of truth: something must still determine
-which name is appropriate for the current system. That is the question
-this section is about, so this approach relocates it rather than
-answering it.
+Two further problems are specific to the mapping. The code performing it
+has to live in the installer, and it is bound to a naming convention:
+something must establish that the resolved name is ``torch_cu128``
+rather than ``torch-cu12`` or ``torch_cuda_128``, and that whatever
+convention is chosen holds for every project using the mechanism. How
+that would be agreed between projects and kept consistent across
+installers is unclear, and the suffix carries meaning that nothing in
+the metadata records. More fundamentally, the mapping needs a source of
+truth: something must still determine which name is appropriate for the
+current system. That is the question this section is about, so this
+approach relocates it rather than answering it.
 
 
 A user-declared environment
