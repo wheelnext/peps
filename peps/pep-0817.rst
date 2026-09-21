@@ -1769,10 +1769,24 @@ Backwards Compatibility
 
 Full backwards compatibility considerations are provided in :pep:`825`.
 The key point is that variant wheels add an additional variant label
-component to the wheel filename. Tools commonly used to install wheels
-at the time of writing reject (ignore) wheels containing that component,
-making it possible to publish variant wheels on an index alongside
-non-variant wheels without risk of them being installed accidentally.
+component to the wheel filename, and that tools commonly used to install
+wheels at the time of writing reject wheels carrying it. This makes it
+possible to publish variant wheels on an index alongside non-variant
+wheels without risk of them being installed accidentally.
+
+That rejection is not incidental. A variant wheel has one filename
+component more than a non-variant one, so a tool unaware of variants
+reads the Python tag in the position where it expects a build number;
+build numbers start with a digit and Python tags do not, so the filename
+fails verification. To keep that true in future, :pep:`825` requires that
+the Python tag component of a wheel filename must not start with a
+digit, which no current tag does.
+
+The guarantee reaches only as far as filename verification does. A
+script that parses wheel filenames loosely, rather than verifying them
+in full, may treat a variant wheel as an ordinary one. Conversely,
+tooling that audits wheel filenames will report variant wheels as
+invalid until it is updated to recognize them.
 
 
 Reference Implementation
