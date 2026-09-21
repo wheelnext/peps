@@ -1025,8 +1025,11 @@ How much code should run, and when
 
 Choosing providers settles where compatibility logic lives. It does not
 settle how much of that logic should run without the user having said
-so, and that question remains genuinely open. It is raised here because
-it is the most contested aspect of the design; the mechanisms themselves
+so. Both extremes are ruled out, for the reasons below: a provider is
+not run merely because a wheel names it, and the user is not asked about
+each one in turn. What remains open is how a provider comes to be
+trusted, so that it runs without the user opting in to it. That is the
+most contested aspect of the design, and the mechanisms themselves
 belong to the subsequent `Standards Track PEPs for wheel variants`_.
 
 Both extremes fail. An installer automatically running whatever provider
