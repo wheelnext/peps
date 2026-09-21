@@ -763,9 +763,6 @@ Reference Implementation
 The `variantlib <https://github.com/wheelnext/variantlib>`__ project
 contains a reference implementation of this PEP.
 
-A client for installing variant wheels is implemented in a
-`uv branch <https://github.com/astral-sh/uv/pull/12203>`__.
-
 
 Rejected Ideas
 ==============
