@@ -690,12 +690,14 @@ a given system. The question that shapes the rest of the design is where
 that knowledge lives, and who is able to add to it.
 
 One point is worth making at the outset, because it is easily lost:
-every approach described here requires a PEP. They differ in what
-requires one *next time*. An approach that standardizes the individual
-compatibility axes requires a further round of standardization, followed
-by an implementation in every installer, each time hardware or a library
-introduces an axis that is not already covered. An approach that
-standardizes an interface requires that round once.
+every approach described here requires standardization. They differ in
+how much, and in what requires more of it *next time*. Standardizing the
+compatibility axes themselves means a document for each, since the rules
+governing NVIDIA CUDA compatibility have little in common with those
+governing AMD ROCm and less still with x86-64 instruction set levels,
+and a further document each time hardware or a library introduces an
+axis not already covered - followed in every case by an implementation
+in each installer. Standardizing an interface means one document, once.
 
 .. list-table::
     :header-rows: 1
@@ -706,7 +708,7 @@ standardizes an interface requires that round once.
       - Detection logic maintained by
       - Third-party code runs at install time
     * - Fixed set of axes
-      - A PEP, then an implementation in every installer
+      - A PEP for that axis, then an implementation in every installer
       - Installer maintainers
       - No
     * - Logic shipped per package
@@ -736,13 +738,14 @@ Alternatives considered
 A fixed set of compatibility axes
 '''''''''''''''''''''''''''''''''
 
-A PEP could define an extended set of compatibility markers - CUDA
-runtime version, GPU architecture, CPU instruction set level, and so
-on - together with the semantics for matching them. Wheels would declare
-their requirements against these markers, and each installer would
-implement the detection needed to evaluate them. The specification would
-not need to say how a tool measures any particular marker; that would
-remain an implementation matter for each tool.
+The standards process could define compatibility markers for these
+characteristics - CUDA runtime version, GPU architecture, CPU
+instruction set level, and so on - together with the semantics for
+matching them. Wheels would declare their requirements against these
+markers, and each installer would implement the detection needed to
+evaluate them. The specification would not need to say how a tool
+measures any particular marker; that would remain an implementation
+matter for each tool.
 
 This approach has real advantages, and it is the alternative most
 frequently raised in discussion. It introduces no new kind of artifact
@@ -750,16 +753,27 @@ and no new execution model. The specification stays purely declarative,
 and the code performing detection is first-party installer code, so no
 new trust surface is created.
 
-The cost is that the specification becomes the gatekeeper for every
-compatibility axis. Each new axis requires agreement across the
-packaging community followed by an implementation in each installer, and
-a newly specified axis is only as useful as its slowest widely deployed
-implementation. The axes in demand today already extend well past GPUs:
-CPU instruction set levels, BLAS and LAPACK implementations, OpenMP
-runtimes, C++ ABIs, and matching against the ABI of a dependency such as
-PyTorch_. Hardware vendors would depend on the standards process in
-order to ship optimized wheels, on a timescale measured against their
-own release cadence.
+It would not, however, be a single document. The rules governing NVIDIA
+CUDA compatibility - driver and runtime versions, real and virtual GPU
+architectures, and the forward-compatibility guarantees between them -
+have little in common with those governing AMD ROCm, and less still with
+x86-64 instruction set levels or Arm feature flags. Each needs different
+expertise to write and different reviewers to assess it competently, and
+a single document covering them all would be difficult to review as a
+whole. A realistic first round is therefore several PEPs: plausibly one
+per accelerator vendor, and at least one more for CPU instruction sets,
+which may not remain single as architectures diverge.
+
+The recurring cost has the same shape, and makes the specification the
+gatekeeper for every compatibility axis. Each new axis requires
+agreement across the packaging community followed by an implementation
+in each installer, and a newly specified axis is only as useful as its
+slowest widely deployed implementation. The axes in demand today already
+extend well past GPUs: CPU instruction set levels, BLAS and LAPACK
+implementations, OpenMP runtimes, C++ ABIs, and matching against the ABI
+of a dependency such as PyTorch_. Hardware vendors would depend on the
+standards process in order to ship optimized wheels, on a timescale
+measured against their own release cadence.
 
 A narrower form of this proposal is to standardize deliberately few
 axes - a small set of community-supported hardware target levels,
