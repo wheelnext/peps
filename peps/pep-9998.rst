@@ -57,7 +57,7 @@ they MUST ensure that the produced wheels conform to :pep:`825` and
   properties
 - when ``providers.{namespace}.static-properties`` specifies more than
   one feature name, there are entries for all feature names in
-  ``default-priorities.feature.{namespace}``
+  ``providers.{namespace}.feature-order``
 
 Additionally, tools MAY verify that:
 
@@ -164,14 +164,6 @@ could look like the following:
     # does not matter), and both are more important than specific BLAS/LAPACK
     # library:
     namespace = ["x86_64", "aarch64", "blas_lapack"]
-
-    # OPTIONAL: makes "library" the most important feature in "blas_lapack"
-    # namespace
-    feature.blas_lapack = ["library"]
-
-    # OPTIONAL: makes ["mkl", "openblas"] the most important values of
-    # "blas_lapack :: library" feature
-    property.blas_lapack.library = ["mkl", "openblas"]
 
     # REQUIRED: variant providers
     # ---------------------------
@@ -403,10 +395,8 @@ When populating static properties, the tool MUST:
    using the lists obtained from ``get_supported_configs()``.
 
 6. If ``get_supported_configs()`` returned more than one feature name,
-   ensure that all feature names are present in
-   ``default-priorities.feature.{namespace}`` list. Any feature names
-   missing should be appended in the same order as returned by
-   ``get_supported_configs()``.
+   set ``providers.{namespace}.feature-order`` to the ordered list of
+   features.
 
 
 Rationale
