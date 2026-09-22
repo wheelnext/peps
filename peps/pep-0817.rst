@@ -109,9 +109,9 @@ tools or further PEPs. A non-exhaustive list:
 - How to instruct build backends to emit variants through the :pep:`517`
   mechanism.
 
-The first of these concerns the encoding only. The sequence requires
-installers to accept a static description of an environment's variant
-properties; what it leaves open is the form that description takes.
+The first of these concerns the encoding only. Installers are expected
+to accept a static description of an environment's variant properties;
+what is left open is the form that description takes.
 
 
 Motivation
@@ -1743,10 +1743,12 @@ publish the following variants:
 - ``vllm-0.27.1-...-torch212.whl`` for PyTorch 2.12.x
 - ``vllm-0.27.1-...-torch211.whl`` for PyTorch 2.11.x
 
-The installer would then default to installing the ``torch213`` variant,
-with options to use ``torch212`` or ``torch211`` if necessary to satisfy
-other dependencies, rather than being forced to install an older vLLM
-version.
+The installer would then select whichever of these matches the PyTorch
+version it resolves to. If only ``vllm`` is requested, that is
+``torch213``, since nothing constrains PyTorch and the newest version is
+chosen. Where something else in the resolution holds PyTorch at an older
+version, ``torch212`` or ``torch211`` is selected instead, rather than
+vLLM having to be downgraded to a release built against that version.
 
 ``abi_dependency`` is meant to be the only piece of metadata introduced
 by the specification that affects dependency resolution rather than only
@@ -1755,8 +1757,8 @@ satisfy constraints elsewhere in the dependency graph is ruled out for
 variants in general (see `Why variants stay out of the resolver's
 search`_), because doing so may be difficult to implement. Support for
 ``abi_dependency`` is therefore optional for installers: one that does
-not implement it selects a variant in the ordinary way and reports any
-conflict it cannot resolve.
+not implement it treats the variants using it as incompatible, and is
+expected to tell the user that those wheels were skipped.
 
 
 Key points
