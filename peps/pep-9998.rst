@@ -175,7 +175,7 @@ could look like the following:
 
     # REQUIRED: variant providers
     # ---------------------------
-    # (keys must matchdefault-priorities.namespace)
+    # (keys must match default-priorities.namespace)
 
     [variant.providers.aarch64]
     # Specifies provider plugin package. REQUIRED since there is no
@@ -335,7 +335,7 @@ the following way:
 
 
 Example implementation of a plugin suitable for build-time use
-'''''''''''''''''''''''''''''''''-----------------------------
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 .. code:: python
 
