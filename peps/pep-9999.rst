@@ -695,6 +695,11 @@ discovery when installed in development environments. This can be used
 by variant-related tools, for example to aid debugging variant selection
 or help configuring source trees.
 
+It is recommended for plugins to install entry points to facilitate
+discovery when installed in development environments. This can be used
+by variant-related tools, for example to aid debugging variant selection
+or help configuring source trees.
+
 The `ABI Dependency Variant Provider
 <#abi-dependency-variant-provider-optional>`_ is defined separately, as
 it needs to interact with the dependency resolver. To avoid adding
