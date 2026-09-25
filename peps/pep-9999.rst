@@ -143,8 +143,10 @@ namespace:
 
 5. The tool SHOULD provide a way for the user to permit installing
    specific provider packages. It MUST NOT install or use any provider
-   packages that are not considered trusted. It SHOULD use an isolated
-   virtual environment while installing provider plugin packages.
+   packages that are not considered trusted. It SHOULD create one isolated
+   virtual environment per unique (variant provider package name, version)
+   pair. Different provider packages use separate environments; two versions
+   of the same provider package also use two separate environments.
 
 6. The tool MUST query the trusted and installed provider packages via
    the `provider plugin API`_ to obtain the list of compatible features
