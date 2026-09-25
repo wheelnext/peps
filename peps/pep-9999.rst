@@ -315,9 +315,9 @@ High level design
 '''''''''''''''''
 
 To make it easier to discover and install plugins, they SHOULD be
-published in the same indexes as the packages using them. In particular,
-packages published to PyPI MUST NOT rely on plugins that need to be
-installed from other indexes.
+published in the same indexes as the packages using them. Package indexes
+SHOULD verify that packages published to the index only require variant
+provider plugins available from that same index.
 
 Except for namespaces reserved as part of this PEP and variant providers
 using the ``static-properties`` key, installable Python packages MUST be
