@@ -37,11 +37,11 @@ intelligence (AI), machine learning (ML), and high-performance computing
 "Wheel Variants" is an extension to the
 :doc:`packaging:specifications/binary-distribution-format` that lets a
 project publish several wheels for the same version, distinguished by
-properties the platform tags cannot carry, and lets installers choose
-between them automatically. It comprises:
+properties the platform compatibility tags cannot carry, and lets
+installers choose between them automatically. It comprises:
 
 - **Variant wheels**, which declare the variant properties they were
-  built for alongside the existing platform tags.
+  built for alongside the existing platform compatibility tags.
 
 - **Variant providers**, which determine the properties a system
   supports. A provider may establish that by inspecting the system at
@@ -147,7 +147,7 @@ The limitations of platform compatibility tags
 ----------------------------------------------
 
 The current wheel format encodes compatibility through three platform
-tags:
+compatibility tags:
 
 1. **Python tag**: encoding the minimum Python version and optionally
    restricting Python distributions (e.g., ``py3`` for any Python 3,
