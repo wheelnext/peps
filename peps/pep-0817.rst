@@ -49,9 +49,9 @@ installers choose between them automatically. It comprises:
   detect, as when choosing between BLAS implementations.
 
 - A **static description of an environment**, which a user may supply in
-  place of any inspection. It is needed when installing for a machine
-  other than the one running the installer, and available to anyone who
-  would rather no provider code ran at all.
+  place of any inspection. Building a container image, a native
+  installer, or a wheel that vendors a particular build of a dependency
+  calls for a stated target rather than a discovered one.
 
 The goal is for the obvious installation command (``{tool} install
 <package>``) to select the most appropriate wheel, whether that choice
@@ -937,13 +937,17 @@ takes their values from a description of the environment that the user
 supplies, by hand or produced by a separate tool, rather than from
 detection. No detection code would run anywhere during installation.
 
-This has the smallest trust surface of any approach considered, since no
-code runs in order to make a compatibility decision, and it describes
-how a substantial group of users already works. HPC sites and
+Many installs have nothing to detect. An install that produces an
+artifact for use elsewhere - a container image, a native installer, or a
+wheel that vendors a particular build of a dependency - is a statement
+about the target, not about the machine doing the work, and the machine
+doing the work may have no GPU in it at all. The approach also describes
+how a substantial group of users already works: HPC sites and
 locked-down corporate environments commonly declare the available
 toolchain, accelerator and library stack as a matter of policy, using
-mechanisms such as those described in `Spack / Archspec`_, and prefer an
-explicit, auditable description to anything discovered at install time.
+mechanisms such as those described in `Spack / Archspec`_. And it has
+the smallest trust surface of any approach considered, since no code
+runs in order to make a compatibility decision.
 
 It is nonetheless unsuitable as the only mechanism, because it requires
 every user to know and state their CUDA runtime version, driver version
