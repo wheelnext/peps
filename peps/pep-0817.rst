@@ -834,9 +834,20 @@ in each installer, and a newly specified axis is only as useful as its
 slowest widely deployed implementation. The axes in demand today already
 extend well past GPUs: CPU instruction set levels, BLAS and LAPACK
 implementations, OpenMP runtimes, C++ ABIs, and matching against the ABI
-of a dependency such as PyTorch_. Hardware vendors would depend on the
-standards process in order to ship optimized wheels, on a timescale
-measured against their own release cadence.
+of a dependency such as PyTorch_.
+
+The cost also recurs within an axis, not only across axes. An axis that
+has been specified still has to be revised as its subject moves: new
+CUDA and ROCm releases, new GPU architectures and new instruction set
+extensions each change which values exist and how they compare. That is
+a far faster tempo than the existing platform compatibility tags deal
+with, where operating systems, C libraries and broad CPU architectures
+turn over slowly - and even at that pace, writing a PEP per tag did not
+hold up: :pep:`600` replaced that practice for ``manylinux`` in order to
+let maintainers adopt new tags sooner and to make better use of limited
+volunteer time. Hardware vendors would depend on the standards process
+in order to ship optimized wheels, on a timescale measured against their
+own release cadence.
 
 A narrower form of this proposal is to standardize deliberately few
 axes - a small set of community-supported hardware target levels,
