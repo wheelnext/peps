@@ -747,12 +747,9 @@ elsewhere.
 
 Where standardization is required, its shape differs sharply.
 Standardizing the compatibility axes themselves means a PEP per axis,
-since the rules governing NVIDIA CUDA compatibility have little in
-common with those governing AMD ROCm and less still with x86-64
-instruction set levels, and a further PEP each time hardware or a
-library introduces an axis not already covered - followed in every case
-by an implementation in each installer. Standardizing an interface means
-one PEP, once.
+and a further one each time hardware or a library introduces an axis not
+already covered, followed in every case by an implementation in each
+installer. Standardizing an interface means one PEP, once.
 
 .. list-table::
     :header-rows: 1
@@ -848,6 +845,14 @@ let maintainers adopt new tags sooner and to make better use of limited
 volunteer time. Hardware vendors would depend on the standards process
 in order to ship optimized wheels, on a timescale measured against their
 own release cadence.
+
+The vendors are also not bound by the standards process. A
+specification that writes down how a platform's versions relate to one
+another records rules that the packaging community does not own and
+cannot hold still: the vendor can redefine them in any hardware or
+software release it makes, leaving the specification wrong until it is
+amended. The renumbering of macOS versions is a reminder that this is
+not hypothetical.
 
 A narrower form of this proposal is to standardize deliberately few
 axes - a small set of community-supported hardware target levels,
