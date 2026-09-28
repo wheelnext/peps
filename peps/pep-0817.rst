@@ -54,7 +54,7 @@ installers choose between them automatically. It comprises:
   calls for a stated target rather than a discovered one.
 
 The goal is for the obvious installation command (``{tool} install
-<package>``) to select the most appropriate wheel, whether that choice
+{package}``) to select the most appropriate wheel, whether that choice
 is detected or declared, with no index URLs, package-name suffixes or
 per-project install instructions.
 
@@ -98,7 +98,7 @@ The four PEPs are:
   strategy, and a community maintained repository of trusted variant
   providers that can be integrated with installers for opt-out behavior.
 
-Of these, :pep:`825` has been accepted as Provisional; the remaining
+Of these, :pep:`825` has been provisionally accepted; the remaining
 three are in preparation, and their scope and details may change.
 
 Some aspects are deliberately left outside the sequence, to evolve via
@@ -959,7 +959,7 @@ least because a declared environment composes with dependency
 resolution, whereas an index URL is a property of a single command and
 does not, so today a project that merely depends on PyTorch_ can undo
 the user's choice. The objection is narrower: the burden remains with
-the user, whereas ``{tool} install <package>`` selecting a working wheel
+the user, whereas ``{tool} install {package}`` selecting a working wheel
 without it is the goal stated in the abstract.
 
 
@@ -975,7 +975,7 @@ updating a provider rather than by amending a specification.
 
 This places the detection logic with those who have both the expertise
 and the motivation to maintain it. A hardware vendor can ship support
-for a new accelerator, and correct compatibility rules when they change,
+for a new accelerator, and correct the compatibility rules when they change,
 on its own release cadence. Installers remain generic, and do not
 acquire a standing obligation to understand every accelerator and ABI on
 every platform. Because providers are shared between projects,
@@ -1864,8 +1864,7 @@ claimed. A namespace has meaning only within the variant metadata of the
 project that uses it, and that project also names the provider package
 implementing it, so choosing a provider is an ordinary dependency
 decision, open to the same scrutiny as any other. How a namespace is
-bound to the provider that governs it, and which names such as
-``abi_dependency`` are reserved, is specified by the Providers PEP.
+bound to the provider that governs it is specified by the Providers PEP.
 
 
 Backwards Compatibility
@@ -1949,7 +1948,7 @@ project names, can retire those well before it drops its non-variant
 wheel, because reaching the users of a workaround is a much easier
 problem: using one is an explicit step taken on the project's own
 instructions, and the project can change the instructions. The plain
-``{tool} install <package>`` path offers no comparable lever, which is
+``{tool} install {package}`` path offers no comparable lever, which is
 why the non-variant wheel is the part that has to linger.
 
 The ``null`` variant does not substitute for a non-variant wheel here.
