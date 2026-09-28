@@ -905,14 +905,18 @@ exclusive, and releases cannot be published synchronously across several
 project names.
 
 Two further problems are specific to the mapping. The code performing it
-has to live in the installer, and it is bound to a naming convention:
-something must establish that the resolved name is ``torch_cu128``
-rather than ``torch-cu12`` or ``torch_cuda_128``, and that whatever
-convention is chosen holds for every project using the mechanism. How
-that would be agreed between projects and kept consistent across
-installers is unclear, and the suffix carries meaning that nothing in
-the metadata records. More fundamentally, the mapping needs a source of
-truth: something must still determine which name is appropriate for the
+has to live in the installer, and it is bound to a naming convention
+that does not exist. Projects already spell the same distinction
+differently: JAX_ publishes ``jax-cuda12-plugin`` and
+``jax-cuda13-plugin``, identifying CUDA by major version alone, while
+PyTorch_ labels its builds ``cu129`` and ``cu130`` in index URLs and
+local version segments, by major and minor. Something must establish
+which form an installer resolves to, and that whatever convention is
+chosen holds for every project using the mechanism. How that would be
+agreed between projects and kept consistent across installers is
+unclear, and the name carries meaning that nothing in the metadata
+records. More fundamentally, the mapping needs a source of truth:
+something must still determine which name is appropriate for the
 current system. That is the question this section is about, so this
 approach relocates it rather than answering it.
 
