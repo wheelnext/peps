@@ -63,13 +63,13 @@ Scope and Standards Track PEPs
 ==============================
 
 This PEP is Informational: it specifies nothing normatively. It serves
-as the umbrella for a sequence of four Standards Track PEPs, supplying
-the motivation, the prior art, and the reasoning behind the design
-choices those PEPs make, so that each of them can be read against a
-shared context rather than restating it. It aims to give a concise
-high-level overview of wheel variants; it does not cover the complete
-functionality proposed as part of the standard, nor does it provide
-normative guidance on implementing it.
+as the umbrella for a sequence of four Standards Track PEPs, and it
+supplies the motivation, the prior art, and the reasoning behind the
+design choices those PEPs make, so that each of them can be read
+against a shared context rather than restating it. It aims to give a
+concise high-level overview of wheel variants; it does not cover the
+complete functionality proposed as part of the standard, nor does it
+provide normative guidance on implementing it.
 
 The four PEPs are:
 
@@ -78,12 +78,16 @@ The four PEPs are:
   variant wheel ordering rules, environment markers and ``pylock.toml``
   integration.
 
-- Providers: the governance of variant namespaces; extending variant
-  metadata with provider information; introducing providers that supply
-  compatible properties statically via variant metadata or dynamically
-  via opt-in Python packages, along with the security considerations for
-  their use; defining the relevant plugin API; introducing a special
-  provider concerned with ABI compatibility.
+- Providers: how the variant properties a system supports are
+  determined; binding every variant namespace to the one provider that
+  governs it (e.g., ``nvidia`` for CUDA capabilities, ``x86_64`` for
+  CPU instruction-set levels, ``blas_lapack`` for the choice of BLAS
+  implementation); extending variant metadata with provider
+  information; introducing providers that supply compatible properties
+  statically via variant metadata or dynamically via opt-in Python
+  packages, along with the security considerations for their use;
+  defining the relevant plugin API; introducing a special provider
+  concerned with ABI compatibility.
 
 - Building: integration with build backends and the ``pyproject.toml``
   file; extending variant metadata and the plugin API to support
@@ -738,7 +742,7 @@ The approaches below differ in how much standardization they require,
 and in whether that requirement returns each time a new compatibility
 axis appears. For two of them - logic shipped per project, and separate
 package names - adding an axis requires no standardization at all, which
-is why both already exist as workarounds today; their cost falls
+is why both already exist as workarounds today; their costs fall
 elsewhere.
 
 Where standardization is required, its shape differs sharply.
@@ -783,7 +787,7 @@ one PEP, once.
       - Yes
       - A provider package release
       - Provider maintainers
-      - Yes, unless the provider is vendored or supplied statically
+      - No, unless the user opts in
 
 The table states what each approach costs and where the work lands. The
 sections below take each in turn; `The approach taken`_ explains the
@@ -814,13 +818,14 @@ new trust surface is created.
 It would not, however, be a single document. The rules governing NVIDIA
 CUDA compatibility - driver and runtime versions, real and virtual GPU
 architectures, and the forward-compatibility guarantees between them -
-have little in common with those governing AMD ROCm, and less still with
-x86-64 instruction set levels or Arm feature flags. Each needs different
-expertise to write and different reviewers to assess it competently, and
-a single document covering them all would be difficult to review as a
-whole. A realistic first round is therefore several PEPs: plausibly one
-per accelerator vendor, and at least one more for CPU instruction sets,
-which may not remain single as architectures diverge.
+have little in common with those governing AMD ROCm or Intel XPU, and
+less still with x86-64 instruction set levels or Arm feature flags. Each
+needs different expertise to write and different reviewers to assess it
+competently, and a single document covering them all would be difficult
+to review as a whole. A realistic first round is therefore several
+PEPs: plausibly one per accelerator vendor, and at least one more for
+CPU instruction sets, which may not remain single as architectures
+diverge.
 
 The recurring cost has the same shape, and makes the specification the
 gatekeeper for every compatibility axis. Each new axis requires
@@ -1834,9 +1839,9 @@ name. Nor do variant namespaces amount to a new global namespace to be
 claimed. A namespace has meaning only within the variant metadata of the
 project that uses it, and that project also names the provider package
 implementing it, so choosing a provider is an ordinary dependency
-decision, open to the same scrutiny as any other. Which parties may
-define a namespace, and how reserved names such as ``abi_dependency``
-are administered, is covered by the Providers PEP.
+decision, open to the same scrutiny as any other. How a namespace is
+bound to the provider that governs it, and which names such as
+``abi_dependency`` are reserved, is specified by the Providers PEP.
 
 
 Backwards Compatibility
