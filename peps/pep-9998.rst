@@ -124,8 +124,12 @@ The provider information dictionaries used as values in the
   time, as explained in `populating static properties from provider
   plugins`_.
 
-If the ``build-requires`` key is specified, then ``feature-order``,
-``requires`` and ``static-properties`` keys MUST NOT be present.
+The ``plugin-api`` key is used with ``build-requires`` in the same way
+as it is used with ``requires``.
+
+If the ``build-requires`` key is specified, then the ``builtin``,
+``feature-order``, ``requires`` and ``static-properties`` keys MUST NOT
+be present.
 
 The ``build-requires`` key is only valid in the ``pyproject.toml`` file.
 In a variant wheel built from that file, the ``build-requires`` and
@@ -135,12 +139,13 @@ more than one feature, then the ``feature-order`` key MUST be added as
 well.
 
 Consequently, every provider metadata MUST use exactly one of these
-three key combinations:
+four key combinations:
 
 1. ``requires``, and optionally ``plugin-api``
 2. ``build-requires``, and optionally ``plugin-api`` (valid only in
    ``pyproject.toml``)
 3. ``static-properties``, and optionally ``feature-order``
+4. ``builtin``
 
 In addition to that, the ``optional`` key is always valid. Further rules
 on when the optional keys are required are specified in :pep:`9999`.
@@ -162,30 +167,39 @@ could look like the following:
     # REQUIRED: specifies that x86_64 CPU properties are more important than
     # aarch64 CPU properties (both are mutually exclusive, so the exact order
     # does not matter), and both are more important than specific BLAS/LAPACK
-    # library:
-    namespace = ["x86_64", "aarch64", "blas_lapack"]
+    # library: The "abi" namespace using a builtin provider is listed last,
+    # it does not influence ordering here.
+    namespace = ["x86_64", "aarch64", "blas_lapack", "abi"]
 
     # REQUIRED: variant providers
     # ---------------------------
     # (keys must match default-priorities.namespace)
 
     [variant.providers.aarch64]
-    # Specifies provider plugin package. REQUIRED since there is no
-    # "static-properties" -- plugin will be queried at install time.
+    # Specifies provider plugin package; the plugin will be queried
+    # at install time. REQUIRED, mutually exclusive with the other required
+    # keys.
     requires = [
       "provider-variant-aarch64 >=0.0.1",
     ]
-    # Overrides plugin API endpoint. OPTIONAL; without it, the API
-    # endpoint "provider_variant_aarch64" would be used.
-    plugin-api = "provider_variant_aarch64.plugin:AArch64Plugin"
+    # "plugin-api" is OPTIONAL here. It is inferred from "requires".
+    # plugin-api = "provider_variant_aarch64"
+
+    [variant.providers.abi]
+    # Specifies that this a builtin provider. REQUIRED, mutually exclusive
+    # with the other required keys.
+    builtin = "abi_dependency"
 
     [variant.providers.blas_lapack]
-    # REQUIRED: used to populate "static-properties".
+    # Specifies that "static-properties" are to be populated from a provider
+    # plugin package; it will be queried at build time. REQUIRED, mutually
+    # exclusive with the other required keys.
     build-requires = ["blas-lapack-variant-provider"]
 
     [variant.providers.x86_64]
-    # Specifies provider plugin package. REQUIRED since there is no
-    # "static-properties" -- plugin will be queried at install time.
+    # Specifies provider plugin package; the plugin will be queried
+    # at install time. REQUIRED, mutually exclusive with the other required
+    # keys.
     requires = [
       "provider-variant-x86-64 >=0.0.1; python_version >= '3.12'",
       "legacy-provider-variant-x86-64 >=0.0.1; python_version < '3.12'",
