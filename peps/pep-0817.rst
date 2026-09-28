@@ -1865,9 +1865,7 @@ Backwards Compatibility
 Full backwards compatibility considerations are provided in :pep:`825`.
 The key point is that variant wheels add an additional variant label
 component to the wheel filename, and that tools commonly used to install
-wheels at the time of writing reject wheels carrying it. This makes it
-possible to publish variant wheels on an index alongside non-variant
-wheels without risk of them being installed accidentally.
+wheels at the time of writing reject wheels carrying it.
 
 That rejection is not incidental. A variant wheel has one filename
 component more than a non-variant one, so a tool unaware of variants
@@ -1882,6 +1880,53 @@ script that parses wheel filenames loosely, rather than verifying them
 in full, may treat a variant wheel as an ordinary one. Conversely,
 tooling that audits wheel filenames will report variant wheels as
 invalid until it is updated to recognize them.
+
+What this buys is coexistence. Variant and non-variant wheels are meant
+to be published to the same index, under the same project name and for
+the same release; neither a separate index nor a separate project name
+is needed, and avoiding both is much of the point of this proposal. An
+installer that does not understand variants sees the non-variant wheel
+and behaves exactly as it does today, while one that does understand
+them sees the variant wheels as well and chooses between them.
+
+
+Adoption and rollout
+====================
+
+The introduction strategy belongs to the fourth PEP in the series, and
+this section sketches only its shape.
+
+A project adopting variants adds to what it publishes on PyPI rather
+than replacing it. Variant wheels go into a release that still carries a
+non-variant wheel, so that variant-aware installers choose among the
+variants while every other consumer continues to receive the wheel it
+would have received anyway. Nothing that works today stops working, and
+no user has to do anything.
+
+Dropping the non-variant wheel is a later and separate decision, and a
+much slower one. It only becomes reasonable once variant-aware
+installers have reached essentially all of a project's users, which is a
+matter of years rather than releases, given how long older installers
+stay in service in pinned CI images and long-term-support
+distributions. Until then, a release published without a non-variant
+wheel is simply uninstallable for part of its audience, and what an
+installer does instead is not necessarily graceful: it may attempt a
+build from source, which can fail with a hard to understand error.
+
+The workarounds can go sooner. A project that today distributes
+per-accelerator builds through separate index URLs, or under separate
+project names, can retire those well before it drops its non-variant
+wheel, because reaching the users of a workaround is a much easier
+problem: using one is an explicit step taken on the project's own
+instructions, and the project can change the instructions. The plain
+``{tool} install <package>`` path offers no comparable lever, which is
+why the non-variant wheel is the part that has to linger.
+
+The ``null`` variant does not substitute for a non-variant wheel here.
+It is a fallback for installers that understand variants but find no
+better match; an installer that does not understand variants cannot
+select it either, because it carries a variant label like any other
+variant wheel.
 
 
 Reference Implementation
