@@ -1889,6 +1889,27 @@ installer that does not understand variants sees the non-variant wheel
 and behaves exactly as it does today, while one that does understand
 them sees the variant wheels as well and chooses between them.
 
+One thing can undermine that, and it is arguably the more consequential
+compatibility question of the two. :pep:`825` introduces environment
+markers that describe variant properties. A project does not have to use
+them, but they are what allows a project whose variants differ in their
+dependencies - a CUDA build and a CPU build, say - to keep one
+dependency list across the entire release instead of diverging per
+wheel, and projects such as PyTorch_ are expected to use them for that
+reason. Those markers then appear in the metadata of every wheel in the
+release, the non-variant wheel included.
+
+Unlike an unrecognized filename component, an unrecognized marker is not
+uniformly survivable, because it changes the dependency specifier
+grammar rather than adding a value to an existing field. What installers
+do when they see an unrecognized marker varies. pip from 24.1 onwards,
+uv and PDM treat the release as having invalid metadata and resolve to
+an earlier one, which is inconvenient but safe; earlier versions of pip
+fail outright; Poetry discards markers it cannot parse and proceeds,
+which makes the dependencies they guard unconditional, so the
+dependencies of every variant are installed together - usually more than
+the user needs, and in rare cases things that conflict.
+
 
 Adoption and rollout
 ====================
