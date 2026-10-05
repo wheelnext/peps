@@ -3,12 +3,7 @@ Title: Wheel Variants: Providers
 Author: Michał Górny <mgorny@quansight.com>,
         Jonathan Dekhtiar <jonathan@dekhtiar.com>,
         Konstantin Schütze <konstin@mailbox.org>,
-        Ralf Gommers <ralf.gommers@gmail.com>,
-        Hyunsu Cho <chohyu01@gmail.com>,
-        Andrey Talman <atalman@meta.com>,
-        Michael Sarahan <msarahan@gmail.com>,
-        Donald Stufft <donald@stufft.io>,
-        Andy R. Terrel <andy.terrel@gmail.com>
+        Ralf Gommers <ralf.gommers@gmail.com>
 Discussions-To: Pending
 Status: Draft
 Type: Standards Track
@@ -790,10 +785,13 @@ feedback of many people in the Python packaging community. In
 particular, we would like to credit the following individuals for their
 help in shaping this PEP (in alphabetical order):
 
-Alban Desmaison, Barry Warsaw, Bradley Dice, Charlie Marsh, Chris Gottbrath,
-Dmitry Rogozhkin, Eli Uriegas, Emma Smith, Geoffrey Thomas, Henry Schreiner,
-Jeff Daily, Jeremy Tanner, Jithun Nair, Keith Kraus, Leo Fang, Mike McCarty,
-Nikita Shulga, Paul Ganssle, Robert Maynard, Vyas Ramasubramani, and Zanie Blue.
+Alban Desmaison, Andrey Talman, Andy R. Terrel, Barry Warsaw, Bradley
+Dice, Charlie Marsh, Chris Gottbrath, Dmitry Rogozhkin, Donald Stufft,
+Doug Hellmann, Eli Uriegas, Emma Smith, Geoffrey Thomas, Henry
+Schreiner, Hyunsu Cho, Jeff Daily, Jeremy Tanner, Jithun Nair, Keith
+Kraus, Leo Fang, Michael Saharan, Mike McCarty, Nikita Shulga, Paul
+Ganssle, Robert Maynard, Seth Larson, Vyas Ramasubramani, and Zanie
+Blue.
 
 
 Change History
