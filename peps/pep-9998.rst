@@ -518,14 +518,6 @@ Change History
     renamed to ``all_properties_compatible``.
 
 
-Appendices
-==========
-
-::
-
-    - :ref:`pep9998-variant-json-schema`
-
-
 Copyright
 =========
 
