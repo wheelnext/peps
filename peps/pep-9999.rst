@@ -847,10 +847,10 @@ help in shaping this PEP (in alphabetical order):
 Alban Desmaison, Andrey Talman, Andy R. Terrel, Barry Warsaw, Bradley
 Dice, Charlie Marsh, Chris Gottbrath, Dmitry Rogozhkin, Donald Stufft,
 Doug Hellmann, Eli Uriegas, Emma Smith, Geoffrey Thomas, Henry
-Schreiner, Hyunsu Cho, Jeff Daily, Jeremy Tanner, Jithun Nair, Keith
-Kraus, Leo Fang, Michael Saharan, Mike McCarty, Nikita Shulga, Paul
-Ganssle, Robert Maynard, Seth Larson, Vyas Ramasubramani, and Zanie
-Blue.
+Schreiner, Jeff Daily, Jeremy Tanner, Jithun Nair, Keith Kraus, Leo Fang,
+Michael Sarahan, Mike Fiedler, Mike McCarty, Nikita Shulga, Paul Ganssle,
+Philip Hyunsu Cho, Robert Maynard, Seth Larson, Vyas Ramasubramani, and
+Zanie Blue.
 
 
 Change History
