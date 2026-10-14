@@ -15,6 +15,15 @@ Post-History: Pending
 Abstract
 ========
 
+This PEP extends :pep:`825` and :pep:`9999` by specifying how variant
+wheels are built. The recommended approach is to store a variant
+metadata seed, along with the definition of supported variants, in
+``pyproject.toml``. Build backends accept a ``variant-label`` setting
+key that enables building a specific variant wheel. The plugin API is
+extended to support validating variant properties in built wheels, and
+to support seeding ``static-properties`` from plugins invoked at build
+time.
+
 
 Motivation
 ==========
