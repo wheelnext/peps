@@ -8,14 +8,14 @@ Discussions-To: Pending
 Status: Draft
 Type: Standards Track
 Topic: Packaging
-Requires: 825, 9999
+Requires: 825, 850
 Created: 02-Mar-2026
 Post-History: Pending
 
 Abstract
 ========
 
-This PEP extends :pep:`825` and :pep:`9999` by specifying how variant
+This PEP extends :pep:`825` and :pep:`850` by specifying how variant
 wheels are built. The recommended approach is to store a variant
 metadata seed, along with the definition of supported variants, in
 ``pyproject.toml``. Build backends accept a ``variant-label`` setting
@@ -28,7 +28,7 @@ time.
 Motivation
 ==========
 
-:pep:`825` and :pep:`9999` introduced variant wheels while focusing on
+:pep:`825` and :pep:`850` introduced variant wheels while focusing on
 the file format and installation process. This PEP follows up on that by
 defining a consistent data format and behavior for building variant
 wheels.
@@ -50,7 +50,7 @@ Building variant wheels
 
 Tools MAY support building variant wheels. When building variant wheels,
 they MUST ensure that the produced wheels conform to :pep:`825` and
-:pep:`9999`. In particular, tools MUST ensure that:
+:pep:`850`. In particular, tools MUST ensure that:
 
 - the variant metadata conforms to the schema
 - there is only a single key in the ``variants`` dictionary
@@ -101,11 +101,11 @@ pyproject.toml integration
 This specification extends the ``pyproject.toml`` file originally
 defined in :pep:`518`. Said file MAY contain a top-level ``variant``
 table that contains variant metadata for the project. The contents of
-this table are defined by :pep:`9999` or a subsequent specification,
-with the extensions listed in this PEP, converted into the respective
-TOML types. When building variant wheels, tools SHOULD use the
-information from this file to seed the variant metadata in the built
-variant wheels. More specifically:
+this table are defined by :pep:`850` or a subsequent specification, with
+the extensions listed in this PEP, converted into the respective TOML
+types. When building variant wheels, tools SHOULD use the information
+from this file to seed the variant metadata in the built variant wheels.
+More specifically:
 
 - the ``default-priorities`` dictionary is used to seed
   ``default-priorities`` in the wheels
@@ -155,20 +155,20 @@ combinations are valid:
 - ``builtin``
 
 Further rules governing the optional keys are required are specified in
-:pep:`9999`.
+:pep:`850`.
 
 
 Example
 '''''''
 
 The ``pyproject.toml`` file corresponding to the package with variant
-metadata equivalent to the one provided in the example in :pep:`9999`
+metadata equivalent to the one provided in the example in :pep:`850`
 could look like the following:
 
 .. code:: toml
 
     [variant]
-    "$schema" = "https://variants-schema.wheelnext.dev/peps/9999/v0.2.0.json"
+    "$schema" = "https://variants-schema.wheelnext.dev/peps/850/v0.2.0.json"
 
     [variant.default-priorities]
     # REQUIRED: specifies that x86_64 CPU properties are more important than
@@ -240,7 +240,7 @@ Provider plugins MAY be used at build time, if the provider metadata
 specifies either ``requires`` or ``build-requires`` key, per the
 `extension to provider metadata`_ section.
 
-The plugin interface specified in :pep:`9999` is extended by adding the
+The plugin interface specified in :pep:`850` is extended by adding the
 following REQUIRED function:
 
 - ``get_all_configs() -> list[VariantFeatureConfigType]`` that returns a
@@ -304,8 +304,8 @@ The resulting interface can be described using the following protocol:
 Example implementation
 ''''''''''''''''''''''
 
-The example plugin implementation from :pep:`9999` can be extended in
-the following way:
+The example plugin implementation from :pep:`850` can be extended in the
+following way:
 
 .. code:: python
 
@@ -325,7 +325,7 @@ the following way:
 
 
     def get_supported_configs() -> list[VariantFeatureConfig]:
-        ...  # same as in PEP 9999
+        ...  # same as in PEP 850
 
 
     def get_all_configs() -> list[VariantFeatureConfig]:
@@ -388,7 +388,7 @@ provider plugin is used to populate the ``static-properties`` dictionary
 while building the variant wheel.
 
 The packages to install and the plugin interface to use are determined
-as specified in :pep:`9999`, except that:
+as specified in :pep:`850`, except that:
 
 - the ``build-requires`` key is used in place of ``requires`` key
 - all providers are assumed to be enabled and trusted
@@ -438,8 +438,8 @@ creating isolated environments and installing packages.
 The provider plugin API is extended to enable verifying whether the
 properties specified for a variant are correct. To this purpose, a
 ``get_all_configs()`` function is introduced that is symmetric to
-``get_supported_configs()`` introduced in :pep:`9999`. However, the
-build tools are not required to perform this validation, as it requires
+``get_supported_configs()`` introduced in :pep:`850`. However, the build
+tools are not required to perform this validation, as it requires
 installing and querying provider plugins.
 
 Furthermore, this PEP permits populating ``static-properties`` using
@@ -449,7 +449,7 @@ question, and explicitly enabled in the package, through using
 synchronizing the feature names and values across multiple packages,
 for example BLAS/LAPACK library names. The process is handled entirely
 at build time, and the resulting wheel is fully compliant with
-:pep:`9999`.
+:pep:`850`.
 
 Technically, the presence of both ``get_supported_configs()`` and
 ``get_all_configs()`` when all properties are compatible is redundant:
@@ -476,8 +476,8 @@ Security Implications
 =====================
 
 There are no new security implications beyond what is already noted in
-:pep:`9999`. In particular, the use of provider plugins during build
-time is not seen as an additional risk, given that the dependencies are
+:pep:`850`. In particular, the use of provider plugins during build time
+is not seen as an additional risk, given that the dependencies are
 provider by the user directly (for example, in ``pyproject.toml``) and
 they are treated equivalently to other build dependencies.
 
