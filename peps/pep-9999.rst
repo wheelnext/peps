@@ -431,6 +431,10 @@ When populating static properties, the tool MUST:
    set ``providers.{namespace}.feature-order`` to the ordered list of
    features.
 
+Note that ``static-properties`` MUST be populated even if no properties
+from the provider's namespace are used, as otherwise metadata across
+different variant wheels would be inconsistent.
+
 
 Rationale
 =========
