@@ -29,49 +29,21 @@ Motivation
 ==========
 
 :pep:`825` and :pep:`850` introduced variant wheels while focusing on
-the file format and installation process. This PEP follows up on that by
-defining a consistent data format and behavior for building variant
-wheels.
-
-
-Rationale
-=========
+the file format and installation process. While technically this is
+sufficient for tools to build working variant wheels, it would likely
+lead to proliferation of different interfaces and inconsistencies in
+user experience.
 
 This PEP considers a variety of possible tools that may emit variant
 wheels, including build backends, build frontends and tools dedicated to
-converting regular wheels into variant wheels. Standardized interfaces
-for project tree metadata and build backends are proposed to offer
-consistent user experience, but are by no means mandatory. The standard
-``pyproject.toml`` file is used to avoid spreading the project
-configuration across multiple files, and the same schema as for variant
-metadata is used.
-
-When using build backends, using ``get_requires*()`` hooks for exposing
-provider plugin dependencies as regular build dependencies is
-recommended. This permits reusing the existing frontend logic for
-creating isolated environments and installing packages.
-
-The provider plugin API is extended to enable verifying whether the
-properties specified for a variant are correct. To this purpose, a
-``get_all_configs()`` function is introduced that is symmetric to
-``get_supported_configs()`` introduced in :pep:`850`. However, the build
-tools are not required to perform this validation, as it requires
-installing and querying provider plugins.
-
-Furthermore, this PEP permits populating ``static-properties`` using
-provider plugins. This needs both to be supported by the plugin in
-question, and explicitly enabled in the package, through using
-``build-requires`` in place of ``requires``. This facilitates
-synchronizing the feature names and values across multiple packages,
-for example BLAS/LAPACK library names. The process is handled entirely
-at build time, and the resulting wheel is fully compliant with
-:pep:`850`.
-
-Technically, the presence of both ``get_supported_configs()`` and
-``get_all_configs()`` when all properties are compatible is redundant:
-both must return the same values, except that the latter may return them
-in any order.  However, the specification requires both to keep a single
-interface for all provider plugins.
+converting regular wheels into variant wheels, and proposes standardized
+format for storing variant metadata and possible variants in the project
+tree using ``pyproject.toml`` and interface for interacting with build
+backends. All of this is given as a recommendation to make documentation
+universal, build backends interchangeable and therefore improve user
+experience. At the same, build backends are permitted to follow a
+different implementation path as necessary to fit their specific use
+cases.
 
 
 Specification
@@ -147,6 +119,8 @@ types. When building variant wheels, tools SHOULD use the information
 from this file to seed the variant metadata in the built variant wheels.
 More specifically:
 
+- the ``$schema`` key specifies the JSON schema of the variant metadata
+  output
 - the ``default-priorities`` dictionary is used to seed
   ``default-priorities`` in the wheels
 - the ``providers`` dictionary is used to seed ``providers`` in the
@@ -456,6 +430,49 @@ When populating static properties, the tool MUST:
 6. If ``get_supported_configs()`` returned more than one feature name,
    set ``providers.{namespace}.feature-order`` to the ordered list of
    features.
+
+
+Rationale
+=========
+
+The standard ``pyproject.toml`` file is used to avoid spreading the
+project configuration across multiple files. The format used matches the
+one used for variant metadata, except for the additions described in
+this specification.
+
+The ``variant.$schema`` key refers to the JSON schema of the metadata
+produced by the tool. Importantly, this schema does not cover the TOML
+extensions given in this PEP, as they are not present in the resulting
+JSON. No separate schema is provided for the TOML table.
+
+When using build backends, using ``get_requires*()`` hooks for exposing
+provider plugin dependencies as regular build dependencies is
+recommended. This permits reusing the existing frontend logic for
+creating isolated environments and installing packages.
+
+The provider plugin API is extended to enable verifying whether the
+properties specified for a variant are correct. To this purpose, a
+``get_all_configs()`` function is introduced that is symmetric to
+``get_supported_configs()`` introduced in :pep:`850`. However, while the
+latter needs to return features and their values in a meaningful order,
+the former is merely used for verification and permits any order for
+provider author's convenience. The build tools are not required to
+perform this validation, as it requires installing and querying provider
+plugins.
+
+Furthermore, this PEP permits populating ``static-properties`` using
+provider plugins. This needs both to be supported by the plugin in
+question, and explicitly enabled in the package, through using
+``build-requires`` in place of ``requires``. This facilitates
+synchronizing the feature names and values across multiple packages,
+for example BLAS/LAPACK library names. The process is handled entirely
+at build time, and the resulting wheel is fully compliant with
+:pep:`850`.
+
+Technically, the presence of both ``get_supported_configs()`` and
+``get_all_configs()`` when all properties are compatible is redundant:
+both must return the same values  However, the specification requires
+both to keep a single interface for all provider plugins.
 
 
 Backwards Compatibility
