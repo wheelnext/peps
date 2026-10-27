@@ -473,6 +473,17 @@ for example BLAS/LAPACK library names. The process is handled entirely
 at build time, and the resulting wheel is fully compliant with
 :pep:`850`.
 
+Since variant property verification is non-obligatory, build backends
+may skip installing install-time plugins while building variant wheels.
+However, they must always install all build-time plugins, as they need
+to be queried to fill ``static-properties`` in. This is necessary even
+if the variant wheel in question does not use any properties within the
+given namespace, as all variant wheels must have consistent metadata --
+it is neither possible to skip emitting ``static-properties`` or skip
+the provider entry entirely. This is a known limitation. Building
+non-variant wheels does not involve ``variant.json``, so all plugins can
+be skipped.
+
 Technically, the presence of both ``get_supported_configs()`` and
 ``get_all_configs()`` when all properties are compatible is redundant:
 both must return the same values  However, the specification requires
