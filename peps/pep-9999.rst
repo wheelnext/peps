@@ -492,6 +492,9 @@ integration`_) follows from :pep:`518` specifying that such tables are
 "reserved for future use by other PEPs". Therefore, introducing the
 ``[variant]`` table is backwards compatible.
 
+Therefore, there are no backwards compatibility implications beyond
+those listed in :pep:`825`.
+
 
 Security Implications
 =====================
