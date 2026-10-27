@@ -16,12 +16,12 @@ Abstract
 ========
 
 This PEP extends :pep:`825` and :pep:`850` by specifying how variant
-wheels are built. The recommended approach is to store a variant
-metadata seed, along with the definition of supported variants, in
+wheels are built. The recommended approach is to store the variant build
+configuration, along with the definition of supported variants, in
 ``pyproject.toml``. Build backends accept a ``variant-label`` setting
 key that enables building a specific variant wheel. The plugin API is
 extended to support validating variant properties in built wheels, and
-to support seeding ``static-properties`` from plugins invoked at build
+to support setting ``static-properties`` from plugins invoked at build
 time.
 
 
@@ -90,7 +90,7 @@ explicitly requested by the user.
 For consistency, it is RECOMMENDED that build backends implement the
 following interface for building variant wheels:
 
-- Variant metadata seed is stored in the ``pyproject.toml`` file, as
+- Variant configuration is stored in the ``pyproject.toml`` file, as
   described in `pyproject.toml integration`_.
 - The available variants are described in the ``variant.variants`` table
   in said file, except for the null variant which is always valid.
@@ -116,14 +116,14 @@ table that contains variant metadata for the project. The contents of
 this table are defined by :pep:`850` or a subsequent specification, with
 the extensions listed in this PEP, converted into the respective TOML
 types. When building variant wheels, tools SHOULD use the information
-from this file to seed the variant metadata in the built variant wheels.
-More specifically:
+from this file to provide the initial values for the variant metadata in
+the built variant wheels. More specifically:
 
 - the ``$schema`` key specifies the JSON schema of the variant metadata
   output
-- the ``default-priorities`` dictionary is used to seed
+- the ``default-priorities`` dictionary is used to set
   ``default-priorities`` in the wheels
-- the ``providers`` dictionary is used to seed ``providers`` in the
+- the ``providers`` dictionary is used to set ``providers`` in the
   wheels and to query providers at build time, if necessary
 - the ``variants`` dictionary provides a mapping of valid variant labels
   to variant properties, to facilitate requesting a build of a specific
