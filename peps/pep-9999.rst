@@ -85,7 +85,9 @@ Build backend support
 
 Build backends MAY support building variant wheels. However, :pep:`517`
 and :pep:`660` hooks MUST NOT build variant wheels, unless they are
-explicitly requested by the user.
+explicitly requested by the user. When building non-variant wheels, the
+backend MAY not validate the variant configuration, and it SHOULD NOT
+install any variant provider packages.
 
 For consistency, it is RECOMMENDED that build backends implement the
 following interface for building variant wheels:
