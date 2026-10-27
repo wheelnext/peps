@@ -9,7 +9,7 @@ Status: Draft
 Type: Standards Track
 Topic: Packaging
 Requires: 825, 850
-Created: 02-Mar-2026
+Created: 26-Oct-2026
 Post-History: Pending
 
 Abstract
@@ -502,7 +502,7 @@ Security Implications
 There are no new security implications beyond what is already noted in
 :pep:`850`. In particular, the use of provider plugins during build time
 is not seen as an additional risk, given that the dependencies are
-provided by the user directly (for example, in ``pyproject.toml``) and
+specified by the package author directly (in ``pyproject.toml``) and
 they are treated equivalently to other build dependencies.
 
 
