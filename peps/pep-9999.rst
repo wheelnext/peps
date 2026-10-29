@@ -452,9 +452,9 @@ extensions given in this PEP, as they are not present in the resulting
 JSON. No separate schema is provided for the TOML table.
 
 When using build backends, using ``get_requires*()`` hooks for exposing
-provider plugin dependencies as regular build dependencies is
-recommended. This permits reusing the existing frontend logic for
-creating isolated environments and installing packages.
+provider plugin dependencies as regular build dependencies permits
+reusing the existing frontend logic for creating isolated environments
+and installing packages.
 
 The provider plugin API is extended to enable verifying whether the
 properties specified for a variant are correct. To this purpose, a
