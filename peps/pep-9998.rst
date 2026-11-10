@@ -1,0 +1,142 @@
+PEP: 9998
+Title: Wheel Variants: UX, Maintainability, Security and Governance
+Author: Michał Górny <mgorny@quansight.com>,
+        Jonathan Dekhtiar <jonathan@dekhtiar.com>,
+        Konstantin Schütze <konstin@mailbox.org>,
+        Ralf Gommers <ralf.gommers@gmail.com>
+Discussions-To: Pending
+Status: Draft
+Type: Standards Track
+Topic: Packaging
+Requires: 850, 9999
+Created: 10-Nov-2026
+Post-History: Pending
+
+Abstract
+========
+
+
+
+Motivation
+==========
+
+:pep:`850` introduced a decentralized governance model for variant
+properties. They are organized into variant namespaces, and these
+namespaces are governed by variant providers. An important kind of
+variant providers are provider plugins, implemented as installable
+Python packages maintained and distributed by various parties.
+
+We recognized the elevated security risk from installing and running
+third-party code while installing wheels, and alleviated it by making
+the mechanism opt-in by default. However, we also noted that the most
+commonly used providers need to be opt-out, in order to provide a good
+user experience and at the same time avoid the danger of security
+fatigue leading to users permitting all provider plugins anyway.
+
+To provide the best user experience and reduce the maintenance overhead
+on packaging tools, this PEP proposes introducing a central database of
+blessed providers, that is provider plugins that are enabled by default.
+This serves the fourfold goal of aiding packaging tool maintainers in
+implementing variant wheel support, aiding package maintainers in
+selecting the most appropriate plugins to accomplish their goal, making
+the most common variants installable out of the box, and providing clear
+guidance for plugin authors.
+
+
+Specification
+=============
+
+Requirements for a blessed provider
+-----------------------------------
+
+Blessed providers are the provider plugins (as defined by :pep:`850`)
+that are enabled by default. They may be vendored, reimplemented or
+installed by the packaging tools using a secure mechanism. Therefore,
+they follow a much stricter standard than regular packages.
+
+For a provider plugin to be accepted as a blessed provider, it MUST
+meet all the following criteria:
+
+- It MUST be written as a pure Python package with no compiled code.
+  However, it MAY interact with preinstalled system libraries (such as
+  drivers) via the standard Python ``ctypes`` module.
+
+- It MUST be written in a portable way, although it can be limited to a
+  subset of platforms of interest. For example, a provider for a GPU
+  acceleration platform that supports Linux and Windows systems only can
+  use functions specific to these systems and return an empty result on
+  other systems.
+
+- It MUST have no dependencies, except for the packages explicitly
+  permitted for blessed providers. The initial list of these packages
+  includes ``packaging`` and ``archspec``.
+
+- It MUST use a permissive open source license, such as ``Apache-2.0``,
+  ``MIT`` or ``BSD-2-Clause``. The use of copyleft or proprietary
+  licenses is not possible. If one wishes to release the plugin into
+  public domain, a license such as ``CC0-1.0`` or ``Unlicense`` MUST be
+  used instead.
+
+- The code MUST be written in a way that is trivial to audit for
+  malicious or vulnerable behavior. This imposes a limit on how big the
+  provider can be, as well as how much ``ctypes``, ``struct`` and
+  similar C-wrapping modules can be used.
+
+- The plugin interface MUST be clearly documented, indicating what
+  properties can be returned and how the platform compatibility is
+  determined. It MUST also provide guidelines for future updates.
+
+The provided list is meant as a list of minimal requirements focused on
+security. All submissions MUST be subject to explicit review, and MAY be
+rejected if there are any concerns about their safety, code quality or
+usefulness. The underlying assumption is that plugins MUST be acceptable
+for inclusion in major packaging tools, and therefore the review process
+has to foresee any concerns the maintainers of these tools may have.
+
+
+Governance
+----------
+
+This PEP proposes forming a new team dedicated to maintaining the list
+and implementations of the blessed providers. The group is placed under
+the governance of the Python Packaging Council, as defined by
+:pep:`772`. The initial set of members will be approved by the PPC.
+
+
+
+
+Rationale
+=========
+
+
+
+Backwards Compatibility
+=======================
+
+
+
+Security Implications
+=====================
+
+
+
+How to Teach This
+=================
+
+
+
+Reference Implementation
+========================
+
+
+
+Change History
+==============
+
+
+
+Copyright
+=========
+
+This document is placed in the public domain or under the
+CC0-1.0-Universal license, whichever is more permissive.
