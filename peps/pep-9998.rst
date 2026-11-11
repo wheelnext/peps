@@ -77,6 +77,9 @@ meet all the following criteria:
   public domain, a license such as ``CC0-1.0`` or ``Unlicense`` MUST be
   used instead.
 
+- It MUST follow a strict "no AI" policy to facilitate inclusion in
+  projects requiring such a policy.
+
 - The code MUST be written in a way that is trivial to audit for
   malicious or vulnerable behavior. This imposes a limit on how big the
   provider can be, as well as how much ``ctypes``, ``struct`` and
@@ -94,15 +97,72 @@ for inclusion in major packaging tools, and therefore the review process
 has to foresee any concerns the maintainers of these tools may have.
 
 
+Blessed provider repository
+---------------------------
+
+All blessed providers will be maintained in a dedicated repository,
+subject to shared governance. While every plugin will have its dedicated
+maintainers, the code MAY be subject to cross-project review.
+
+Every plugin MUST be built and released as a separate Python package, to
+facilitate direct installation via the mechanism specified in
+:pep:`850`. The releases MUST provide a pure Python wheels with full
+provenance linked to the project repository, so that tools can verify
+the authenticity of downloaded wheels. The repository MUST also provide
+a lockfile with embedded wheel checksums for all blessed providers and
+their dependencies that can be reused by tools.
+
+The plugins MUST also account for easy vendoring inside other projects.
+The repository will also include vetted vendored versions of their
+dependencies for convenience.
+
+
 Governance
 ----------
 
 This PEP proposes forming a new team dedicated to maintaining the list
 and implementations of the blessed providers. The group is placed under
 the governance of the Python Packaging Council, as defined by
-:pep:`772`. The initial set of members will be approved by the PPC.
+:pep:`772`.
+
+The initial members of the team will be appointed by the Python
+Packaging Council. New members will be approved by the existing team
+members. Invitations will be extended to the maintainers of blessed
+providers and major packaging tools working towards supporting
+:pep:`850`.
+
+The primary task of the team will be the maintenance of the `blessed
+provider repository`_ and deciding on the inclusion of new blessed
+providers. Inclusion of a new provider requires a consensus among the
+team members. If no such consensus can be reached, the effective
+rejection MAY be appealed to the Python Packaging Council.
 
 
+Integration with packaging tools
+--------------------------------
+
+For a tool to be considered compliant with this PEP, it MUST use all the
+blessed providers by default. Using one of the following integration
+strategies is suggested:
+
+- recognizing blessed providers dynamically, through their PyPI packages
+  having full provenance pointing to the blessed provider repository
+
+- using a fixed list of blessed providers and verifying the provenance
+  of the fetched wheels
+
+- using the lockfile provided as part of the blessed provider repository
+  and verifying the fetched wheels against the checksums provided in the
+  repository
+
+- vendoring the blessed provider repository into the project
+
+- reimplementing the blessed providers, based on the documentation or
+  code provided in the repository
+
+Should the tool choose any of the strategies involved fixing the list or
+implementation of blessed providers, they MUST periodically update them
+to ensure full compliance.
 
 
 Rationale
