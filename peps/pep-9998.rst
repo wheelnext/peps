@@ -133,9 +133,10 @@ providers and major packaging tools working towards supporting
 
 The primary task of the team will be the maintenance of the `blessed
 provider repository`_ and deciding on the inclusion of new blessed
-providers. Inclusion of a new provider requires a consensus among the
-team members. If no such consensus can be reached, the effective
-rejection MAY be appealed to the Python Packaging Council.
+providers. Inclusion of a new provider or significant changes to the
+provider behavior requires a consensus among the team members. If no
+such consensus can be reached, the effective rejection MAY be appealed
+to the Python Packaging Council.
 
 
 Integration with packaging tools
@@ -168,16 +169,78 @@ to ensure full compliance.
 Rationale
 =========
 
+The primary goal of the specification is to combine good security
+practices with good user experience. The underlying assumption is that
+the most commonly installed variant wheels would be installable out of
+the box, and therefore the providers used in them would be used by
+default. To ensure that this works consistently, the blessed providers
+are selected centrally and tools such as installers are expected to
+follow this centralized repository.
+
+A range of integration strategies are provided to account for different
+needs of different tools. Some tools may choose to install them directly
+from PyPI, and appropriately secure methods for doing that are provided.
+Others may choose to vendor the reference implementations, or even
+reimplement them separately. To make all these options possible and to
+ensure that a sufficient level of trust in blessed providers is
+maintained, the specification sets a rigorous list of requirements that
+must be met before a provider can be accepted. At the same time, it is
+expected that even if a provider meets all the rigorous quality and
+security criteria, it may not be accepted if it is not considered useful
+enough to justify adding one more blessed provider.
+
+The actual maintenance and governance is performed by a dedicated team,
+formed from blessed provider maintainers and other stakeholders
+representing the packaging tool community. The team is placed under the
+governance of Python Packaging Council, which serves as an ultimate
+authority to resolve gridlocks and prevent "rogue" decisions. However,
+experience shows that most of the day-to-day decisions do not need
+committee involvement.
 
 
 Backwards Compatibility
 =======================
 
+This PEP does not introduce any new backwards compatibility
+considerations, compared to :pep:`850`.
 
 
 Security Implications
 =====================
 
+The primary security considerations regarding variant providers are
+outlined in :pep:`850`. Of the risks listed there, this PEP specifically
+addresses the risk of security fatigue, by aiming for the most commonly
+used providers to be enabled by default.
+
+This PEP specifically introduces two potential attack vectors:
+
+1. Adding malicious code directly into one of the blessed providers, or
+   adding a new blessed provider containing such code.
+
+2. Compromising the process of installing a blessed provider (if
+   applicable).
+
+To address the risk of malicious code in blessed providers, the
+specification requires a thorough review from the team and sets a high
+bar for the provider to be accepted. The code is expected to be readable
+and clear, avoid risky practices and too much complexity. Furthermore,
+all blessed providers must also fully document their interface and
+behavior, and tools may choose to reimplement them instead.
+
+The risk of compromising the installation process applies specifically
+to tools that choose to install the providers from PyPI rather than
+vendor or reimplement them. The PEP providers two different mechanisms
+to address this risk:
+
+a. All blessed provider releases are required to be made with full
+   provenance. The tools are required to verify the provenance of the
+   wheels fetched and to ensure that it points at the correct blessed
+   provider repository.
+
+b. Alternatively, tools can instead vendor a lockfile that contains the
+   checksums of blessed provider wheels. Then they are required to
+   verify that the fetched wheels match the checksums.
 
 
 How to Teach This
