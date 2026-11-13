@@ -15,6 +15,15 @@ Post-History: Pending
 Abstract
 ========
 
+This PEP extends :pep:`850` by defining blessed providers that are
+expected to be enabled by packaging tools by default. To be accepted
+into the blessed provider set, a provider must meet rigorous security,
+quality and usefulness requirements. A dedicated team is formed from
+plugin and packaging tool maintainers, that is responsible for reviewing
+blessed provider candidates and maintaining them. Packaging tools can
+obtain blessed providers from PyPI, where they are published with full
+provenance, from the repository or via reimplementing them based on
+published documentation.
 
 
 Motivation
