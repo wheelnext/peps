@@ -1,0 +1,276 @@
+PEP: 9998
+Title: Wheel Variants: UX, Maintainability, Security and Governance
+Author: Michał Górny <mgorny@quansight.com>,
+        Jonathan Dekhtiar <jonathan@dekhtiar.com>,
+        Konstantin Schütze <konstin@mailbox.org>,
+        Ralf Gommers <ralf.gommers@gmail.com>
+Discussions-To: Pending
+Status: Draft
+Type: Standards Track
+Topic: Packaging
+Requires: 850, 9999
+Created: 10-Nov-2026
+Post-History: Pending
+
+Abstract
+========
+
+This PEP extends :pep:`850` by defining blessed providers that are
+expected to be enabled by packaging tools by default. To be accepted
+into the blessed provider set, a provider must meet rigorous security,
+quality and usefulness requirements. A dedicated team is formed from
+plugin and packaging tool maintainers, that is responsible for reviewing
+blessed provider candidates and maintaining them. Packaging tools can
+obtain blessed providers from PyPI, where they are published with full
+provenance, from the repository or via reimplementing them based on
+published documentation.
+
+
+Motivation
+==========
+
+:pep:`850` introduced a decentralized governance model for variant
+properties. They are organized into variant namespaces, and these
+namespaces are governed by variant providers. An important kind of
+variant providers are provider plugins, implemented as installable
+Python packages maintained and distributed by various parties.
+
+We recognized the elevated security risk from installing and running
+third-party code while installing wheels, and alleviated it by making
+the mechanism opt-in by default. However, we also noted that the most
+commonly used providers need to be opt-out, in order to provide a good
+user experience and at the same time avoid the danger of security
+fatigue leading to users permitting all provider plugins anyway.
+
+To provide the best user experience and reduce the maintenance overhead
+on packaging tools, this PEP proposes introducing a central database of
+blessed providers, that is provider plugins that are enabled by default.
+This serves the fourfold goal of aiding packaging tool maintainers in
+implementing variant wheel support, aiding package maintainers in
+selecting the most appropriate plugins to accomplish their goal, making
+the most common variants installable out of the box, and providing clear
+guidance for plugin authors.
+
+
+Specification
+=============
+
+Requirements for a blessed provider
+-----------------------------------
+
+Blessed providers are the provider plugins (as defined by :pep:`850`)
+that are enabled by default. They may be vendored, reimplemented or
+installed by the packaging tools using a secure mechanism. Therefore,
+they follow a much stricter standard than regular packages.
+
+For a provider plugin to be accepted as a blessed provider, it MUST
+meet all the following criteria:
+
+- It MUST be written as a pure Python package with no compiled code.
+  However, it MAY interact with preinstalled system libraries (such as
+  drivers) via the standard Python ``ctypes`` module.
+
+- It MUST be written in a portable way, although it can be limited to a
+  subset of platforms of interest. For example, a provider for a GPU
+  acceleration platform that supports Linux and Windows systems only can
+  use functions specific to these systems and return an empty result on
+  other systems.
+
+- It MUST have no dependencies, except for the packages explicitly
+  permitted for blessed providers. The initial list of these packages
+  includes ``packaging`` and ``archspec``.
+
+- It MUST use a permissive open source license, such as ``Apache-2.0``,
+  ``MIT`` or ``BSD-2-Clause``. The use of copyleft or proprietary
+  licenses is not possible. If one wishes to release the plugin into
+  public domain, a license such as ``CC0-1.0`` or ``Unlicense`` MUST be
+  used instead.
+
+- It MUST follow a strict "no AI" policy to facilitate inclusion in
+  projects requiring such a policy.
+
+- The code MUST be written in a way that is trivial to audit for
+  malicious or vulnerable behavior. This imposes a limit on how big the
+  provider can be, as well as how much ``ctypes``, ``struct`` and
+  similar C-wrapping modules can be used.
+
+- The plugin interface MUST be clearly documented, indicating what
+  properties can be returned and how the platform compatibility is
+  determined. It MUST also provide guidelines for future updates.
+
+The provided list is meant as a list of minimal requirements focused on
+security. All submissions MUST be subject to explicit review, and MAY be
+rejected if there are any concerns about their safety, code quality or
+usefulness. The underlying assumption is that plugins MUST be acceptable
+for inclusion in major packaging tools, and therefore the review process
+has to foresee any concerns the maintainers of these tools may have.
+
+
+Blessed provider repository
+---------------------------
+
+All blessed providers will be maintained in a dedicated repository,
+subject to shared governance. While every plugin will have its dedicated
+maintainers, the code MAY be subject to cross-project review.
+
+Every plugin MUST be built and released as a separate Python package, to
+facilitate direct installation via the mechanism specified in
+:pep:`850`. The releases MUST provide a pure Python wheels with full
+provenance linked to the project repository, so that tools can verify
+the authenticity of downloaded wheels. The repository MUST also provide
+a lockfile with embedded wheel checksums for all blessed providers and
+their dependencies that can be reused by tools.
+
+The plugins MUST also account for easy vendoring inside other projects.
+The repository will also include vetted vendored versions of their
+dependencies for convenience.
+
+
+Governance
+----------
+
+This PEP proposes forming a new team dedicated to maintaining the list
+and implementations of the blessed providers. The group is placed under
+the governance of the Python Packaging Council, as defined by
+:pep:`772`.
+
+The initial members of the team will be appointed by the Python
+Packaging Council. New members will be approved by the existing team
+members. Invitations will be extended to the maintainers of blessed
+providers and major packaging tools working towards supporting
+:pep:`850`.
+
+The primary task of the team will be the maintenance of the `blessed
+provider repository`_ and deciding on the inclusion of new blessed
+providers. Inclusion of a new provider or significant changes to the
+provider behavior requires a consensus among the team members. If no
+such consensus can be reached, the effective rejection MAY be appealed
+to the Python Packaging Council.
+
+
+Integration with packaging tools
+--------------------------------
+
+For a tool to be considered compliant with this PEP, it MUST use all the
+blessed providers by default. Using one of the following integration
+strategies is suggested:
+
+- recognizing blessed providers dynamically, through their PyPI packages
+  having full provenance pointing to the blessed provider repository
+
+- using a fixed list of blessed providers and verifying the provenance
+  of the fetched wheels
+
+- using the lockfile provided as part of the blessed provider repository
+  and verifying the fetched wheels against the checksums provided in the
+  repository
+
+- depending on the blessed provider packages directly
+
+- vendoring the blessed provider repository into the project
+
+- reimplementing the blessed providers, based on the documentation or
+  code provided in the repository
+
+Should the tool choose any of the strategies involved fixing the list or
+implementation of blessed providers, they MUST periodically update them
+to ensure full compliance.
+
+
+Rationale
+=========
+
+The primary goal of the specification is to combine good security
+practices with good user experience. The underlying assumption is that
+the most commonly installed variant wheels would be installable out of
+the box, and therefore the providers used in them would be used by
+default. To ensure that this works consistently, the blessed providers
+are selected centrally and tools such as installers are expected to
+follow this centralized repository.
+
+A range of integration strategies are provided to account for different
+needs of different tools. Some tools may choose to install them directly
+from PyPI, and appropriately secure methods for doing that are provided.
+Others may choose to vendor the reference implementations, or even
+reimplement them separately. To make all these options possible and to
+ensure that a sufficient level of trust in blessed providers is
+maintained, the specification sets a rigorous list of requirements that
+must be met before a provider can be accepted. At the same time, it is
+expected that even if a provider meets all the rigorous quality and
+security criteria, it may not be accepted if it is not considered useful
+enough to justify adding one more blessed provider.
+
+The actual maintenance and governance is performed by a dedicated team,
+formed from blessed provider maintainers and other stakeholders
+representing the packaging tool community. The team is placed under the
+governance of Python Packaging Council, which serves as an ultimate
+authority to resolve gridlocks and prevent "rogue" decisions. However,
+experience shows that most of the day-to-day decisions do not need
+committee involvement.
+
+
+Backwards Compatibility
+=======================
+
+This PEP does not introduce any new backwards compatibility
+considerations, compared to :pep:`850`.
+
+
+Security Implications
+=====================
+
+The primary security considerations regarding variant providers are
+outlined in :pep:`850`. Of the risks listed there, this PEP specifically
+addresses the risk of security fatigue, by aiming for the most commonly
+used providers to be enabled by default.
+
+This PEP specifically introduces two potential attack vectors:
+
+1. Adding malicious code directly into one of the blessed providers, or
+   adding a new blessed provider containing such code.
+
+2. Compromising the process of installing a blessed provider (if
+   applicable).
+
+To address the risk of malicious code in blessed providers, the
+specification requires a thorough review from the team and sets a high
+bar for the provider to be accepted. The code is expected to be readable
+and clear, avoid risky practices and too much complexity. Furthermore,
+all blessed providers must also fully document their interface and
+behavior, and tools may choose to reimplement them instead.
+
+The risk of compromising the installation process applies specifically
+to tools that choose to install the providers from PyPI rather than
+vendor or reimplement them. The PEP providers two different mechanisms
+to address this risk:
+
+a. All blessed provider releases are required to be made with full
+   provenance. The tools are required to verify the provenance of the
+   wheels fetched and to ensure that it points at the correct blessed
+   provider repository.
+
+b. Alternatively, tools can instead vendor a lockfile that contains the
+   checksums of blessed provider wheels. Then they are required to
+   verify that the fetched wheels match the checksums.
+
+
+How to Teach This
+=================
+
+
+
+Reference Implementation
+========================
+
+
+
+Change History
+==============
+
+
+
+Copyright
+=========
+
+This document is placed in the public domain or under the
+CC0-1.0-Universal license, whichever is more permissive.
