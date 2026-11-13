@@ -156,6 +156,8 @@ strategies is suggested:
   and verifying the fetched wheels against the checksums provided in the
   repository
 
+- depending on the blessed provider packages directly
+
 - vendoring the blessed provider repository into the project
 
 - reimplementing the blessed providers, based on the documentation or
