@@ -111,7 +111,8 @@ Blessed provider repository
 
 All blessed providers will be maintained in a dedicated repository,
 subject to shared governance. While every plugin will have its dedicated
-maintainers, the code MAY be subject to cross-project review.
+maintainers, the main branch and releases will require approval from the
+core maintainers.
 
 Every plugin MUST be built and released as a separate Python package, to
 facilitate direct installation via the mechanism specified in
@@ -136,16 +137,15 @@ the governance of the Python Packaging Council, as defined by
 
 The initial members of the team will be appointed by the Python
 Packaging Council. New members will be approved by the existing team
-members. Invitations will be extended to the maintainers of blessed
-providers and major packaging tools working towards supporting
-:pep:`850`.
+members.
 
-The primary task of the team will be the maintenance of the `blessed
-provider repository`_ and deciding on the inclusion of new blessed
-providers. Inclusion of a new provider or significant changes to the
-provider behavior requires a consensus among the team members. If no
-such consensus can be reached, the effective rejection MAY be appealed
-to the Python Packaging Council.
+The primary task of the team will be the review of updates and releases
+of the providers in the `blessed provider repository`_., as well as new
+blessed providers. Inclusion of a new provider or significant changes to
+the provider behavior requires a consensus among the team remembers and
+a RFC addressed to the maintainers of packaging tools featuring wheel
+variant support. If no agreement can be reached via this process, the
+effective rejection MAY be appealed to the Python Packaging Council.
 
 
 Integration with packaging tools
