@@ -152,29 +152,30 @@ Integration with packaging tools
 --------------------------------
 
 For a tool to be considered compliant with this PEP, it MUST use all the
-blessed providers by default. Using one of the following integration
-strategies is suggested:
+blessed providers by default. A number of integration strategies are
+supported, including:
 
-- recognizing blessed providers dynamically, through their PyPI packages
-  having full provenance pointing to the blessed provider repository
+- Downloading blessed provider packages from PyPI on demand. The tool
+  can either:
 
-- using a fixed list of blessed providers and verifying the provenance
-  of the fetched wheels
+  - use a fixed list of blessed providers
+  - use a lockfile with wheel checksums
+  - dynamically determine whether a particular provider package is
+    blessed by checking its provenance against the blessed provider
+    repository
 
-- using the lockfile provided as part of the blessed provider repository
-  and verifying the fetched wheels against the checksums provided in the
-  repository
+- Including blessed provider packages as part of tool dependencies.
+  The tool can either depend on a fixed list of provider packages
+  directly, or on a metapackage including the current list.
 
-- depending on the blessed provider packages directly
+- Vendoring the blessed provider repository into the project.
 
-- vendoring the blessed provider repository into the project
+- Reimplementing the blessed providers, based on the documentation or
+  code provided in the repository.
 
-- reimplementing the blessed providers, based on the documentation or
-  code provided in the repository
-
-Should the tool choose any of the strategies involved fixing the list or
-implementation of blessed providers, they MUST periodically update them
-to ensure full compliance.
+Should the tool choose any of the strategies involving fixing the list
+or implementation of blessed providers, they MUST periodically update
+them to ensure full compliance.
 
 
 Rationale
